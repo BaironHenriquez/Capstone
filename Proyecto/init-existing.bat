@@ -100,7 +100,7 @@ docker-compose -f docker-compose.existing.yml exec app php artisan storage:link
 REM Instalar y configurar Tailwind CSS
 echo.
 echo ========================================
-echo   INSTALANDO TAILWIND CSS
+echo   INSTALANDO TAILWIND CSS Y VITE
 echo ========================================
 echo Instalando dependencias de Node.js...
 docker-compose -f docker-compose.existing.yml exec node npm install
@@ -108,8 +108,8 @@ docker-compose -f docker-compose.existing.yml exec node npm install
 echo Instalando Tailwind CSS y dependencias...
 docker-compose -f docker-compose.existing.yml exec node npm install -D tailwindcss postcss autoprefixer @tailwindcss/forms
 
-echo Inicializando configuracion de Tailwind CSS...
-docker-compose -f docker-compose.existing.yml exec node npx tailwindcss init -p
+echo Configurando Tailwind CSS con colores personalizados...
+echo Ya configurado en tailwind.config.js con paleta tecnica personalizada
 
 REM Instalar SDKs de terceros
 echo.
@@ -129,9 +129,15 @@ echo.
 echo ========================================
 echo   OPTIMIZANDO CONFIGURACION
 echo ========================================
-docker-compose -f docker-compose.existing.yml exec app php artisan config:cache
-docker-compose -f docker-compose.existing.yml exec app php artisan route:cache
-docker-compose -f docker-compose.existing.yml exec app php artisan view:cache
+docker-compose -f docker-compose.existing.yml exec app composer dump-autoload
+docker-compose -f docker-compose.existing.yml exec app php artisan config:clear
+docker-compose -f docker-compose.existing.yml exec app php artisan route:clear
+docker-compose -f docker-compose.existing.yml exec app php artisan view:clear
+
+REM Construir assets de produccion con Vite
+echo.
+echo Construyendo assets de produccion con Vite...
+docker-compose -f docker-compose.existing.yml exec node npm run build
 
 echo.
 echo ========================================
@@ -142,6 +148,7 @@ echo [OK] Proyecto Capstone inicializado correctamente
 echo.
 echo URLS DISPONIBLES:
 echo   - Aplicacion Laravel: http://localhost:8080
+echo   - Vite Dev Server:    http://localhost:5173
 echo   - phpMyAdmin:         http://localhost:8081
 echo.
 echo CREDENCIALES DE BASE DE DATOS:
@@ -150,12 +157,35 @@ echo   - Usuario:       capstone_user
 echo   - Password:      capstone_password_2025
 echo   - Host externo:  localhost:3307
 echo.
+echo PUERTOS CONFIGURADOS:
+echo   - Laravel (Nginx):   8080
+echo   - Vite Dev Server:   5173
+echo   - phpMyAdmin:        8081
+echo   - MySQL:             3307
+echo   - Redis:             6379
+echo.
 echo COMANDOS UTILES:
 echo   - Ver logs:           docker-compose -f docker-compose.existing.yml logs -f
 echo   - Detener servicios:  docker-compose -f docker-compose.existing.yml down
 echo   - Reiniciar:          docker-compose -f docker-compose.existing.yml restart
+echo   - Limpiar cache:      docker-compose -f docker-compose.existing.yml exec app php artisan config:clear
 echo.
-echo Para desarrollo frontend (Tailwind CSS):
+echo PARA DESARROLLO FRONTEND (ejecutar en terminal separada):
 echo   docker-compose -f docker-compose.existing.yml exec node npm run dev
+echo.
+echo FUNCIONALIDADES IMPLEMENTADAS:
+echo   ✓ Paleta de colores personalizada TechService Pro
+echo   ✓ Animaciones CSS con Tailwind
+echo   ✓ Interfaz completa de servicio tecnico
+echo   ✓ Formularios de solicitud de servicio
+echo   ✓ Sistema de estado de ordenes
+echo   ✓ Vistas especializadas: computadoras, moviles, soporte
+echo   ✓ Diseno responsive y moderno
+echo.
+echo NOTAS IMPORTANTES:
+echo   - Los assets estan construidos para produccion
+echo   - Para desarrollo con hot-reload ejecuta 'npm run dev' por separado
+echo   - Todas las rutas del servicio tecnico estan configuradas
+echo   - La interfaz usa colores: dark-blue, electric-blue, success-green, etc.
 echo.
 pause

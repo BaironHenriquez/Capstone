@@ -81,12 +81,15 @@ services:
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
-      PMA_USER: root
-      PMA_PASSWORD: root_password
+      PMA_USER: capstone_user
+      PMA_PASSWORD: capstone_password_2025
+      MYSQL_ROOT_PASSWORD: capstone_root_2025
     ports:
       - "8081:80"
     networks:
       - laravel
+    depends_on:
+      - db
 
 # Redes
 networks:
