@@ -1,380 +1,734 @@
-# Proyecto Capstone Laravel con Docker# Proyecto Laravel con Docker# Proyecto Laravel con Docker# 🚀 Proyecto Laravel con Docker<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Proyecto Capstone Laravel con Docker# Proyecto Capstone Laravel con Docker
 
 
 
-Proyecto Laravel completo con Docker, MySQL, Redis, Nginx, Node.js y Tailwind CSS configurado para el desarrollo del Capstone.
+Proyecto Laravel completo con Docker, MySQL, Redis, Nginx, Node.js, Tailwind CSS y SDKs integrados configurado para el desarrollo del Capstone.Proyecto Laravel completo con Docker, MySQL, Redis, Nginx, Node.js, Tailwind CSS y SDKs integrados configurado para el desarrollo del Capstone.
 
 
 
-## RequisitosEste proyecto está configurado para ejecutar una aplicación Laravel completa usando Docker, incluyendo MySQL, Redis, Nginx, y Node.js para el desarrollo frontend.
+## Requisitos## Requisitos
 
 
 
-- [Docker](https://www.docker.com/get-started)
+- [Docker](https://www.docker.com/get-started)- [Docker](https://www.docker.com/get-started)
 
-- [Docker Compose](https://docs.docker.com/compose/install/)
-
-## RequisitosEste proyecto está configurado para ejecutar una aplicación Laravel completa usando Docker, incluyendo MySQL, Redis, Nginx, y Node.js para el desarrollo frontend.
-
-## Servicios Incluidos
+- [Docker Compose](https://docs.docker.com/compose/install/)- [Docker Compose](https://docs.docker.com/compose/install/)
 
 
 
-- **Laravel** (PHP 8.2 + Composer)
-
-- **MySQL 8.0** (Base de datos con usuario específico del proyecto)- [Docker](https://www.docker.com/get-started)
-
-- **Redis** (Cache y sesiones)  
-
-- **Nginx** (Servidor web)- [Docker Compose](https://docs.docker.com/compose/install/)
-
-- **Node.js 18** (Frontend/NPM)
-
-- **phpMyAdmin** (Administración de BD)## RequisitosEste proyecto está configurado para ejecutar una aplicación Laravel completa usando Docker, incluyendo MySQL, Redis, Nginx, y Node.js para el desarrollo frontend.<p align="center">
-
-- **Tailwind CSS** (Framework CSS preconfigurado)
-
-## Servicios Incluidos
-
-## Inicio Rápido para Colaboradores
+## Servicios y Tecnologías Incluidas## Servicios Incluidos
 
 
 
-### Si CLONASTE este repositorio desde GitHub:
+- **Laravel** (PHP 8.2 + Composer)- **Laravel** (PHP 8.2 + Composer)
 
-- **Laravel** (PHP 8.2 + Composer)
+- **MySQL 8.0** (Base de datos con usuario específico del proyecto)- **MySQL 8.0** (Base de datos con usuario específico del proyecto)
 
-```powershell
+- **Redis** (Cache y sesiones)  - **Redis** (Cache y sesiones)  
 
-# Solo necesitas ejecutar este comando:- **MySQL 8.0** (Base de datos)- [Docker](https://www.docker.com/get-started)<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+- **Nginx** (Servidor web)- **Nginx** (Servidor web)
 
-.\init-existing.bat
+- **Node.js 18** (Frontend/NPM)- **Node.js 18** (Frontend/NPM)
 
-```- **Redis** (Cache y sesiones)  
+- **phpMyAdmin** (Administración de BD)- **phpMyAdmin** (Administración de BD)
 
+- **Tailwind CSS** (Framework CSS preconfigurado)- **Tailwind CSS** (Framework CSS preconfigurado)
 
+- **PayPal SDK** (Integración de pagos)- **PayPal SDK** (Integración de pagos)
 
-**Esto configurará automáticamente:**- **Nginx** (Servidor web)- [Docker Compose](https://docs.docker.com/compose/install/)
-
-- Docker y todos los contenedores
-
-- MySQL con base de datos y usuario específicos del proyecto- **Node.js 18** (Frontend/NPM)
-
-- Laravel con todas las dependencias
-
-- Tailwind CSS completamente configurado- **phpMyAdmin** (Administración de BD)## 📋 Requisitos<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-
-- Migraciones de base de datos
-
-- Optimización de cache
+- **Bunny.net SDK** (CDN y servicios multimedia)- **Bunny.net SDK** (CDN y servicios multimedia)
 
 
 
-### Configuración Automática Incluida## Inicio Rápido## Servicios Incluidos
+## Inicio Rápido para Colaboradores## Inicio Rápido para Colaboradores
 
 
 
-El script `init-existing.bat` configurará automáticamente:
+### Si CLONASTE este repositorio desde GitHub:### Si CLONASTE este repositorio desde GitHub:
 
 
 
-**Base de Datos:**### IMPORTANTE: Elige el script correcto según tu situación<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+```powershell```powershell
+
+# Solo necesitas ejecutar este comando:# Solo necesitas ejecutar este comando:
+
+.\init-existing.bat.\init-existing.bat
+
+``````
+
+
+
+**Esto configurará automáticamente:****Esto configurará automáticamente:**
+
+- Docker y todos los contenedores- Docker y todos los contenedores
+
+- MySQL con base de datos y usuario específicos del proyecto- MySQL con base de datos y usuario específicos del proyecto
+
+- Laravel con todas las dependencias- Laravel con todas las dependencias
+
+- Tailwind CSS completamente configurado- Tailwind CSS completamente configurado
+
+- SDKs de PayPal y Bunny.net preinstalados- SDKs de PayPal y Bunny.net preinstalados
+
+- Migraciones de base de datos- Migraciones de base de datos
+
+- Optimización de cache- Optimización de cache
+
+
+
+### Configuración Automática Incluida.\init-existing.bat
+
+
+
+El script `init-existing.bat` configurará automáticamente:```- **Redis** (Cache y sesiones)  
+
+
+
+**Base de Datos:**
 
 - Base de datos: `capstone_laravel`
 
-- Usuario: `capstone_user`
+- Usuario: `capstone_user`**Esto configurará automáticamente:**- **Nginx** (Servidor web)- [Docker Compose](https://docs.docker.com/compose/install/)
 
 - Contraseña: `capstone_password_2025`
 
-- Base de datos de testing: `capstone_laravel_testing`#### Si CLONASTE este repositorio desde GitHub:- **Laravel** (PHP 8.2 + Composer)
+- Base de datos de testing: `capstone_laravel_testing`- Docker y todos los contenedores
 
 
 
-**Tecnologías Frontend:**```powershell
+**Tecnologías Frontend:**- MySQL con base de datos y usuario específicos del proyecto- **Node.js 18** (Frontend/NPM)
 
 - Tailwind CSS v4.0
 
-- PostCSS y Autoprefixer.\init-existing.bat- **MySQL 8.0** (Base de datos)- [Docker](https://www.docker.com/get-started)<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+- PostCSS y Autoprefixer- Laravel con todas las dependencias
 
 - Vite para desarrollo
 
-- Configuración personalizada con colores del proyecto```
+- Configuración personalizada con colores del proyecto- Tailwind CSS completamente configurado- **phpMyAdmin** (Administración de BD)## 📋 Requisitos<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
 
 
 
-## URLs Disponibles**Por qué:** Laravel ya está instalado en el repositorio, solo necesitas configurar el entorno Docker.- **Redis** (Cache y sesiones)
+**SDKs de Terceros:**- Migraciones de base de datos
+
+- PayPal SDK (@paypal/sdk-js) para procesamiento de pagos
+
+- Bunny.net SDK (bunnynet) para CDN y servicios multimedia- Optimización de cache
 
 
 
-- **Aplicación Laravel:** http://localhost:8080
+## URLs Disponibles
+
+
+
+- **Aplicación Laravel:** http://localhost:8080### Configuración Automática Incluida## Inicio Rápido## Servicios Incluidos
 
 - **phpMyAdmin:** http://localhost:8081
 
-  - Usuario: `capstone_user`#### Si estás creando un proyecto NUEVO desde cero:- **Nginx** (Servidor web)- [Docker Compose](https://docs.docker.com/compose/install/)</p>
+  - Usuario: `capstone_user`
 
   - Contraseña: `capstone_password_2025`
 
-  - Host de BD: `db` (puerto interno 3306, externo 3307)```powershell
+  - Host de BD: `db` (puerto interno 3306, externo 3307)El script `init-existing.bat` configurará automáticamente:
 
 - **Vite Dev Server:** http://localhost:5173
 
-.\init-smart.bat- **Node.js 18** (Frontend/NPM)
 
-## Desarrollo Frontend con Tailwind CSS
 
-```
+## Desarrollo Frontend con Tailwind CSS y SDKs
+
+**Base de Datos:**### IMPORTANTE: Elige el script correcto según tu situación<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
 
 Para trabajar con Tailwind CSS en modo desarrollo:
 
-**Por qué:** Detecta automáticamente si Laravel existe y lo instala si es necesario.- **phpMyAdmin** (Administración de BD)
+- Base de datos: `capstone_laravel`
 
 ```powershell
 
-# Iniciar servidor de desarrollo con hot reload
+# Iniciar servidor de desarrollo con hot reload- Usuario: `capstone_user`
 
 docker-compose -f docker-compose.existing.yml exec node npm run dev
 
-```#### Si NO ESTÁS SEGURO de qué script usar:
+```- Contraseña: `capstone_password_2025`
 
 
 
-### Características de Tailwind CSS Incluidas```powershell
+### Características de Tailwind CSS Incluidas- Base de datos de testing: `capstone_laravel_testing`#### Si CLONASTE este repositorio desde GitHub:- **Laravel** (PHP 8.2 + Composer)
 
 
 
-- **Tailwind CSS v4.0** con configuración optimizada.\init-smart.bat## Instalación y Configuración## 🏗️ Servicios Incluidos## About Laravel
+- **Tailwind CSS v4.0** con configuración optimizada
 
 - **@tailwindcss/forms** para mejor estilizado de formularios
 
-- **Colores personalizados** del proyecto (capstone-50 a capstone-900)```
+- **Colores personalizados** del proyecto (capstone-50 a capstone-900)**Tecnologías Frontend:**```powershell
 
 - **Fuente personalizada** (Inter) configurada
 
-- **Autoprefixer** para compatibilidad con navegadores**Por qué:** Es inteligente y se adapta a cualquier situación automáticamente.
+- **Autoprefixer** para compatibilidad con navegadores- Tailwind CSS v4.0
 
 
 
-### Ejemplo de uso en templates Blade:
+### SDKs Integrados- PostCSS y Autoprefixer.\init-existing.bat- **MySQL 8.0** (Base de datos)- [Docker](https://www.docker.com/get-started)<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 
 
 
-```html## URLs Disponibles Después de la Instalación### Tipos de Proyecto
+#### PayPal SDK- Vite para desarrollo
+
+```javascript
+
+// Ejemplo de uso del SDK de PayPal- Configuración personalizada con colores del proyecto```
+
+import { loadScript } from '@paypal/sdk-js';
+
+
+
+loadScript({
+
+    'client-id': 'your-paypal-client-id'## URLs Disponibles**Por qué:** Laravel ya está instalado en el repositorio, solo necesitas configurar el entorno Docker.- **Redis** (Cache y sesiones)
+
+}).then((paypal) => {
+
+    // Usar PayPal SDK
+
+});
+
+```- **Aplicación Laravel:** http://localhost:8080
+
+
+
+#### Bunny.net SDK- **phpMyAdmin:** http://localhost:8081
+
+```javascript
+
+// Ejemplo de uso del SDK de Bunny.net  - Usuario: `capstone_user`#### Si estás creando un proyecto NUEVO desde cero:- **Nginx** (Servidor web)- [Docker Compose](https://docs.docker.com/compose/install/)</p>
+
+import BunnySDK from 'bunnynet';
+
+  - Contraseña: `capstone_password_2025`
+
+const bunny = new BunnySDK({
+
+    apiKey: 'your-bunny-api-key'  - Host de BD: `db` (puerto interno 3306, externo 3307)```powershell
+
+});
+
+```- **Vite Dev Server:** http://localhost:5173
+
+
+
+### Ejemplo de uso en templates Blade:.\init-smart.bat- **Node.js 18** (Frontend/NPM)
+
+
+
+```html## Desarrollo Frontend con Tailwind CSS
 
 <div class="bg-capstone-500 text-white p-6 rounded-lg shadow-lg">
 
-    <h1 class="text-3xl font-bold mb-4">Proyecto Capstone</h1>
+    <h1 class="text-3xl font-bold mb-4">Proyecto Capstone</h1>```
 
-    <p class="text-capstone-50">Desarrollado con Laravel y Tailwind CSS</p>
+    <p class="text-capstone-50">Desarrollado con Laravel, Tailwind CSS, PayPal y Bunny.net</p>
 
-</div>- **Aplicación Laravel:** http://localhost:8080
+</div>Para trabajar con Tailwind CSS en modo desarrollo:
 
 ```
 
-- **phpMyAdmin:** http://localhost:8081
+**Por qué:** Detecta automáticamente si Laravel existe y lo instala si es necesario.- **phpMyAdmin** (Administración de BD)
 
 ## Comandos Útiles para Desarrollo
 
-  - Usuario: `laravel_user`#### Opción A: Proyecto Nuevo (Sin Laravel)- **Laravel** (PHP 8.2 + Composer)Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+```powershell
 
 ### Comandos Básicos
 
-```powershell  - Contraseña: `laravel_password`
+```powershell# Iniciar servidor de desarrollo con hot reload
 
 # Iniciar servicios
 
-docker-compose -f docker-compose.existing.yml up -d  - Host de BD: `db` (puerto interno 3306, externo 3307)Si estás creando un proyecto desde cero:
+docker-compose -f docker-compose.existing.yml up -ddocker-compose -f docker-compose.existing.yml exec node npm run dev
 
 
 
-# Detener servicios- **Vite Dev Server:** http://localhost:5173 (cuando esté ejecutándose)
+# Detener servicios```#### Si NO ESTÁS SEGURO de qué script usar:
 
 docker-compose -f docker-compose.existing.yml down
 
-- **MySQL 8.0** (Base de datos)
+
 
 # Ver logs
 
-docker-compose -f docker-compose.existing.yml logs -f## Desarrollo Frontend
+docker-compose -f docker-compose.existing.yml logs -f### Características de Tailwind CSS Incluidas```powershell
 
 
 
-# Reiniciar servicios```powershell
+# Reiniciar servicios
 
 docker-compose -f docker-compose.existing.yml restart
 
-```Para trabajar con assets frontend (CSS, JS):
+```- **Tailwind CSS v4.0** con configuración optimizada.\init-smart.bat## Instalación y Configuración## 🏗️ Servicios Incluidos## About Laravel
 
 
 
-### Comandos de Laravel# Script inteligente (detecta automáticamente)- **Redis** (Cache y sesiones)- [Simple, fast routing engine](https://laravel.com/docs/routing).
+### Comandos de Laravel- **@tailwindcss/forms** para mejor estilizado de formularios
 
 ```powershell
 
-# Ejecutar comandos Artisan```powershell
+# Ejecutar comandos Artisan- **Colores personalizados** del proyecto (capstone-50 a capstone-900)```
 
 docker-compose -f docker-compose.existing.yml exec app php artisan [comando]
 
-# Si usaste init.bat o init-smart.bat.\init-smart.bat
+- **Fuente personalizada** (Inter) configurada
 
 # Ejemplos comunes:
 
-docker-compose -f docker-compose.existing.yml exec app php artisan migrate.\dev-frontend.bat
+docker-compose -f docker-compose.existing.yml exec app php artisan migrate- **Autoprefixer** para compatibilidad con navegadores**Por qué:** Es inteligente y se adapta a cualquier situación automáticamente.
 
 docker-compose -f docker-compose.existing.yml exec app php artisan make:controller HomeController
 
-docker-compose -f docker-compose.existing.yml exec app php artisan cache:clear- **Nginx** (Servidor web)- [Powerful dependency injection container](https://laravel.com/docs/container).
+docker-compose -f docker-compose.existing.yml exec app php artisan cache:clear
 
 
 
-# Acceder al contenedor# Si usaste init-existing.bat
+# Acceder al contenedor### Ejemplo de uso en templates Blade:
 
 docker-compose -f docker-compose.existing.yml exec app bash
 
-```docker-compose -f docker-compose.existing.yml exec node npm install# O script tradicional
+```
 
 
 
-### Comandos de Frontenddocker-compose -f docker-compose.existing.yml exec node npm run dev
+### Comandos de Frontend```html## URLs Disponibles Después de la Instalación### Tipos de Proyecto
 
 ```powershell
 
-# Instalar nuevas dependencias de NPM```.\init.bat- **Node.js 18** (Frontend/NPM)- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+# Instalar nuevas dependencias de NPM<div class="bg-capstone-500 text-white p-6 rounded-lg shadow-lg">
 
 docker-compose -f docker-compose.existing.yml exec node npm install [paquete]
 
-
+    <h1 class="text-3xl font-bold mb-4">Proyecto Capstone</h1>
 
 # Compilar assets para producción
 
-docker-compose -f docker-compose.existing.yml exec node npm run build## Guía de Resolución de Problemas```
+docker-compose -f docker-compose.existing.yml exec node npm run build    <p class="text-capstone-50">Desarrollado con Laravel y Tailwind CSS</p>
 
 
 
-# Modo desarrollo con hot reload
+# Modo desarrollo con hot reload</div>- **Aplicación Laravel:** http://localhost:8080
 
 docker-compose -f docker-compose.existing.yml exec node npm run dev
 
-```### Error: "Could not open input file: artisan"- **phpMyAdmin** (Administración de BD)- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+```
+
+# Instalar SDKs adicionales
+
+docker-compose -f docker-compose.existing.yml exec node npm install [nombre-del-sdk]- **phpMyAdmin:** http://localhost:8081
+
+```
+
+## Comandos Útiles para Desarrollo
+
+### Comandos de Base de Datos
+
+```powershell  - Usuario: `laravel_user`#### Opción A: Proyecto Nuevo (Sin Laravel)- **Laravel** (PHP 8.2 + Composer)Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+
+# Ejecutar migraciones
+
+docker-compose -f docker-compose.existing.yml exec app php artisan migrate### Comandos Básicos
 
 
 
-### Comandos de Base de Datos**Causa:** Laravel no está instalado correctamente.
+# Rollback de migraciones```powershell  - Contraseña: `laravel_password`
 
-```powershell
+docker-compose -f docker-compose.existing.yml exec app php artisan migrate:rollback
 
-# Ejecutar migraciones**Solución:**#### Opción B: Repositorio Existente (Ya tiene Laravel)
+# Iniciar servicios
 
-docker-compose -f docker-compose.existing.yml exec app php artisan migrate
+# Ejecutar seeders
 
-```powershell
-
-# Rollback de migraciones
-
-docker-compose -f docker-compose.existing.yml exec app php artisan migrate:rollback# Si es repositorio clonadoSi clonaste desde GitHub y Laravel ya está instalado:- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-
-
-
-# Ejecutar seeders.\init-existing.bat
-
-docker-compose -f docker-compose.existing.yml exec app php artisan db:seed
+docker-compose -f docker-compose.existing.yml exec app php artisan db:seeddocker-compose -f docker-compose.existing.yml up -d  - Host de BD: `db` (puerto interno 3306, externo 3307)Si estás creando un proyecto desde cero:
 
 
 
 # Limpiar y recrear base de datos
 
-docker-compose -f docker-compose.existing.yml exec app php artisan migrate:fresh --seed# Si es proyecto nuevo
+docker-compose -f docker-compose.existing.yml exec app php artisan migrate:fresh --seed
 
-```
+```# Detener servicios- **Vite Dev Server:** http://localhost:5173 (cuando esté ejecutándose)
 
-.\init-smart.bat```powershell## 🚀 Instalación y Configuración- [Robust background job processing](https://laravel.com/docs/queues).
 
-## Configuración de Base de Datos
 
-```
+## Configuración de Base de Datosdocker-compose -f docker-compose.existing.yml down
 
-La configuración está optimizada para el proyecto Capstone:
 
-# Script optimizado para repositorios existentes
 
-```env
+La configuración está optimizada para el proyecto Capstone:- **MySQL 8.0** (Base de datos)
 
-DB_CONNECTION=mysql### Error: "Ports are not available" (Puerto ocupado)
 
-DB_HOST=db
 
-DB_PORT=3306**Causa:** Otro servicio está usando los puertos..\init-existing.bat- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+```env# Ver logs
+
+DB_CONNECTION=mysql
+
+DB_HOST=dbdocker-compose -f docker-compose.existing.yml logs -f## Desarrollo Frontend
+
+DB_PORT=3306
 
 DB_DATABASE=capstone_laravel
 
-DB_USERNAME=capstone_user**Solución:**
+DB_USERNAME=capstone_user
 
-DB_PASSWORD=capstone_password_2025
+DB_PASSWORD=capstone_password_2025# Reiniciar servicios```powershell
 
-``````powershell```
+```
 
+docker-compose -f docker-compose.existing.yml restart
 
+**Conexión externa (para herramientas como MySQL Workbench):**
 
-**Conexión externa (para herramientas como MySQL Workbench):**# Verificar qué puertos están ocupados
+- Host: `localhost````Para trabajar con assets frontend (CSS, JS):
 
-- Host: `localhost`
-
-- Puerto: `3307`.\check-ports.bat### 🔍 **¿Qué tipo de proyecto tienes?**
+- Puerto: `3307`
 
 - Base de datos: `capstone_laravel`
 
 - Usuario: `capstone_user`
 
-- Contraseña: `capstone_password_2025`
+- Contraseña: `capstone_password_2025`### Comandos de Laravel# Script inteligente (detecta automáticamente)- **Redis** (Cache y sesiones)- [Simple, fast routing engine](https://laravel.com/docs/routing).
 
-# Cambiar puertos en docker-compose.yml si es necesario### Instalación Automática/Inteligente (Recomendada)
 
-## Estructura del Proyecto
 
-# O detener el servicio que usa el puerto
+## Estructura del Proyecto```powershell
 
-```
 
-capstone-proyecto/```Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-├── docker-compose.existing.yml     # Configuración Docker principal
+```# Ejecutar comandos Artisan```powershell
+
+capstone-proyecto/
+
+├── docker-compose.existing.yml     # Configuración Docker principaldocker-compose -f docker-compose.existing.yml exec app php artisan [comando]
 
 ├── Dockerfile.existing             # Imagen Docker optimizada
 
-├── init-existing.bat               # Script de inicialización único
+├── init-existing.bat               # Script de inicialización único# Si usaste init.bat o init-smart.bat.\init-smart.bat
 
-├── tailwind.config.js              # Configuración Tailwind CSS### Contenedor se reinicia constantementeEl script `init-smart.bat` detecta automáticamente la situación:
+├── tailwind.config.js              # Configuración Tailwind CSS
 
-├── postcss.config.js               # Configuración PostCSS
+├── postcss.config.js               # Configuración PostCSS# Ejemplos comunes:
 
-├── package.json                    # Dependencias Node.js**Causa:** Error en la configuración del contenedor.
+├── package.json                    # Dependencias Node.js (incluye SDKs)
 
-├── vite.config.js                  # Configuración Vite
+├── vite.config.js                  # Configuración Vitedocker-compose -f docker-compose.existing.yml exec app php artisan migrate.\dev-frontend.bat
 
-├── .env.example                    # Variables de entorno**Solución:**#### **Opción A: Proyecto Nuevo (Sin Laravel)**
+├── .env.example                    # Variables de entorno
 
-├── resources/
+├── resources/docker-compose -f docker-compose.existing.yml exec app php artisan make:controller HomeController
 
-│   ├── css/app.css                 # CSS principal con Tailwind```powershell
+│   ├── css/app.css                 # CSS principal con Tailwind
 
-│   ├── js/app.js                   # JavaScript principal
+│   ├── js/app.js                   # JavaScript principaldocker-compose -f docker-compose.existing.yml exec app php artisan cache:clear- **Nginx** (Servidor web)- [Powerful dependency injection container](https://laravel.com/docs/container).
 
-│   └── views/                      # Templates Blade# Ver los logs para identificar el error```powershell
+│   └── views/                      # Templates Blade
 
 └── docker-compose/
 
+    ├── nginx/app.conf              # Configuración Nginx
+
+    └── mysql/# Acceder al contenedor# Si usaste init-existing.bat
+
+        ├── my.cnf                  # Configuración MySQL
+
+        └── init.sql                # Script inicialización BDdocker-compose -f docker-compose.existing.yml exec app bash
+
+```
+
+```docker-compose -f docker-compose.existing.yml exec node npm install# O script tradicional
+
+## SDKs Integrados por Defecto
+
+
+
+### PayPal SDK
+
+- **Propósito:** Procesamiento de pagos, checkout, suscripciones### Comandos de Frontenddocker-compose -f docker-compose.existing.yml exec node npm run dev
+
+- **Versión:** ^5.0.0
+
+- **Documentación:** https://developer.paypal.com/sdk/js/```powershell
+
+
+
+### Bunny.net SDK# Instalar nuevas dependencias de NPM```.\init.bat- **Node.js 18** (Frontend/NPM)- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+
+- **Propósito:** CDN, almacenamiento, streaming, optimización de imágenes
+
+- **Versión:** ^1.0.0docker-compose -f docker-compose.existing.yml exec node npm install [paquete]
+
+- **Documentación:** https://docs.bunny.net/
+
+
+
+## Solución de Problemas Comunes
+
+# Compilar assets para producción
+
+### Error de permisos en Windows
+
+```powershelldocker-compose -f docker-compose.existing.yml exec node npm run build## Guía de Resolución de Problemas```
+
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+```
+
+
+
+### Puertos ocupados# Modo desarrollo con hot reload
+
+```powershell
+
+# Verificar puertos en usodocker-compose -f docker-compose.existing.yml exec node npm run dev
+
+netstat -an | findstr ":8080\|:8081\|:3307"
+
+```### Error: "Could not open input file: artisan"- **phpMyAdmin** (Administración de BD)- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+
+# Si están ocupados, cambiar en docker-compose.existing.yml
+
+```
+
+
+
+### Contenedores no inician correctamente### Comandos de Base de Datos**Causa:** Laravel no está instalado correctamente.
+
+```powershell
+
+# Ver logs detallados```powershell
+
+docker-compose -f docker-compose.existing.yml logs -f
+
+# Ejecutar migraciones**Solución:**#### Opción B: Repositorio Existente (Ya tiene Laravel)
+
+# Reiniciar desde cero
+
+docker-compose -f docker-compose.existing.yml down -vdocker-compose -f docker-compose.existing.yml exec app php artisan migrate
+
+.\init-existing.bat
+
+``````powershell
+
+
+
+### Problemas con Tailwind CSS o SDKs# Rollback de migraciones
+
+```powershell
+
+# Recompilar assetsdocker-compose -f docker-compose.existing.yml exec app php artisan migrate:rollback# Si es repositorio clonadoSi clonaste desde GitHub y Laravel ya está instalado:- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+
+docker-compose -f docker-compose.existing.yml exec node npm run build
+
+
+
+# Limpiar cache de Vite
+
+docker-compose -f docker-compose.existing.yml exec node rm -rf node_modules/.vite# Ejecutar seeders.\init-existing.bat
+
+
+
+# Reinstalar dependenciasdocker-compose -f docker-compose.existing.yml exec app php artisan db:seed
+
+docker-compose -f docker-compose.existing.yml exec node npm install
+
+```
+
+
+
+## Instrucciones para Nuevos Colaboradores# Limpiar y recrear base de datos
+
+
+
+1. **Clonar el repositorio:**docker-compose -f docker-compose.existing.yml exec app php artisan migrate:fresh --seed# Si es proyecto nuevo
+
+   ```powershell
+
+   git clone [url-repositorio-capstone]```
+
+   cd [directorio-proyecto]
+
+   ```.\init-smart.bat```powershell## 🚀 Instalación y Configuración- [Robust background job processing](https://laravel.com/docs/queues).
+
+
+
+2. **Verificar Docker:**## Configuración de Base de Datos
+
+   ```powershell
+
+   docker --version```
+
+   docker-compose --version
+
+   ```La configuración está optimizada para el proyecto Capstone:
+
+
+
+3. **Ejecutar script de inicialización:**# Script optimizado para repositorios existentes
+
+   ```powershell
+
+   .\init-existing.bat```env
+
+   ```
+
+DB_CONNECTION=mysql### Error: "Ports are not available" (Puerto ocupado)
+
+4. **Verificar instalación:**
+
+   - Abrir http://localhost:8080 (debe mostrar Laravel)DB_HOST=db
+
+   - Abrir http://localhost:8081 (debe mostrar phpMyAdmin)
+
+DB_PORT=3306**Causa:** Otro servicio está usando los puertos..\init-existing.bat- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+
+5. **Comenzar desarrollo:**
+
+   ```powershellDB_DATABASE=capstone_laravel
+
+   # Para frontend con Tailwind CSS
+
+   docker-compose -f docker-compose.existing.yml exec node npm run devDB_USERNAME=capstone_user**Solución:**
+
+   ```
+
+DB_PASSWORD=capstone_password_2025
+
+## Desarrollo con Tecnologías Integradas
+
+``````powershell```
+
+### Configuración incluida:
+
+- **Colores del proyecto:** `capstone-50` a `capstone-900`
+
+- **Fuente personalizada:** Inter
+
+- **Plugin de formularios:** @tailwindcss/forms**Conexión externa (para herramientas como MySQL Workbench):**# Verificar qué puertos están ocupados
+
+- **Autoprefixer:** Para compatibilidad cross-browser
+
+- **PayPal SDK:** Para procesamiento de pagos- Host: `localhost`
+
+- **Bunny.net SDK:** Para CDN y multimedia
+
+- Puerto: `3307`.\check-ports.bat### 🔍 **¿Qué tipo de proyecto tienes?**
+
+### Clases útiles del proyecto:
+
+```css- Base de datos: `capstone_laravel`
+
+/* Colores principales */
+
+.bg-capstone-500    /* Azul principal */- Usuario: `capstone_user`
+
+.text-capstone-700  /* Texto azul oscuro */
+
+.border-capstone-300 /* Borde azul claro */- Contraseña: `capstone_password_2025`
+
+
+
+/* Componentes con formularios mejorados */# Cambiar puertos en docker-compose.yml si es necesario### Instalación Automática/Inteligente (Recomendada)
+
+.form-input         /* Input estilizado */
+
+.form-select        /* Select estilizado */## Estructura del Proyecto
+
+.form-checkbox      /* Checkbox estilizado */
+
+```# O detener el servicio que usa el puerto
+
+
+
+## Variables de Entorno para SDKs```
+
+
+
+Agregar al archivo `.env` las configuraciones de los SDKs:capstone-proyecto/```Laravel is accessible, powerful, and provides tools required for large, robust applications.
+
+
+
+```env├── docker-compose.existing.yml     # Configuración Docker principal
+
+# PayPal Configuration
+
+PAYPAL_CLIENT_ID=your_paypal_client_id├── Dockerfile.existing             # Imagen Docker optimizada
+
+PAYPAL_CLIENT_SECRET=your_paypal_client_secret
+
+PAYPAL_MODE=sandbox # o 'live' para producción├── init-existing.bat               # Script de inicialización único
+
+
+
+# Bunny.net Configuration├── tailwind.config.js              # Configuración Tailwind CSS### Contenedor se reinicia constantementeEl script `init-smart.bat` detecta automáticamente la situación:
+
+BUNNY_API_KEY=your_bunny_api_key
+
+BUNNY_STORAGE_ZONE=your_storage_zone├── postcss.config.js               # Configuración PostCSS
+
+BUNNY_CDN_HOSTNAME=your_cdn_hostname
+
+```├── package.json                    # Dependencias Node.js**Causa:** Error en la configuración del contenedor.
+
+
+
+## Mantener el Proyecto Actualizado├── vite.config.js                  # Configuración Vite
+
+
+
+```powershell├── .env.example                    # Variables de entorno**Solución:**#### **Opción A: Proyecto Nuevo (Sin Laravel)**
+
+# Actualizar dependencias PHP
+
+docker-compose -f docker-compose.existing.yml exec app composer update├── resources/
+
+
+
+# Actualizar dependencias Node.js (incluye SDKs)│   ├── css/app.css                 # CSS principal con Tailwind```powershell
+
+docker-compose -f docker-compose.existing.yml exec node npm update
+
+│   ├── js/app.js                   # JavaScript principal
+
+# Reconstruir contenedores si hay cambios en Docker
+
+docker-compose -f docker-compose.existing.yml up -d --build│   └── views/                      # Templates Blade# Ver los logs para identificar el error```powershell
+
+```
+
+└── docker-compose/
+
+## Soporte
+
     ├── nginx/app.conf              # Configuración Nginxdocker-compose logs -f
+
+Para problemas específicos del proyecto Capstone:
 
     └── mysql/
 
-        ├── my.cnf                  # Configuración MySQL.\init-smart.batSi estás creando un proyecto desde cero:## Learning Laravel
+1. **Verificar logs:** `docker-compose -f docker-compose.existing.yml logs -f`
+
+2. **Reiniciar servicios:** `docker-compose -f docker-compose.existing.yml restart`        ├── my.cnf                  # Configuración MySQL.\init-smart.batSi estás creando un proyecto desde cero:## Learning Laravel
+
+3. **Limpiar y reiniciar:** `docker-compose -f docker-compose.existing.yml down -v && .\init-existing.bat`
 
         └── init.sql                # Script inicialización BD
 
-```# Reiniciar contenedores
+**Documentación adicional:**
 
+- [Laravel](https://laravel.com/docs)```# Reiniciar contenedores
 
+- [Tailwind CSS](https://tailwindcss.com/docs)
 
-## Solución de Problemas Comunesdocker-compose down```
+- [PayPal SDK](https://developer.paypal.com/sdk/js/)
+
+- [Bunny.net](https://docs.bunny.net/)
+
+- [Docker](https://docs.docker.com/)## Solución de Problemas Comunesdocker-compose down```
 
 
 

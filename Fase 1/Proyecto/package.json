@@ -6,6 +6,10 @@
         "build": "vite build",
         "dev": "vite"
     },
+    "dependencies": {
+        "@paypal/sdk-js": "^5.0.0",
+        "bunnynet": "^1.0.0"
+    },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
         "axios": "^1.11.0",

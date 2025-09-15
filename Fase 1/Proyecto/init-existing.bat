@@ -111,6 +111,19 @@ docker-compose -f docker-compose.existing.yml exec node npm install -D tailwindc
 echo Inicializando configuracion de Tailwind CSS...
 docker-compose -f docker-compose.existing.yml exec node npx tailwindcss init -p
 
+REM Instalar SDKs de terceros
+echo.
+echo ========================================
+echo   INSTALANDO SDKS DE TERCEROS
+echo ========================================
+echo Instalando SDK de PayPal...
+docker-compose -f docker-compose.existing.yml exec node npm install @paypal/sdk-js
+
+echo Instalando SDK de Bunny.net...
+docker-compose -f docker-compose.existing.yml exec node npm install bunnynet
+
+echo [OK] SDKs de PayPal y Bunny.net instalados correctamente
+
 REM Limpiar y optimizar cache de Laravel
 echo.
 echo ========================================
