@@ -117,10 +117,10 @@ echo ========================================
 echo   INSTALANDO SDKS DE TERCEROS
 echo ========================================
 echo Instalando SDK de PayPal...
-docker-compose -f docker-compose.existing.yml exec node npm install @paypal/sdk-js
+docker-compose -f docker-compose.existing.yml exec node npm install @paypal/paypal-js
 
 echo Instalando SDK de Bunny.net...
-docker-compose -f docker-compose.existing.yml exec node npm install bunnynet
+docker-compose -f docker-compose.existing.yml exec node npm install bunny-sdk
 
 echo [OK] SDKs de PayPal y Bunny.net instalados correctamente
 
