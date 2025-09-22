@@ -26,7 +26,7 @@
                 <div class="flex items-center space-x-4">
                     @if (Route::has('login'))
                         @auth
-                            <a href="{{ url('/dashboard') }}" class="bg-tech-electric-blue hover:bg-blue-600 text-tech-pure-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105">
+                            <a href="{{ url('/dashboard-admin') }}" class="bg-tech-electric-blue hover:bg-blue-600 text-tech-pure-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105">
                                 Dashboard
                             </a>
                         @else
@@ -62,6 +62,12 @@
                     </a>
                     <a href="{{ route('ordenes.index') }}" class="bg-transparent border-2 border-tech-pure-white text-tech-pure-white hover:bg-tech-pure-white hover:text-tech-dark-blue px-8 py-3 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 inline-block">
                         Ver Órdenes
+                    </a>
+                </div>
+                <!-- Botón Dashboard Admin (Borrador) -->
+                <div class="mt-4 animate-fade-in">
+                    <a href="{{ route('dashboard-admin') }}" class="bg-tech-warning-orange hover:bg-orange-600 text-tech-pure-white px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105 inline-block">
+                        🚧 Dashboard Administrativo (Borrador)
                     </a>
                 </div>
             </div>
