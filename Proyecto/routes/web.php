@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Auth;
 
 // Página principal
 Route::get('/', function () {
-    return view('welcome');
+    return view('welcome-new');
 })->name('home');
 
 // Rutas de autenticación (Laravel Breeze/UI)

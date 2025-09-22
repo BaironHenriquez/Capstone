@@ -1,0 +1,376 @@
+/* Baieco Custom Styles - Complementa Tailwind CSS */
+
+/* Variables CSS personalizadas */
+:root {
+    --primary-blue: #1e40af;
+    --secondary-blue: #3b82f6;
+    --accent-orange: #f97316;
+    --success-green: #10b981;
+    --warning-yellow: #fbbf24;
+    --dark-gray: #1f2937;
+    --light-gray: #f8fafc;
+    --pure-white: #ffffff;
+    --gradient-primary: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #f97316 100%);
+    --gradient-secondary: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.05);
+    --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1);
+    --shadow-large: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+/* Animaciones principales */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes bounceGentle {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes blob {
+    0% {
+        transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+        transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
+    100% {
+        transform: translate(0px, 0px) scale(1);
+    }
+}
+
+@keyframes typing {
+    from {
+        width: 0;
+    }
+    to {
+        width: 100%;
+    }
+}
+
+@keyframes blink {
+    50% {
+        border-color: transparent;
+    }
+}
+
+@keyframes slideOut {
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Clases de animación */
+.animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.animate-slide-in-left {
+    animation: slideInLeft 0.8s ease-out forwards;
+}
+
+.animate-slide-in-right {
+    animation: slideInRight 0.8s ease-out forwards;
+}
+
+.animate-bounce-gentle {
+    animation: bounceGentle 2s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+.animate-blob {
+    animation: blob 7s infinite;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.6s ease-out forwards;
+}
+
+.animate-slide-out {
+    animation: slideOut 0.3s ease-in forwards;
+}
+
+/* Delays para animaciones escalonadas */
+.animation-delay-100 { animation-delay: 0.1s; }
+.animation-delay-200 { animation-delay: 0.2s; }
+.animation-delay-300 { animation-delay: 0.3s; }
+.animation-delay-500 { animation-delay: 0.5s; }
+.animation-delay-1000 { animation-delay: 1s; }
+.animation-delay-2000 { animation-delay: 2s; }
+.animation-delay-4000 { animation-delay: 4s; }
+
+/* Clases de utilidad personalizadas */
+.bg-baieco-primary { background-color: var(--primary-blue); }
+.bg-baieco-secondary { background-color: var(--secondary-blue); }
+.bg-baieco-accent { background-color: var(--accent-orange); }
+.bg-baieco-success { background-color: var(--success-green); }
+.bg-baieco-warning { background-color: var(--warning-yellow); }
+.bg-baieco-dark { background-color: var(--dark-gray); }
+.bg-baieco-light { background-color: var(--light-gray); }
+
+.text-baieco-primary { color: var(--primary-blue); }
+.text-baieco-secondary { color: var(--secondary-blue); }
+.text-baieco-accent { color: var(--accent-orange); }
+.text-baieco-success { color: var(--success-green); }
+.text-baieco-warning { color: var(--warning-yellow); }
+.text-baieco-dark { color: var(--dark-gray); }
+
+.border-baieco-primary { border-color: var(--primary-blue); }
+.border-baieco-secondary { border-color: var(--secondary-blue); }
+.border-baieco-accent { border-color: var(--accent-orange); }
+
+/* Gradientes personalizados */
+.gradient-primary {
+    background: var(--gradient-primary);
+}
+
+.gradient-secondary {
+    background: var(--gradient-secondary);
+}
+
+.gradient-hero {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 50%, var(--accent-orange) 100%);
+}
+
+.gradient-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Efectos de sombra personalizados */
+.shadow-soft { box-shadow: var(--shadow-soft); }
+.shadow-medium { box-shadow: var(--shadow-medium); }
+.shadow-large { box-shadow: var(--shadow-large); }
+
+/* Efectos especiales */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.feature-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--shadow-large);
+}
+
+.navbar-scrolled {
+    background-color: rgba(30, 64, 175, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+/* Elementos interactivos */
+.btn-primary {
+    background: var(--gradient-primary);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 2px solid var(--primary-blue);
+    color: var(--primary-blue);
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: var(--primary-blue);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Efectos de texto */
+.typing-effect {
+    overflow: hidden;
+    border-right: 2px solid var(--accent-orange);
+    white-space: nowrap;
+    animation: typing 3.5s steps(40, end), blink 0.75s step-end infinite;
+}
+
+/* Scroll behavior */
+.smooth-scroll {
+    scroll-behavior: smooth;
+}
+
+/* Loading states */
+.loading-spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 4px solid white;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Intersection Observer animations */
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease-out;
+}
+
+.animate-on-scroll.animate-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Responsive typography */
+@media (max-width: 640px) {
+    .hero-title {
+        font-size: 2.5rem;
+        line-height: 1.2;
+    }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+    .hero-title {
+        font-size: 3.5rem;
+        line-height: 1.2;
+    }
+}
+
+@media (min-width: 769px) {
+    .hero-title {
+        font-size: 4.5rem;
+        line-height: 1.1;
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--light-gray);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--secondary-blue);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-blue);
+}
+
+/* Focus styles */
+.focus-ring:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+}
+
+/* Mobile menu animations */
+.mobile-menu-enter {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.mobile-menu-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.3s ease-out;
+}
+
+.mobile-menu-exit {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.mobile-menu-exit-active {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease-in;
+}
