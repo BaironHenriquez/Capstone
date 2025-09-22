@@ -1,0 +1,201 @@
+/* Estilos para vistas de autenticación - Baieco */
+
+/* Variables CSS para Baieco */
+:root {
+    --baieco-primary: #1e40af;
+    --baieco-secondary: #3b82f6;
+    --baieco-accent: #ef4444;
+    --baieco-success: #10b981;
+    --baieco-dark: #1f2937;
+    --baieco-light: #f8fafc;
+}
+
+/* Gradiente de fondo para login */
+.auth-gradient {
+    background: linear-gradient(135deg, var(--baieco-primary) 0%, var(--baieco-secondary) 50%, var(--baieco-accent) 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Efectos de glassmorphism para el formulario */
+.glass-form {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Animaciones para campos de entrada */
+.input-float {
+    transition: all 0.3s ease;
+}
+
+.input-float:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+}
+
+/* Botón principal con animaciones */
+.btn-primary {
+    background: linear-gradient(45deg, var(--baieco-primary), var(--baieco-secondary));
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(30, 64, 175, 0.4);
+}
+
+/* Logo animado */
+.logo-container {
+    animation: logoFloat 3s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Partículas flotantes de fondo */
+.particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.particle {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: float 6s ease-in-out infinite;
+}
+
+.particle:nth-child(1) {
+    width: 80px;
+    height: 80px;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.particle:nth-child(2) {
+    width: 40px;
+    height: 40px;
+    left: 70%;
+    animation-delay: 2s;
+}
+
+.particle:nth-child(3) {
+    width: 60px;
+    height: 60px;
+    left: 40%;
+    animation-delay: 4s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.3;
+    }
+    50% {
+        transform: translateY(-100px) rotate(180deg);
+        opacity: 0.8;
+    }
+}
+
+/* Efecto de carga */
+.loading-spinner {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 2px solid white;
+    width: 16px;
+    height: 16px;
+    animation: spin 1s linear infinite;
+    display: none;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Alertas de demo */
+.demo-alert {
+    background: linear-gradient(45deg, #dbeafe, #bfdbfe);
+    border: 1px solid #3b82f6;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+    .glass-form {
+        margin: 1rem;
+        padding: 2rem 1.5rem;
+    }
+    
+    .particle {
+        display: none;
+    }
+}
+
+/* Estados de error */
+.input-error {
+    border-color: var(--baieco-accent);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Transiciones suaves */
+* {
+    transition: all 0.3s ease;
+}
+
+/* Mejoras de accesibilidad */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Focus visible para navegación por teclado */
+.focus-visible:focus {
+    outline: 2px solid var(--baieco-secondary);
+    outline-offset: 2px;
+}

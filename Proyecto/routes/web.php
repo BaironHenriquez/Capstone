@@ -1,22 +1,29 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\DashboardController;
 
 // Página principal
 Route::get('/', function () {
     return view('welcome-new');
 })->name('home');
 
-// Rutas de autenticación (Laravel Breeze/UI)
+// Rutas de autenticación
 Route::middleware('guest')->group(function () {
-    Route::get('/login', function () {
-        return view('auth.login');
-    })->name('login');
-    
-    Route::get('/register', function () {
-        return view('auth.register');
-    })->name('register');
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [LoginController::class, 'login']);
+});
+
+// Rutas protegidas
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+});
+
+// Rutas demo (sin middleware auth para pruebas)
+Route::group(['prefix' => 'demo'], function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('demo.dashboard');
 });
 
 
