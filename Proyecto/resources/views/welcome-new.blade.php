@@ -35,7 +35,7 @@
                             </a>
                             @if (Route::has('register'))
                                 <a href="{{ route('register') }}" class="bg-tech-warning-orange hover:bg-orange-600 text-tech-pure-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105">
-                                    Registrarse
+                                    ola
                                 </a>
                             @endif
                         @endauth

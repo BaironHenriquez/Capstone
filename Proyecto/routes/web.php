@@ -18,6 +18,7 @@ Route::middleware('guest')->group(function () {
     })->name('register');
 });
 
+
 // Dashboard para usuarios autenticados
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -43,6 +44,14 @@ Route::prefix('servicios')->name('servicios.')->group(function () {
         return view('servicios.soporte');
     })->name('soporte');
     
+    Route::get('/dashboard_tecnico', function () {
+    return view('tecnico.dashboard_tecnico');
+    })->name('dashboard_tecnico');
+
+
+
+
+
     // Procesar solicitud de servicio
     Route::post('/crear', function () {
         // Aquí iría la lógica para procesar la solicitud
