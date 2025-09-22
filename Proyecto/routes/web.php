@@ -107,7 +107,7 @@ Route::get('/dashboard-admin', function () {
         'crecimiento' => 17.1 // porcentaje
     ];
     
-    return view('dashboard', compact('resumenOrdenes', 'tecnicos', 'alertas', 'metricas'));
+    return view('administrador.dashboard-admin', compact('resumenOrdenes', 'tecnicos', 'alertas', 'metricas'));
 })->name('dashboard-admin');
 
 // Rutas de servicios
