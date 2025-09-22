@@ -31,14 +31,15 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
-/* Animaciones para campos de entrada */
+/* Animaciones para campos de entrada - SIMPLIFICADAS */
 .input-float {
-    transition: all 0.3s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .input-float:focus {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+    border-color: var(--baieco-secondary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
 }
 
 /* Botón principal con animaciones */
@@ -79,7 +80,8 @@
     50% { transform: translateY(-10px); }
 }
 
-/* Partículas flotantes de fondo */
+/* Partículas flotantes de fondo - DESACTIVADAS TEMPORALMENTE */
+/*
 .particles {
     position: absolute;
     width: 100%;
@@ -97,6 +99,7 @@
     pointer-events: none;
     animation: float 6s ease-in-out infinite;
 }
+*/
 
 .particle:nth-child(1) {
     width: 80px;
@@ -176,10 +179,12 @@
     box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
-/* Transiciones suaves */
+/* Transiciones suaves - DESACTIVADAS TEMPORALMENTE */
+/*
 * {
     transition: all 0.3s ease;
 }
+*/
 
 /* Mejoras de accesibilidad */
 .sr-only {
@@ -198,4 +203,28 @@
 .focus-visible:focus {
     outline: 2px solid var(--baieco-secondary);
     outline-offset: 2px;
+}
+
+/* FIXES PARA INTERACTIVIDAD */
+input[type="email"], 
+input[type="password"], 
+input[type="checkbox"],
+button[type="submit"] {
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 100 !important;
+}
+
+.glass-form {
+    position: relative !important;
+    z-index: 50 !important;
+}
+
+/* Asegurar que los inputs sean clickables */
+input {
+    cursor: text !important;
+}
+
+button {
+    cursor: pointer !important;
 }

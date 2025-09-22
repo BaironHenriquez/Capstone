@@ -63,12 +63,13 @@ function initFormValidation() {
     // Manejo del envío del formulario
     if (form) {
         form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            if (validateForm()) {
-                showLoadingState(submitButton);
-                simulateLogin();
+            // Solo validar, pero permitir el envío normal al servidor
+            if (!validateForm()) {
+                e.preventDefault(); // Solo prevenir si hay errores de validación
+                return false;
             }
+            // Permitir que el formulario se envíe normalmente al servidor Laravel
+            showLoadingState(submitButton);
         });
     }
 }

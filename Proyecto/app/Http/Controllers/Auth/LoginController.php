@@ -32,7 +32,12 @@ class LoginController extends Controller
         // Verificar credenciales demo hardcodeadas
         if ($this->attemptDemoLogin($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended('/dashboard')->with('success', '¡Bienvenido a Baieco!');
+            
+            // Obtener el rol del usuario demo para redirección
+            $user = session('demo_user');
+            $redirectUrl = $this->getRedirectByRole($user['role']);
+            
+            return redirect($redirectUrl)->with('success', '¡Bienvenido a Baieco!');
         }
 
         // Intento de login normal con base de datos (cuando esté disponible)
@@ -54,27 +59,33 @@ class LoginController extends Controller
         $demoUsers = [
             [
                 'email' => 'admin@baieco.cl',
-                'password' => 'admin123',
+                'password' => '123',
                 'role' => 'admin',
                 'name' => 'Carlos Administrador'
             ],
             [
                 'email' => 'tecnico@techfixpro.cl',
-                'password' => 'tecnico123',
+                'password' => '123',
                 'role' => 'tecnico',
                 'name' => 'Juan Pérez'
             ],
             [
-                'email' => 'demo@baieco.cl',
-                'password' => '123456',
-                'role' => 'tecnico',
-                'name' => 'Usuario Demo'
+                'email' => 'maria@techfixpro.cl',
+                'password' => '123',
+                'role' => 'trabajador',
+                'name' => 'María González'
             ],
             [
                 'email' => 'pedro@repairzone.cl',
-                'password' => 'demo123',
+                'password' => '123',
                 'role' => 'tecnico',
                 'name' => 'Pedro Martínez'
+            ],
+            [
+                'email' => 'demo@baieco.cl',
+                'password' => '123',
+                'role' => 'admin',
+                'name' => 'Usuario Demo'
             ]
         ];
 
@@ -93,6 +104,22 @@ class LoginController extends Controller
         }
 
         return false;
+    }
+
+    /**
+     * Determinar redirección según el rol del usuario
+     */
+    private function getRedirectByRole($role)
+    {
+        switch ($role) {
+            case 'admin':
+                return '/dashboard-admin';
+            case 'tecnico':
+            case 'trabajador':
+                return '/dashboard_tecnico';
+            default:
+                return '/home';
+        }
     }
 
     /**

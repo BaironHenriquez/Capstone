@@ -117,6 +117,11 @@ Route::get('/dashboard-admin', function () {
     return view('administrador.dashboard-admin', compact('resumenOrdenes', 'tecnicos', 'alertas', 'metricas'));
 })->name('dashboard-admin');
 
+// Dashboard técnico 
+Route::get('/dashboard_tecnico', function () {
+    return view('tecnico.dashboard_tecnico');
+})->name('dashboard_tecnico');
+
 // Rutas de servicios
 Route::prefix('servicios')->name('servicios.')->group(function () {
     // Página de creación de servicio
@@ -136,14 +141,6 @@ Route::prefix('servicios')->name('servicios.')->group(function () {
     Route::get('/soporte', function () {
         return view('servicios.soporte');
     })->name('soporte');
-    
-    Route::get('/dashboard_tecnico', function () {
-    return view('tecnico.dashboard_tecnico');
-    })->name('dashboard_tecnico');
-
-
-
-
 
     // Procesar solicitud de servicio
     Route::post('/crear', function () {
