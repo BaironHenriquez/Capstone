@@ -69,8 +69,11 @@
                     <a href="{{ route('dashboard-admin') }}" class="bg-tech-warning-orange hover:bg-orange-600 text-tech-pure-white px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105 inline-block">
                         🚧 Dashboard Administrativo (Borrador)
                     </a>
+
+                    <a href="{{ route('servicios.dashboard_tecnico') }}" class="bg-tech-warning-orange hover:bg-orange-600 text-tech-pure-white px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105 inline-block mt-3">
+                        👷 Dashboard Técnico (Borrador)
+                    </a>
                 </div>
-            </div>
         </div>
     </section>
 

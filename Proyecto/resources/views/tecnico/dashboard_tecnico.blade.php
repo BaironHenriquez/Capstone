@@ -6,10 +6,11 @@
     <title>Dashboard Técnico</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
+<!-- Navigation Header --> <nav class="bg-tech-dark-blue shadow-lg sticky top-0 z-50 animate-slide-down"> <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"> <div class="flex justify-between h-16"> <div class="flex items-center"> <div class="flex-shrink-0 animate-scale-in"> <span class="text-tech-pure-white text-2xl font-bold">TechService Pro</span> </div> <div class="hidden md:ml-10 md:flex md:space-x-8"> <a href="{{ route('home') }}" class="text-tech-pure-white hover:text-tech-electric-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Inicio</a> <a href="{{ route('dashboard-admin') }}" class="text-tech-electric-blue bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Panel</a> <a href="{{ route('ordenes.index') }}" class="text-tech-pure-white hover:text-tech-electric-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Órdenes</a> </div> </div> <div class="flex items-center space-x-4"> <div class="text-tech-pure-white text-sm"> <span class="hidden sm:inline">Panel </span> <span class="font-semibold">Técnico Administrador</span> </div> <a href="{{ route('home') }}" class="text-tech-pure-white hover:text-tech-electric-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300"> <i class="fas fa-arrow-left mr-1"></i> Volver al Inicio </a> </div> </div> </div> </nav>
 <body class="bg-gray-100 font-sans">
 
     <div class="min-h-screen flex">
-      
+
         <!-- Sidebar -->
         <aside class="w-64 bg-blue-900 text-white flex flex-col p-6">
             
