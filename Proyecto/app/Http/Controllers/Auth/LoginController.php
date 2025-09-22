@@ -29,6 +29,11 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
+        \Log::info('LOGIN ATTEMPT', [
+            'email' => $credentials['email'],
+            'timestamp' => now()
+        ]);
+
         // Verificar credenciales demo hardcodeadas PRIMERO
         if ($this->attemptDemoLogin($credentials)) {
             $request->session()->regenerate();
@@ -36,6 +41,12 @@ class LoginController extends Controller
             // Obtener el rol del usuario demo para redirección
             $user = session('demo_user');
             $redirectUrl = $this->getRedirectByRole($user['role']);
+            
+            \Log::info('DEMO LOGIN SUCCESS', [
+                'user' => $user,
+                'redirect_url' => $redirectUrl,
+                'role' => $user['role']
+            ]);
             
             return redirect($redirectUrl)->with('success', '¡Bienvenido a Baieco!');
         }
@@ -114,15 +125,23 @@ class LoginController extends Controller
      */
     private function getRedirectByRole($role)
     {
-        switch ($role) {
-            case 'admin':
-                return '/dashboard-admin';
-            case 'tecnico':
-            case 'trabajador':
-                return '/dashboard_tecnico';
-            default:
-                return '/home';
-        }
+        \Log::info('GET REDIRECT BY ROLE', [
+            'role' => $role,
+            'timestamp' => now()
+        ]);
+
+        $redirectUrl = match ($role) {
+            'admin' => '/dashboard-admin',
+            'tecnico', 'trabajador' => '/dashboard_tecnico',
+            default => '/home'
+        };
+
+        \Log::info('REDIRECT URL DETERMINED', [
+            'role' => $role,
+            'redirect_url' => $redirectUrl
+        ]);
+
+        return $redirectUrl;
     }
 
     /**
