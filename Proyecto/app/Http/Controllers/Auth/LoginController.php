@@ -29,7 +29,7 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
-        // Verificar credenciales demo hardcodeadas
+        // Verificar credenciales demo hardcodeadas PRIMERO
         if ($this->attemptDemoLogin($credentials)) {
             $request->session()->regenerate();
             
@@ -40,11 +40,14 @@ class LoginController extends Controller
             return redirect($redirectUrl)->with('success', '¡Bienvenido a Baieco!');
         }
 
-        // Intento de login normal con base de datos (cuando esté disponible)
+        // Solo intentar login con base de datos si NO es un usuario demo
+        // Comentado temporalmente para usar solo sistema demo
+        /*
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
             return redirect()->intended('/dashboard')->with('success', '¡Bienvenido de vuelta!');
         }
+        */
 
         throw ValidationException::withMessages([
             'email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
