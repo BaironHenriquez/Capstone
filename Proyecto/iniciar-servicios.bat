@@ -36,9 +36,37 @@ docker-compose -f docker-compose.existing.yml up -d
 REM Verificar que los servicios estan corriendo
 echo.
 echo Verificando estado de los servicios...
-timeout /t 10 /nobreak >nul
+timeout /t 15 /nobreak >nul
 
 docker-compose -f docker-compose.existing.yml ps
+
+REM Verificar conexion a base de datos y ejecutar migraciones
+echo.
+echo Verificando base de datos y ejecutando migraciones...
+echo Esperando que MySQL este completamente listo...
+timeout /t 10 /nobreak >nul
+
+REM Ejecutar migraciones automaticamente
+docker exec laravel-app php artisan migrate --force
+if errorlevel 1 (
+    echo [WARNING] Error ejecutando migraciones, reintentando en 5 segundos...
+    timeout /t 5 /nobreak >nul
+    docker exec laravel-app php artisan migrate --force
+)
+
+REM Limpiar caches de Laravel
+echo Limpiando caches de Laravel...
+docker exec laravel-app php artisan config:clear
+docker exec laravel-app php artisan cache:clear
+docker exec laravel-app php artisan config:cache
+
+echo [OK] Base de datos configurada y migraciones ejecutadas
+
+REM Preparar entorno Node.js para Vite
+echo.
+echo Preparando entorno Node.js para desarrollo frontend...
+docker exec laravel-node npm install >nul 2>&1
+echo [OK] Dependencias de Node.js instaladas
 
 echo.
 echo ========================================

@@ -1,0 +1,117 @@
+/* Validaciones del formulario de Servicio Técnico */
+
+/* Estados de validación */
+.input-valid {
+    border-color: #10b981 !important;
+}
+
+.input-valid:focus {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+.input-invalid {
+    border-color: #ef4444 !important;
+}
+
+.input-invalid:focus {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.input-warning {
+    border-color: #f59e0b !important;
+}
+
+.input-warning:focus {
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1) !important;
+}
+
+/* Mensajes de error */
+.error-message {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    animation: slideDown 0.3s ease-out;
+}
+
+.success-message {
+    color: #10b981;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    animation: slideDown 0.3s ease-out;
+}
+
+/* Contadores de caracteres */
+.char-counter {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+    text-align: right;
+    transition: color 0.3s ease;
+}
+
+.char-counter.warning {
+    color: #d97706;
+}
+
+.char-counter.danger {
+    color: #dc2626;
+    font-weight: 500;
+}
+
+/* Animaciones */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes shake {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateX(0);
+    }
+    10%, 30%, 70%, 90% {
+        transform: translateX(-10px);
+    }
+    40%, 60% {
+        transform: translateX(10px);
+    }
+}
+
+/* Efectos visuales */
+.input-shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* Loading states */
+.btn-loading {
+    opacity: 0.75;
+    cursor: not-allowed;
+}
+
+.btn-loading svg {
+    animation: spin 1s linear infinite;
+}
+
+/* Estilos responsive para móviles */
+@media (max-width: 640px) {
+    .error-message, .success-message {
+        font-size: 0.75rem;
+    }
+    
+    .char-counter {
+        font-size: 0.75rem;
+    }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

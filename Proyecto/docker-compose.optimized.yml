@@ -1,0 +1,134 @@
+services:
+  # Servicio de la aplicación Laravel
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.optimized
+    image: laravel-app-optimized
+    container_name: laravel-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      # Solo montar directorios específicos para mejor rendimiento
+      - ./app:/var/www/app
+      - ./config:/var/www/config
+      - ./database:/var/www/database
+      - ./resources:/var/www/resources
+      - ./routes:/var/www/routes
+      - ./.env:/var/www/.env
+      # Usar volúmenes nombrados para cache y logs
+      - laravel-storage:/var/www/storage
+      - laravel-bootstrap-cache:/var/www/bootstrap/cache
+    networks:
+      - laravel
+    environment:
+      - PHP_OPCACHE_VALIDATE_TIMESTAMPS=1
+      - PHP_OPCACHE_REVALIDATE_FREQ=0
+
+  # Servidor web Nginx optimizado
+  webserver:
+    image: nginx:alpine
+    container_name: laravel-webserver
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./public:/var/www/public:ro
+      - ./docker-compose/nginx:/etc/nginx/conf.d
+    networks:
+      - laravel
+    depends_on:
+      - app
+
+  # Base de datos MySQL con configuración optimizada
+  db:
+    image: mysql:8.0
+    container_name: laravel-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_USER: laravel_user
+      MYSQL_PASSWORD: laravel_password
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./docker-compose/mysql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - laravel
+    ports:
+      - "3307:3306"
+    command: --default-authentication-plugin=mysql_native_password
+             --innodb-buffer-pool-size=512M
+             --innodb-log-file-size=128M
+             --max_connections=200
+
+  # Redis optimizado para cache y sesiones
+  redis:
+    image: redis:alpine
+    container_name: laravel-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - laravel
+    volumes:
+      - redis-data:/data
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  # Servicio Node.js para desarrollo frontend
+  node:
+    image: node:18-alpine
+    container_name: laravel-node
+    restart: "no"
+    working_dir: /var/www
+    volumes:
+      - ./package.json:/var/www/package.json
+      - ./package-lock.json:/var/www/package-lock.json
+      - ./vite.config.js:/var/www/vite.config.js
+      - ./tailwind.config.js:/var/www/tailwind.config.js
+      - ./postcss.config.js:/var/www/postcss.config.js
+      - ./resources:/var/www/resources
+      - ./public:/var/www/public
+      - node-modules:/var/www/node_modules
+    command: tail -f /dev/null
+    ports:
+      - "5173:5173"
+    networks:
+      - laravel
+    depends_on:
+      - app
+
+  # phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: laravel-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root_password
+    ports:
+      - "8081:80"
+    networks:
+      - laravel
+
+# Redes
+networks:
+  laravel:
+    driver: bridge
+
+# Volúmenes optimizados
+volumes:
+  dbdata:
+    driver: local
+  redis-data:
+    driver: local
+  laravel-storage:
+    driver: local
+  laravel-bootstrap-cache:
+    driver: local
+  node-modules:
+    driver: local
