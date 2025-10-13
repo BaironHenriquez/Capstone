@@ -18,6 +18,10 @@ class DatabaseSeeder extends Seeder
             ServicioTecnicoSeeder::class,
             MarcaSeeder::class,
             UserSeeder::class,
+            ClienteSeeder::class,
+            TecnicoSeeder::class,
+            TrabajadorSeeder::class,
+            OrdenServicioSeeder::class,
         ]);
     }
 }

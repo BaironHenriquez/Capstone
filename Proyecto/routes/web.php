@@ -1,24 +1,77 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\OrdenServicioController;
+use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\TecnicoController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\PayPalController;
+use App\Http\Controllers\SetupController;
+use App\Http\Controllers\IAController;
 
 // Página principal
 Route::get('/', function () {
     return view('welcome-new');
 })->name('home');
 
-// Rutas de autenticación
+// ============================================
+// MÓDULO DE SUSCRIPCIÓN Y AUTENTICACIÓN
+// ============================================
+
+// Registro y autenticación personalizada
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [LoginController::class, 'login']);
+    Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register.form');
+    Route::post('/register', [RegisterController::class, 'register'])->name('register');
+    Route::post('/login', [RegisterController::class, 'login'])->name('login');
 });
+
+// Rutas de suscripción (requieren autenticación)
+Route::middleware('auth')->prefix('subscription')->name('subscription.')->group(function () {
+    Route::get('/plans', [SubscriptionController::class, 'showPlans'])->name('plans');
+    Route::get('/checkout/{plan}', [SubscriptionController::class, 'checkout'])->name('checkout');
+    Route::get('/show', [SubscriptionController::class, 'show'])->name('show');
+    Route::get('/success', [SubscriptionController::class, 'success'])->name('success');
+    Route::post('/cancel', [SubscriptionController::class, 'cancel'])->name('cancel');
+});
+
+// Rutas de PayPal (requieren autenticación)
+Route::middleware('auth')->prefix('paypal')->name('paypal.')->group(function () {
+    Route::post('/create-payment', [PayPalController::class, 'createPayment'])->name('create.payment');
+    Route::get('/approve/{paymentId}', [PayPalController::class, 'approvePayment'])->name('approve');
+    // Ruta temporal para manejar el formato anterior con query parameters
+    Route::get('/approve', function (Request $request) {
+        $paymentId = $request->query('payment_id');
+        if ($paymentId) {
+            return redirect()->route('paypal.approve', ['paymentId' => $paymentId]);
+        }
+        abort(404);
+    });
+    Route::post('/execute', [PayPalController::class, 'executePayment'])->name('execute');
+    Route::get('/success', [PayPalController::class, 'success'])->name('success');
+    Route::get('/cancel', [PayPalController::class, 'cancel'])->name('cancel');
+});
+
+// Ruta para usuarios sin suscripción activa
+Route::middleware('auth')->get('/no-subscription', function () {
+    return view('subscription.no-subscription');
+})->name('no.subscription');
 
 // Rutas protegidas
 Route::middleware('auth')->group(function () {
-    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::post('/logout', [RegisterController::class, 'logout'])->name('logout');
+    
+    // Rutas de configuración (requieren suscripción pero NO servicio técnico completo)
+    Route::middleware('subscription')->prefix('setup')->name('setup.')->group(function () {
+        Route::get('/technical-service', [\App\Http\Controllers\SetupController::class, 'showTechnicalServiceForm'])->name('technical-service');
+        Route::post('/technical-service', [\App\Http\Controllers\SetupController::class, 'saveTechnicalService'])->name('technical-service.save');
+    });
+    
+    // Dashboard requiere suscripción activa Y servicio técnico completo
+    Route::middleware(['subscription', 'technical.service'])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
 // Rutas demo (sin middleware auth para pruebas)
@@ -27,8 +80,8 @@ Route::group(['prefix' => 'demo'], function () {
 });
 
 
-// Dashboard administrativo (borrador - acceso público)
-Route::get('/dashboard-admin', function () {
+// Dashboard administrativo (requiere autenticación y suscripción)
+Route::middleware(['auth', 'subscription'])->get('/dashboard-admin', function () {
     // Datos simulados para el dashboard
     $resumenOrdenes = [
         'total' => 156,
@@ -117,8 +170,8 @@ Route::get('/dashboard-admin', function () {
     return view('administrador.dashboard-admin', compact('resumenOrdenes', 'tecnicos', 'alertas', 'metricas'));
 })->name('dashboard-admin');
 
-// Dashboard técnico 
-Route::get('/dashboard_tecnico', function () {
+// Dashboard técnico (requiere autenticación y suscripción)
+Route::middleware(['auth', 'subscription'])->get('/dashboard_tecnico', function () {
     return view('tecnico.dashboard_tecnico');
 })->name('dashboard_tecnico');
 
@@ -154,13 +207,35 @@ Route::prefix('servicios')->name('servicios.')->group(function () {
     })->name('store');
 });
 
-// Rutas de órdenes de servicio
+// Rutas de órdenes de servicio (CRUD completo)
+Route::middleware(['auth', 'subscription'])->group(function () {
+    // Rutas para Clientes
+    Route::resource('clientes', ClienteController::class);
+    Route::get('clientes/{cliente}/estadisticas', [ClienteController::class, 'estadisticas'])->name('clientes.estadisticas');
+
+    // Rutas para Técnicos
+    Route::resource('tecnicos', TecnicoController::class);
+    Route::get('tecnicos/{tecnico}/ordenes', [TecnicoController::class, 'ordenes'])->name('tecnicos.ordenes');
+    Route::post('tecnicos/{tecnico}/activar', [TecnicoController::class, 'activar'])->name('tecnicos.activar');
+    Route::post('tecnicos/{tecnico}/desactivar', [TecnicoController::class, 'desactivar'])->name('tecnicos.desactivar');
+
+    // Rutas para Órdenes de Servicio (CRUD completo)
+    Route::resource('ordenes', OrdenServicioController::class);
+    Route::post('ordenes/{orden}/asignar-tecnico', [OrdenServicioController::class, 'asignarTecnico'])->name('ordenes.asignar-tecnico');
+    Route::post('ordenes/{orden}/cambiar-estado', [OrdenServicioController::class, 'cambiarEstado'])->name('ordenes.cambiar-estado');
+    Route::get('ordenes/{orden}/historial', [OrdenServicioController::class, 'historial'])->name('ordenes.historial');
+
+    // Rutas de funcionalidades IA
+    Route::prefix('ia')->name('ia.')->group(function () {
+        Route::post('recomendar-tecnico', [IAController::class, 'recomendarTecnico'])->name('recomendar-tecnico');
+        Route::get('priorizar-ordenes', [IAController::class, 'priorizarOrdenes'])->name('priorizar-ordenes');
+        Route::get('alertas-predictivas', [IAController::class, 'alertasPredictivas'])->name('alertas-predictivas');
+        Route::post('optimizar-rutas', [IAController::class, 'optimizarRutas'])->name('optimizar-rutas');
+    });
+});
+
+// Rutas públicas de órdenes
 Route::prefix('ordenes')->name('ordenes.')->group(function () {
-    // Lista de órdenes (requiere autenticación)
-    Route::get('/', function () {
-        return view('ordenes.index');
-    })->name('index')->middleware('auth');
-    
     // Buscar orden por número (público)
     Route::get('/buscar', function () {
         $numeroOrden = request('numero_orden');
@@ -169,11 +244,6 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
         }
         return redirect()->route('home')->with('error', 'Número de orden requerido.');
     })->name('buscar');
-    
-    // Ver detalles de una orden específica
-    Route::get('/{id}', function ($id) {
-        return view('ordenes.detalle', compact('id'));
-    })->name('show');
 });
 
 // Rutas de contacto

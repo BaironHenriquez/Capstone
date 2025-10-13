@@ -11,7 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'subscription' => \App\Http\Middleware\CheckSubscription::class,
+            'technical.service' => \App\Http\Middleware\CheckTechnicalServiceComplete::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
