@@ -133,6 +133,9 @@
                         <a href="{{ route('tecnicos.index') }}" class="text-tech-pure-white hover:text-tech-electric-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {{ request()->routeIs('tecnicos*') ? 'text-tech-electric-blue bg-blue-600' : '' }}">
                             <i class="fas fa-tools mr-1"></i> Técnicos
                         </a>
+                        <a href="{{ route('equipos-marcas.index') }}" class="text-tech-pure-white hover:text-tech-electric-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {{ request()->routeIs('equipos-marcas*') ? 'text-tech-electric-blue bg-blue-600' : '' }}">
+                            <i class="fas fa-laptop mr-1"></i> Equipos
+                        </a>
                         <a href="{{ route('ordenes.index') }}" class="text-tech-pure-white hover:text-tech-electric-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {{ request()->routeIs('ordenes*') ? 'text-tech-electric-blue bg-blue-600' : '' }}">
                             <i class="fas fa-clipboard-list mr-1"></i> Órdenes
                         </a>
@@ -179,6 +182,9 @@
                 </a>
                 <a href="{{ route('tecnicos.index') }}" class="text-tech-pure-white hover:text-tech-electric-blue block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('tecnicos*') ? 'bg-blue-600' : '' }}">
                     <i class="fas fa-tools mr-2"></i> Técnicos
+                </a>
+                <a href="{{ route('equipos-marcas.index') }}" class="text-tech-pure-white hover:text-tech-electric-blue block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('equipos-marcas*') ? 'bg-blue-600' : '' }}">
+                    <i class="fas fa-laptop mr-2"></i> Equipos
                 </a>
                 <a href="{{ route('ordenes.index') }}" class="text-tech-pure-white hover:text-tech-electric-blue block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('ordenes*') ? 'bg-blue-600' : '' }}">
                     <i class="fas fa-clipboard-list mr-2"></i> Órdenes

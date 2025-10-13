@@ -15,6 +15,7 @@ use App\Http\Controllers\SetupController;
 use App\Http\Controllers\IAController;
 use App\Http\Controllers\GestionTecnicosController;
 use App\Http\Controllers\GestionClientesController;
+use App\Http\Controllers\GestionEquiposMarcasController;
 
 // Página principal
 Route::get('/', function () {
@@ -313,6 +314,39 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::put('/{id}', [GestionClientesController::class, 'update'])->name('update');
         Route::patch('/{id}/toggle-status', [GestionClientesController::class, 'toggleStatus'])->name('toggle-status');
         Route::delete('/{id}', [GestionClientesController::class, 'destroy'])->name('destroy');
+    });
+
+    // Gestión de Equipos y Marcas
+    Route::get('/gestion-equipos-marcas', [GestionEquiposMarcasController::class, 'index'])->name('equipos-marcas.index');
+    
+    // Gestión de Marcas
+    Route::prefix('marcas')->name('equipos-marcas.marcas.')->group(function () {
+        Route::get('/', [GestionEquiposMarcasController::class, 'marcasIndex'])->name('index');
+        Route::get('/create', [GestionEquiposMarcasController::class, 'marcasCreate'])->name('create');
+        Route::post('/', [GestionEquiposMarcasController::class, 'marcasStore'])->name('store');
+        Route::get('/{id}/edit', [GestionEquiposMarcasController::class, 'marcasEdit'])->name('edit');
+        Route::put('/{id}', [GestionEquiposMarcasController::class, 'marcasUpdate'])->name('update');
+        Route::patch('/{id}/toggle-status', [GestionEquiposMarcasController::class, 'marcasToggleStatus'])->name('toggle-status');
+        Route::delete('/{id}', [GestionEquiposMarcasController::class, 'marcasDestroy'])->name('destroy');
+    });
+
+    // Gestión de Equipos
+    Route::prefix('equipos')->name('equipos-marcas.equipos.')->group(function () {
+        Route::get('/', [GestionEquiposMarcasController::class, 'equiposIndex'])->name('index');
+        Route::get('/create', [GestionEquiposMarcasController::class, 'equiposCreate'])->name('create');
+        Route::post('/', [GestionEquiposMarcasController::class, 'equiposStore'])->name('store');
+        Route::get('/{id}/edit', [GestionEquiposMarcasController::class, 'equiposEdit'])->name('edit');
+        Route::put('/{id}', [GestionEquiposMarcasController::class, 'equiposUpdate'])->name('update');
+        Route::patch('/{id}/toggle-status', [GestionEquiposMarcasController::class, 'equiposToggleStatus'])->name('toggle-status');
+        Route::delete('/{id}', [GestionEquiposMarcasController::class, 'equiposDestroy'])->name('destroy');
+    });
+
+    // Asociaciones Cliente-Equipo
+    Route::prefix('cliente-equipos')->name('equipos-marcas.cliente-equipos.')->group(function () {
+        Route::get('/', [GestionEquiposMarcasController::class, 'clienteEquiposIndex'])->name('index');
+        Route::get('/create', [GestionEquiposMarcasController::class, 'clienteEquiposCreate'])->name('create');
+        Route::post('/', [GestionEquiposMarcasController::class, 'clienteEquiposStore'])->name('store');
+        Route::get('/{id}', [GestionEquiposMarcasController::class, 'clienteEquiposShow'])->name('show');
     });
 });
 
