@@ -106,6 +106,9 @@
                         <a href="{{ route('admin.gestion-tecnicos') }}" class="text-tech-pure-white hover:text-tech-electric-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">
                             <i class="fas fa-users-cog mr-1"></i>Técnicos
                         </a>
+                        <a href="{{ route('admin.clientes.index') }}" class="text-tech-pure-white hover:text-tech-electric-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">
+                            <i class="fas fa-users mr-1"></i>Clientes
+                        </a>
                         <a href="{{ route('ordenes.index') }}" class="text-tech-pure-white hover:text-tech-electric-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Órdenes</a>
                     </div>
                 </div>
@@ -288,17 +291,17 @@
                     </div>
                 </a>
 
-                <!-- Clientes -->
-                <a href="{{ route('clientes.index') }}" 
+                <!-- Gestión de Clientes -->
+                <a href="{{ route('admin.clientes.index') }}" 
                    class="group p-6 bg-gradient-to-br from-green-500 to-green-600 rounded-xl text-white hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
                     <div class="flex items-center justify-between mb-4">
-                        <i class="fas fa-user-friends text-3xl opacity-80 group-hover:opacity-100 transition-opacity"></i>
-                        <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">GESTIÓN</span>
+                        <i class="fas fa-users text-3xl opacity-80 group-hover:opacity-100 transition-opacity"></i>
+                        <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">NUEVO</span>
                     </div>
-                    <h3 class="text-lg font-semibold mb-2">Base de Clientes</h3>
-                    <p class="text-sm opacity-80">Administrar información de clientes</p>
+                    <h3 class="text-lg font-semibold mb-2">Gestión de Clientes</h3>
+                    <p class="text-sm opacity-80">Crear, editar y administrar clientes del sistema</p>
                     <div class="mt-4 flex items-center text-sm">
-                        <span>Ver clientes</span>
+                        <span>Ver todos</span>
                         <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </a>

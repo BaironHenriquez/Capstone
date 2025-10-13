@@ -14,6 +14,7 @@ use App\Http\Controllers\PayPalController;
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\IAController;
 use App\Http\Controllers\GestionTecnicosController;
+use App\Http\Controllers\GestionClientesController;
 
 // Página principal
 Route::get('/', function () {
@@ -297,8 +298,21 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::post('/', [GestionTecnicosController::class, 'store'])->name('store');
         Route::get('/{id}/edit', [GestionTecnicosController::class, 'edit'])->name('edit');
         Route::put('/{id}', [GestionTecnicosController::class, 'update'])->name('update');
-        Route::post('/{id}/ban', [GestionTecnicosController::class, 'toggleBan'])->name('ban');
+        Route::patch('/{id}/toggle-ban', [GestionTecnicosController::class, 'toggleBan'])->name('toggle-ban');
         Route::delete('/{id}', [GestionTecnicosController::class, 'destroy'])->name('destroy');
+    });
+
+    // Gestión de Clientes
+    Route::get('/gestion-clientes', [GestionClientesController::class, 'index'])->name('clientes.index');
+    
+    Route::prefix('clientes')->name('clientes.')->group(function () {
+        Route::get('/create', [GestionClientesController::class, 'create'])->name('create');
+        Route::post('/', [GestionClientesController::class, 'store'])->name('store');
+        Route::get('/{id}', [GestionClientesController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [GestionClientesController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [GestionClientesController::class, 'update'])->name('update');
+        Route::patch('/{id}/toggle-status', [GestionClientesController::class, 'toggleStatus'])->name('toggle-status');
+        Route::delete('/{id}', [GestionClientesController::class, 'destroy'])->name('destroy');
     });
 });
 

@@ -28,7 +28,7 @@ Proyecto Laravel 11 completo con sistema de gestión de órdenes de servicio té
 - **Procesamiento de Pagos:** Integración completa con PayPal SDK v8.4.2
 - **Dashboard Administrativo:** Panel de control con métricas, estadísticas y gráficos
 - **Gestión de Técnicos:** CRUD completo para técnicos de servicio con panel administrativo (crear, editar, listar, suspender/activar, eliminar), gestión de especialidades, asignaciones automáticas y estadísticas
-- **Gestión de Clientes:** Sistema de clientes con historial y comunicación
+- **Gestión de Clientes:** CRUD completo para clientes con panel administrativo (crear, editar, listar, activar/desactivar, eliminar), relación cliente-órdenes, historial completo, filtrado avanzado y estadísticas detalladas
 - **Órdenes de Servicio:** Creación, seguimiento y gestión completa del flujo
 - **Sistema de Roles:** Diferenciación completa entre admin, técnico y cliente
 - **Notificaciones:** Sistema de alertas y comunicación en tiempo real
@@ -250,6 +250,28 @@ Proyecto/
   - Interfaz responsive con Tailwind CSS
 - **Rutas:** `/admin/gestion-tecnicos/*` (requiere autenticación de administrador)
 - **Acceso:** http://localhost:8080/admin/gestion-tecnicos
+- **Credenciales de prueba:** admin@baieco.cl / admin123
+
+### Gestión de Clientes
+- **Ubicación:** `resources/views/clientes/`
+- **Controller:** `app/Http/Controllers/GestionClientesController.php`
+- **Funcionalidades:**
+  - Panel administrativo completo con estadísticas (clientes activos, VIP, con órdenes)
+  - Crear nuevos clientes con información personal, empresa y configuración
+  - Editar información completa de clientes existentes
+  - Ver detalles completos del cliente con historial de órdenes
+  - Activar/desactivar clientes (toggle de estado)
+  - Eliminar clientes del sistema (con validación de órdenes activas)
+  - Búsqueda por nombre, email, RUT, empresa
+  - Filtrado por estado, tipo de cliente y servicio técnico
+  - Relación completa cliente → órdenes de servicio
+  - Estadísticas por cliente (órdenes totales, completadas, pendientes, valor gastado)
+  - Paginación, ordenamiento y filtros avanzados
+  - Validación completa con formateo automático de RUT
+  - Interfaz responsive con cards informativas
+  - Panel lateral con información y acciones rápidas
+- **Rutas:** `/admin/gestion-clientes/*` (requiere autenticación de administrador)
+- **Acceso:** http://localhost:8080/admin/gestion-clientes
 - **Credenciales de prueba:** admin@baieco.cl / admin123
 
 ### Sistema de Autenticación
