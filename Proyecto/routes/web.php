@@ -211,3 +211,13 @@ Route::post('/logout', function () {
     request()->session()->regenerateToken();
     return redirect('/');
 })->name('logout');
+
+Route::prefix('tecnico')->group(function () {
+    Route::view('/resumen', 'tecnico.resumen')->name('tecnico.resumen');
+    Route::view('/clientes', 'tecnico.clientes')->name('tecnico.clientes');
+    Route::view('/equipos', 'tecnico.equipos')->name('tecnico.equipos');
+    Route::view('/marcas', 'tecnico.marcas')->name('tecnico.marcas');
+    Route::view('/ordenes', 'tecnico.ordenes')->name('tecnico.ordenes');
+    Route::view('/modificaciones', 'tecnico.modificaciones')->name('tecnico.modificaciones');
+    Route::view('/ingresar_orden', 'tecnico.ingresar_orden')->name('tecnico.ingresar_orden');
+});
