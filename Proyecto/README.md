@@ -29,6 +29,7 @@ Proyecto Laravel 11 completo con sistema de gestión de órdenes de servicio té
 - **Dashboard Administrativo:** Panel de control con métricas, estadísticas y gráficos
 - **Gestión de Técnicos:** CRUD completo para técnicos de servicio con panel administrativo (crear, editar, listar, suspender/activar, eliminar), gestión de especialidades, asignaciones automáticas y estadísticas
 - **Gestión de Clientes:** CRUD completo para clientes con panel administrativo (crear, editar, listar, activar/desactivar, eliminar), relación cliente-órdenes, historial completo, filtrado avanzado y estadísticas detalladas
+- **Gestión de Equipos y Marcas:** Sistema completo de catálogo de equipos y marcas con asociaciones cliente-equipo, seguimiento de garantías, mantenimiento programado, especificaciones técnicas y estadísticas de servicio
 - **Órdenes de Servicio:** Creación, seguimiento y gestión completa del flujo
 - **Sistema de Roles:** Diferenciación completa entre admin, técnico y cliente
 - **Notificaciones:** Sistema de alertas y comunicación en tiempo real
@@ -217,9 +218,10 @@ Proyecto/
 │       ├── ordenes/                # Órdenes de servicio
 │       ├── paypal/                 # Integración PayPal
 │       ├── setup/                  # Configuración inicial
-│       ├── subscription/           # Sistema de suscripciones
-│       ├── tecnico/                # Panel técnico
-│       └── tecnicos/               # Gestión de técnicos
+      ├── subscription/           # Sistema de suscripciones
+      ├── tecnico/                # Panel técnico
+      ├── tecnicos/               # Gestión de técnicos
+      └── equipos-marcas/         # Gestión de equipos y marcas
 └── docker-compose/
     ├── nginx/app.conf              # Configuración Nginx
     └── mysql/
@@ -272,6 +274,29 @@ Proyecto/
   - Panel lateral con información y acciones rápidas
 - **Rutas:** `/admin/gestion-clientes/*` (requiere autenticación de administrador)
 - **Acceso:** http://localhost:8080/admin/gestion-clientes
+- **Credenciales de prueba:** admin@baieco.cl / admin123
+
+### Gestión de Equipos y Marcas
+- **Ubicación:** `resources/views/equipos-marcas/`
+- **Controller:** `app/Http/Controllers/GestionEquiposMarcasController.php`
+- **Funcionalidades:**
+  - Dashboard principal con estadísticas completas (equipos, marcas, asociaciones, garantías)
+  - **Gestión de Marcas:** CRUD completo con carga de logos, popularidad y estado
+  - **Gestión de Equipos:** CRUD completo con imágenes, especificaciones técnicas, precios y garantías
+  - **Asociaciones Cliente-Equipo:** Vincular equipos con clientes incluyendo número de serie y fechas
+  - Seguimiento automático de garantías (activa, por vencer, vencida)
+  - Control de mantenimiento programado y alertas
+  - Búsqueda avanzada por marca, modelo, especificaciones y cliente
+  - Filtrado por estado, precio, garantía y mantenimiento
+  - Estadísticas detalladas de servicios por equipo y popularidad de marcas
+  - Historial completo de servicios por equipo-cliente
+  - Cálculo automático de costos totales de servicio
+  - Validación completa de formularios con carga de archivos
+  - Interfaz responsive con tarjetas informativas y estados visuales
+  - Sistema de badges para estados (activo, mantenimiento, garantía)
+- **Modelos:** `Marca`, `Equipo`, `ClienteEquipo` con relaciones completas
+- **Rutas:** `/admin/gestion-equipos-marcas/*`, `/admin/marcas/*`, `/admin/equipos/*`, `/admin/cliente-equipos/*`
+- **Acceso:** http://localhost:8080/admin/gestion-equipos-marcas
 - **Credenciales de prueba:** admin@baieco.cl / admin123
 
 ### Sistema de Autenticación
