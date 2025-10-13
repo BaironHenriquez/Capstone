@@ -142,6 +142,11 @@ Route::prefix('servicios')->name('servicios.')->group(function () {
         return view('servicios.soporte');
     })->name('soporte');
 
+    // 🔹 Nueva ruta para calificar técnico
+    Route::get('/calificar_tecnico', function () {
+        return view('servicios.calificar_tecnico');
+    })->name('calificar_tecnico');
+
     // Procesar solicitud de servicio
     Route::post('/crear', function () {
         // Aquí iría la lógica para procesar la solicitud
