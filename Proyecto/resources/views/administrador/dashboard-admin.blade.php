@@ -103,6 +103,9 @@
                     <div class="hidden md:ml-10 md:flex md:space-x-8">
                         <a href="{{ route('home') }}" class="text-tech-pure-white hover:text-tech-electric-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Inicio</a>
                         <a href="{{ route('dashboard-admin') }}" class="text-tech-electric-blue bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Panel</a>
+                        <a href="{{ route('admin.gestion-tecnicos') }}" class="text-tech-pure-white hover:text-tech-electric-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">
+                            <i class="fas fa-users-cog mr-1"></i>Técnicos
+                        </a>
                         <a href="{{ route('ordenes.index') }}" class="text-tech-pure-white hover:text-tech-electric-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Órdenes</a>
                     </div>
                 </div>
@@ -239,6 +242,81 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Accesos Rápidos de Administración -->
+        <div class="dashboard-card bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8 hover-lift">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-rocket text-capstone-600 mr-2"></i>
+                    Accesos Rápidos de Administración
+                </h2>
+                <div class="text-sm text-gray-500">
+                    Gestión del sistema
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Gestión de Técnicos -->
+                <a href="{{ route('admin.gestion-tecnicos') }}" 
+                   class="group p-6 bg-gradient-to-br from-capstone-500 to-capstone-600 rounded-xl text-white hover:from-capstone-600 hover:to-capstone-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <i class="fas fa-users-cog text-3xl opacity-80 group-hover:opacity-100 transition-opacity"></i>
+                        <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">NUEVO</span>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">Gestión de Técnicos</h3>
+                    <p class="text-sm opacity-80">Crear, editar y administrar técnicos del sistema</p>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span>Ver todos</span>
+                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </a>
+
+                <!-- Órdenes de Servicio -->
+                <a href="{{ route('ordenes.index') }}" 
+                   class="group p-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <i class="fas fa-clipboard-list text-3xl opacity-80 group-hover:opacity-100 transition-opacity"></i>
+                        <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">{{ $resumenOrdenes['pendientes'] }}</span>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">Órdenes de Servicio</h3>
+                    <p class="text-sm opacity-80">Gestionar y supervisar órdenes activas</p>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span>Administrar</span>
+                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </a>
+
+                <!-- Clientes -->
+                <a href="{{ route('clientes.index') }}" 
+                   class="group p-6 bg-gradient-to-br from-green-500 to-green-600 rounded-xl text-white hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <i class="fas fa-user-friends text-3xl opacity-80 group-hover:opacity-100 transition-opacity"></i>
+                        <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">GESTIÓN</span>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">Base de Clientes</h3>
+                    <p class="text-sm opacity-80">Administrar información de clientes</p>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span>Ver clientes</span>
+                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </a>
+
+                <!-- Reportes -->
+                <a href="#" 
+                   class="group p-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl text-white hover:from-purple-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <i class="fas fa-chart-bar text-3xl opacity-80 group-hover:opacity-100 transition-opacity"></i>
+                        <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">STATS</span>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">Reportes</h3>
+                    <p class="text-sm opacity-80">Estadísticas y análisis detallados</p>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span>Ver reportes</span>
+                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </a>
             </div>
         </div>
 

@@ -27,7 +27,7 @@ Proyecto Laravel 11 completo con sistema de gestión de órdenes de servicio té
 - **Gestión de Suscripciones:** Sistema completo de planes y pagos con PayPal
 - **Procesamiento de Pagos:** Integración completa con PayPal SDK v8.4.2
 - **Dashboard Administrativo:** Panel de control con métricas, estadísticas y gráficos
-- **Gestión de Técnicos:** CRUD completo de técnicos de servicio con asignaciones
+- **Gestión de Técnicos:** CRUD completo para técnicos de servicio con panel administrativo (crear, editar, listar, suspender/activar, eliminar), gestión de especialidades, asignaciones automáticas y estadísticas
 - **Gestión de Clientes:** Sistema de clientes con historial y comunicación
 - **Órdenes de Servicio:** Creación, seguimiento y gestión completa del flujo
 - **Sistema de Roles:** Diferenciación completa entre admin, técnico y cliente
@@ -233,6 +233,24 @@ Proyecto/
 - **Ubicación:** `resources/views/administrador/`
 - **Funcionalidades:** Métricas, estadísticas, gráficos con Chart.js
 - **Acceso:** http://localhost:8080/dashboard-admin
+
+### Gestión de Técnicos
+- **Ubicación:** `resources/views/tecnicos/`
+- **Controller:** `app/Http/Controllers/GestionTecnicosController.php`
+- **Funcionalidades:** 
+  - Panel administrativo completo con estadísticas (técnicos activos, suspendidos, especialidades)
+  - Crear nuevos técnicos con información personal, contacto y especialidades
+  - Editar información existente de técnicos
+  - Suspender/activar técnicos (toggle de estado)
+  - Eliminar técnicos del sistema
+  - Búsqueda por nombre, especialidad y estado
+  - Filtrado avanzado por múltiples criterios
+  - Paginación y ordenamiento
+  - Validación completa de formularios
+  - Interfaz responsive con Tailwind CSS
+- **Rutas:** `/admin/gestion-tecnicos/*` (requiere autenticación de administrador)
+- **Acceso:** http://localhost:8080/admin/gestion-tecnicos
+- **Credenciales de prueba:** admin@baieco.cl / admin123
 
 ### Sistema de Autenticación
 - **Ubicación:** `resources/views/auth/`

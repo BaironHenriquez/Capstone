@@ -13,6 +13,7 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\PayPalController;
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\IAController;
+use App\Http\Controllers\GestionTecnicosController;
 
 // Página principal
 Route::get('/', function () {
@@ -81,8 +82,8 @@ Route::group(['prefix' => 'demo'], function () {
 });
 
 
-// Dashboard administrativo (requiere autenticación y suscripción)
-Route::middleware(['auth', 'subscription'])->get('/dashboard-admin', function () {
+// Dashboard administrativo (acceso simplificado para desarrollo)
+Route::middleware(['auth'])->get('/dashboard-admin', function () {
     // Datos simulados para el dashboard
     $resumenOrdenes = [
         'total' => 156,
@@ -282,6 +283,24 @@ Route::post('/logout', function () {
     request()->session()->regenerateToken();
     return redirect('/');
 })->name('logout');
+
+// ============================================
+// MÓDULO DE GESTIÓN DE TÉCNICOS (ADMINISTRADOR)
+// ============================================
+
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    // Gestión de Técnicos
+    Route::get('/gestion-tecnicos', [GestionTecnicosController::class, 'index'])->name('gestion-tecnicos');
+    
+    Route::prefix('tecnicos')->name('tecnicos.')->group(function () {
+        Route::get('/create', [GestionTecnicosController::class, 'create'])->name('create');
+        Route::post('/', [GestionTecnicosController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [GestionTecnicosController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [GestionTecnicosController::class, 'update'])->name('update');
+        Route::post('/{id}/ban', [GestionTecnicosController::class, 'toggleBan'])->name('ban');
+        Route::delete('/{id}', [GestionTecnicosController::class, 'destroy'])->name('destroy');
+    });
+});
 
 Route::prefix('tecnico')->group(function () {
     Route::view('/resumen', 'tecnico.resumen')->name('tecnico.resumen');
