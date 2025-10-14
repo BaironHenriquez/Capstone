@@ -258,7 +258,7 @@ Proyecto/
 - **Ubicación:** `resources/views/clientes/`
 - **Controller:** `app/Http/Controllers/GestionClientesController.php`
 - **Funcionalidades:**
-  - Panel administrativo completo con estadísticas (clientes activos, VIP, con órdenes)
+  - Panel administrativo completo con estadísticas (clientes activos, inactivos, con órdenes)
   - Crear nuevos clientes con información personal, empresa y configuración
   - Editar información completa de clientes existentes
   - Ver detalles completos del cliente con historial de órdenes

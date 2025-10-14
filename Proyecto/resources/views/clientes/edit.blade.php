@@ -168,9 +168,8 @@
                                         required
                                         class="w-full rounded-lg border-gray-300 focus:border-capstone-500 focus:ring-capstone-500 @error('tipo_cliente') border-red-500 @enderror">
                                     <option value="">Seleccionar tipo</option>
+                                    <option value="particular" {{ old('tipo_cliente', $cliente->tipo_cliente) == 'particular' ? 'selected' : '' }}>Particular</option>
                                     <option value="regular" {{ old('tipo_cliente', $cliente->tipo_cliente) == 'regular' ? 'selected' : '' }}>Regular</option>
-                                    <option value="vip" {{ old('tipo_cliente', $cliente->tipo_cliente) == 'vip' ? 'selected' : '' }}>VIP</option>
-                                    <option value="corporativo" {{ old('tipo_cliente', $cliente->tipo_cliente) == 'corporativo' ? 'selected' : '' }}>Corporativo</option>
                                 </select>
                                 @error('tipo_cliente')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -189,8 +188,6 @@
                                     <option value="">Seleccionar estado</option>
                                     <option value="activo" {{ old('estado', $cliente->estado) == 'activo' ? 'selected' : '' }}>Activo</option>
                                     <option value="inactivo" {{ old('estado', $cliente->estado) == 'inactivo' ? 'selected' : '' }}>Inactivo</option>
-                                    <option value="vip" {{ old('estado', $cliente->estado) == 'vip' ? 'selected' : '' }}>VIP</option>
-                                    <option value="moroso" {{ old('estado', $cliente->estado) == 'moroso' ? 'selected' : '' }}>Moroso</option>
                                 </select>
                                 @error('estado')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

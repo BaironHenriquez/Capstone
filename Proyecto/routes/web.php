@@ -84,8 +84,8 @@ Route::group(['prefix' => 'demo'], function () {
 });
 
 
-// Dashboard administrativo (acceso simplificado para desarrollo)
-Route::middleware(['auth'])->get('/dashboard-admin', function () {
+// Dashboard administrativo (acceso público para desarrollo)
+Route::get('/dashboard-admin', function () {
     // Datos simulados para el dashboard
     $resumenOrdenes = [
         'total' => 156,
@@ -290,7 +290,11 @@ Route::post('/logout', function () {
 // MÓDULO DE GESTIÓN DE TÉCNICOS (ADMINISTRADOR)
 // ============================================
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+// ============================================
+// MÓDULO DE GESTIÓN ADMINISTRATIVA (ACCESO PÚBLICO PARA DESARROLLO)
+// ============================================
+
+Route::prefix('admin')->name('admin.')->group(function () {
     // Gestión de Técnicos
     Route::get('/gestion-tecnicos', [GestionTecnicosController::class, 'index'])->name('gestion-tecnicos');
     

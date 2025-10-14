@@ -3,143 +3,78 @@
 @section('title', 'Gestión de Equipos y Marcas')
 
 @section('header')
-<div class="flex justify-between items-center">
-    <div>
-        <h1 class="text-3xl font-bold text-gray-900">Gestión de Equipos y Marcas</h1>
-        <p class="mt-2 text-gray-600">Catálogo completo de equipos, marcas y asociaciones con clientes</p>
-    </div>
+<!-- Title Section -->
+<div class="mb-8 text-center">
+    <h2 class="text-3xl font-bold text-sky-800 mb-2">Gestión de Equipos y Marcas</h2>
+    <p class="text-gray-700">Administra el catálogo de equipos electrónicos y marcas disponibles para reparación</p>
 </div>
 @endsection
 
 @section('content')
 <div class="space-y-6">
-    <!-- Estadísticas Generales -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-        <!-- Total Marcas -->
-        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-            <div class="flex items-center">
-                <div class="flex-1">
-                    <p class="text-blue-100 text-sm font-medium">Total Marcas</p>
-                    <p class="text-3xl font-bold">{{ number_format($totalMarcas) }}</p>
-                </div>
-                <div class="bg-blue-400 bg-opacity-30 rounded-lg p-3">
-                    <i class="fas fa-tags text-2xl"></i>
-                </div>
-            </div>
+    <!-- Estadísticas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <div class="bg-gradient-to-br from-sky-100 to-sky-200 rounded-xl p-6 shadow-md">
+            <h3 class="text-sm font-semibold text-sky-700 mb-1">Total Marcas</h3>
+            <p class="text-3xl font-bold text-sky-900">{{ number_format($totalMarcas) }}</p>
         </div>
-
-        <!-- Marcas Activas -->
-        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
-            <div class="flex items-center">
-                <div class="flex-1">
-                    <p class="text-green-100 text-sm font-medium">Marcas Activas</p>
-                    <p class="text-3xl font-bold">{{ number_format($marcasActivas) }}</p>
-                </div>
-                <div class="bg-green-400 bg-opacity-30 rounded-lg p-3">
-                    <i class="fas fa-check-circle text-2xl"></i>
-                </div>
-            </div>
+        <div class="bg-gradient-to-br from-amber-100 to-yellow-200 rounded-xl p-6 shadow-md">
+            <h3 class="text-sm font-semibold text-amber-700 mb-1">Total Equipos</h3>
+            <p class="text-3xl font-bold text-amber-900">{{ number_format($totalEquipos) }}</p>
         </div>
-
-        <!-- Total Equipos -->
-        <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
-            <div class="flex items-center">
-                <div class="flex-1">
-                    <p class="text-purple-100 text-sm font-medium">Total Equipos</p>
-                    <p class="text-3xl font-bold">{{ number_format($totalEquipos) }}</p>
-                </div>
-                <div class="bg-purple-400 bg-opacity-30 rounded-lg p-3">
-                    <i class="fas fa-laptop text-2xl"></i>
-                </div>
-            </div>
+        <div class="bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl p-6 shadow-md">
+            <h3 class="text-sm font-semibold text-orange-700 mb-1">En Clientes</h3>
+            <p class="text-3xl font-bold text-orange-900">{{ number_format($totalClienteEquipos) }}</p>
         </div>
-
-        <!-- Equipos Activos -->
-        <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
-            <div class="flex items-center">
-                <div class="flex-1">
-                    <p class="text-orange-100 text-sm font-medium">Equipos Activos</p>
-                    <p class="text-3xl font-bold">{{ number_format($equiposActivos) }}</p>
-                </div>
-                <div class="bg-orange-400 bg-opacity-30 rounded-lg p-3">
-                    <i class="fas fa-desktop text-2xl"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Equipos en Clientes -->
-        <div class="bg-gradient-to-r from-teal-500 to-teal-600 rounded-xl p-6 text-white">
-            <div class="flex items-center">
-                <div class="flex-1">
-                    <p class="text-teal-100 text-sm font-medium">En Clientes</p>
-                    <p class="text-3xl font-bold">{{ number_format($totalClienteEquipos) }}</p>
-                </div>
-                <div class="bg-teal-400 bg-opacity-30 rounded-lg p-3">
-                    <i class="fas fa-users text-2xl"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Con Garantía -->
-        <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-xl p-6 text-white">
-            <div class="flex items-center">
-                <div class="flex-1">
-                    <p class="text-indigo-100 text-sm font-medium">Con Garantía</p>
-                    <p class="text-3xl font-bold">{{ number_format($equiposConGarantia) }}</p>
-                </div>
-                <div class="bg-indigo-400 bg-opacity-30 rounded-lg p-3">
-                    <i class="fas fa-shield-alt text-2xl"></i>
-                </div>
-            </div>
+        <div class="bg-gradient-to-br from-green-100 to-emerald-200 rounded-xl p-6 shadow-md">
+            <h3 class="text-sm font-semibold text-green-700 mb-1">Con Garantía</h3>
+            <p class="text-3xl font-bold text-green-900">{{ number_format($equiposConGarantia) }}</p>
         </div>
     </div>
 
     <!-- Acciones Rápidas -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-capstone-500 to-capstone-600">
-            <h2 class="text-lg font-semibold text-white flex items-center">
-                <i class="fas fa-bolt mr-2"></i>
-                Acciones Rápidas
-            </h2>
-        </div>
-        <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Gestión de Marcas -->
-                <a href="{{ route('admin.equipos-marcas.marcas.index') }}" 
-                   class="group p-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
-                    <div class="flex items-center justify-between mb-4">
-                        <i class="fas fa-tags text-3xl opacity-80 group-hover:opacity-100 transition-opacity"></i>
-                        <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">GESTIÓN</span>
-                    </div>
-                    <h3 class="text-lg font-semibold mb-2">Marcas</h3>
-                    <p class="text-sm opacity-80">Administrar catálogo de marcas</p>
-                    <div class="mt-4 flex items-center text-sm">
-                        <span>Gestionar</span>
-                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-                    </div>
-                </a>
+    <div class="bg-white rounded-xl p-6 shadow-md border border-gray-100 mb-10">
+        <h3 class="text-lg font-semibold text-teal-700 mb-4">Acciones Rápidas</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <a href="{{ route('admin.equipos-marcas.marcas.index') }}" class="flex items-center p-4 rounded-lg bg-gradient-to-r from-sky-400 to-blue-500 text-white hover:opacity-90 transition">
+                <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                </svg>
+                <div class="text-left">
+                    <h4 class="font-medium">Gestionar Marcas</h4>
+                    <p class="text-sm text-blue-50">Catálogo de marcas</p>
+                </div>
+            </a>
 
-                <!-- Gestión de Equipos -->
-                <a href="{{ route('admin.equipos-marcas.equipos.index') }}" 
-                   class="group p-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl text-white hover:from-purple-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
-                    <div class="flex items-center justify-between mb-4">
-                        <i class="fas fa-laptop text-3xl opacity-80 group-hover:opacity-100 transition-opacity"></i>
-                        <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">CATÁLOGO</span>
-                    </div>
-                    <h3 class="text-lg font-semibold mb-2">Equipos</h3>
-                    <p class="text-sm opacity-80">Administrar catálogo de equipos</p>
-                    <div class="mt-4 flex items-center text-sm">
-                        <span>Gestionar</span>
-                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-                    </div>
-                </a>
+            <a href="{{ route('admin.equipos-marcas.equipos.index') }}" class="flex items-center p-4 rounded-lg bg-gradient-to-r from-green-400 to-emerald-500 text-white hover:opacity-90 transition">
+                <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                <div class="text-left">
+                    <h4 class="font-medium">Gestionar Equipos</h4>
+                    <p class="text-sm text-green-50">Catálogo de equipos</p>
+                </div>
+            </a>
 
-                <!-- Asociaciones Cliente-Equipo -->
-                <a href="{{ route('admin.equipos-marcas.cliente-equipos.index') }}" 
-                   class="group p-6 bg-gradient-to-br from-green-500 to-green-600 rounded-xl text-white hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
-                    <div class="flex items-center justify-between mb-4">
-                        <i class="fas fa-link text-3xl opacity-80 group-hover:opacity-100 transition-opacity"></i>
-                        <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">ASOCIACIONES</span>
+            <a href="{{ route('admin.equipos-marcas.cliente-equipos.index') }}" class="flex items-center p-4 rounded-lg bg-gradient-to-r from-purple-400 to-fuchsia-500 text-white hover:opacity-90 transition">
+                <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                </svg>
+                <div class="text-left">
+                    <h4 class="font-medium">Asociaciones</h4>
+                    <p class="text-sm text-purple-50">Cliente-Equipos</p>
+                </div>
+            </a>
+
+            <a href="#reportes" class="flex items-center p-4 rounded-lg bg-gradient-to-r from-amber-400 to-orange-500 text-white hover:opacity-90 transition">
+                <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                <div class="text-left">
+                    <h4 class="font-medium">Reportes</h4>
+                    <p class="text-sm text-orange-50">Estadísticas</p>
+                </div>
+            </a>
                     </div>
                     <h3 class="text-lg font-semibold mb-2">Cliente-Equipos</h3>
                     <p class="text-sm opacity-80">Equipos asociados a clientes</p>
@@ -167,149 +102,77 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Marcas Más Populares -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600">
-                <h2 class="text-lg font-semibold text-white flex items-center">
-                    <i class="fas fa-star mr-2"></i>
-                    Marcas Más Populares
-                </h2>
-            </div>
-            <div class="p-6">
-                @if($marcasPopulares->count() > 0)
-                    <div class="space-y-4">
-                        @foreach($marcasPopulares as $marca)
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                        <i class="fas fa-tag text-blue-600"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-medium text-gray-900">{{ $marca->nombre_marca }}</h4>
-                                        <p class="text-sm text-gray-600">{{ $marca->categoria ?? 'Sin categoría' }}</p>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="text-lg font-bold text-blue-600">{{ $marca->equipos_count }}</div>
-                                    <div class="text-sm text-gray-500">equipos</div>
-                                </div>
-                            </div>
-                        @endforeach
+    <!-- Marcas Más Populares -->
+    <div class="bg-white rounded-xl p-6 shadow-md border border-gray-100">
+        <h3 class="text-lg font-semibold text-teal-700 mb-4">Marcas Más Populares</h3>
+        <div class="space-y-4">
+            @if($marcasPopulares->count() > 0)
+                @foreach($marcasPopulares as $marca)
+                <div class="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 hover:shadow-md transition">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-sky-200 to-sky-300 rounded-lg flex items-center justify-center mr-3">
+                            <span class="text-sm font-semibold text-sky-800">#{{ $loop->iteration }}</span>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-800">{{ $marca->nombre }}</h4>
+                            <p class="text-sm text-gray-600">{{ $marca->categoria ?? 'Sin categoría' }}</p>
+                        </div>
                     </div>
-                @else
-                    <div class="text-center py-8">
-                        <i class="fas fa-tags text-4xl text-gray-400 mb-4"></i>
-                        <p class="text-gray-600">No hay marcas registradas aún.</p>
+                    <div class="flex items-center space-x-2">
+                        <span class="px-3 py-1 rounded-full text-sm font-semibold bg-emerald-200 text-emerald-800">
+                            {{ $marca->equipos_count }} equipos
+                        </span>
+                        <button class="text-sky-600 hover:text-sky-800 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
                     </div>
-                @endif
-            </div>
-        </div>
-
-        <!-- Categorías de Equipos -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="px-6 py-4 bg-gradient-to-r from-purple-500 to-purple-600">
-                <h2 class="text-lg font-semibold text-white flex items-center">
-                    <i class="fas fa-th-list mr-2"></i>
-                    Categorías de Equipos
-                </h2>
-            </div>
-            <div class="p-6">
-                @if($categorias->count() > 0)
-                    <div class="grid grid-cols-2 gap-4">
-                        @foreach($categorias as $categoria)
-                            <div class="p-4 bg-gray-50 rounded-lg text-center">
-                                <div class="text-2xl font-bold text-purple-600">{{ $categoria->total }}</div>
-                                <div class="text-sm text-gray-600 mt-1">{{ $categoria->categoria }}</div>
-                            </div>
-                        @endforeach
-                    </div>
-                @else
-                    <div class="text-center py-8">
-                        <i class="fas fa-laptop text-4xl text-gray-400 mb-4"></i>
-                        <p class="text-gray-600">No hay equipos categorizados aún.</p>
-                    </div>
-                @endif
-            </div>
+                </div>
+                @endforeach
+            @else
+                <div class="text-center py-8">
+                    <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                    </svg>
+                    <p class="text-gray-600">No hay marcas registradas aún.</p>
+                </div>
+            @endif
         </div>
     </div>
 
     <!-- Equipos que Necesitan Mantenimiento -->
     @if($equiposMantenimiento->count() > 0)
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="px-6 py-4 bg-gradient-to-r from-yellow-500 to-yellow-600">
-                <h2 class="text-lg font-semibold text-white flex items-center">
-                    <i class="fas fa-tools mr-2"></i>
-                    Equipos que Necesitan Mantenimiento
-                </h2>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Equipo
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Cliente
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Número de Serie
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Estado
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Acciones
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($equiposMantenimiento as $clienteEquipo)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10">
-                                            <div class="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
-                                                <i class="fas fa-laptop text-purple-600"></i>
-                                            </div>
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900">
-                                                {{ $clienteEquipo->equipo->marca->nombre_marca }} {{ $clienteEquipo->equipo->modelo }}
-                                            </div>
-                                            <div class="text-sm text-gray-500">
-                                                {{ $clienteEquipo->equipo->tipo_equipo }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ $clienteEquipo->cliente->nombre_completo }}</div>
-                                    <div class="text-sm text-gray-500">{{ $clienteEquipo->cliente->empresa ?? 'Sin empresa' }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ $clienteEquipo->numero_serie }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $clienteEquipo->estado_badge }}">
-                                        {{ ucfirst(str_replace('_', ' ', $clienteEquipo->estado)) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <a href="{{ route('admin.equipos-marcas.cliente-equipos.show', $clienteEquipo->id) }}" 
-                                       class="text-capstone-600 hover:text-capstone-900 mr-3">
-                                        <i class="fas fa-eye"></i> Ver
-                                    </a>
-                                    <a href="#" 
-                                       class="text-orange-600 hover:text-orange-900">
-                                        <i class="fas fa-tools"></i> Programar Mantto.
-                                    </a>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+        <div class="bg-white rounded-xl p-6 shadow-md border border-gray-100 mt-10">
+            <h3 class="text-lg font-semibold text-teal-700 mb-4">Equipos que Necesitan Mantenimiento</h3>
+            <div class="space-y-4">
+                @foreach($equiposMantenimiento as $clienteEquipo)
+                <div class="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 hover:shadow-md transition">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-amber-200 to-amber-300 rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-5 h-5 text-amber-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-800">{{ $clienteEquipo->equipo->marca->nombre }} {{ $clienteEquipo->equipo->modelo }}</h4>
+                            <p class="text-sm text-gray-600">{{ $clienteEquipo->cliente->nombre_completo }} - {{ $clienteEquipo->numero_serie }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="px-3 py-1 rounded-full text-sm font-semibold bg-amber-200 text-amber-800">
+                            {{ ucfirst(str_replace('_', ' ', $clienteEquipo->estado)) }}
+                        </span>
+                        <button class="text-sky-600 hover:text-sky-800 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                @endforeach
             </div>
         </div>
     @endif

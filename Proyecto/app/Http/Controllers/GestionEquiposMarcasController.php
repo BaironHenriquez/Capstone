@@ -16,7 +16,7 @@ class GestionEquiposMarcasController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        // $this->middleware('auth'); // Comentado para desarrollo
         // $this->middleware('subscription'); // Comentado para desarrollo
     }
 
@@ -25,47 +25,166 @@ class GestionEquiposMarcasController extends Controller
      */
     public function index(Request $request)
     {
-        // Estadísticas generales
-        $totalMarcas = Marca::count();
-        $marcasActivas = Marca::where('activa', true)->count();
-        $totalEquipos = Equipo::count();
-        $equiposActivos = Equipo::where('activo', true)->count();
-        $totalClienteEquipos = ClienteEquipo::count();
-        $equiposConGarantia = ClienteEquipo::conGarantia()->count();
+        // Datos simulados para el dashboard de equipos y marcas
+        $totalMarcas = 45;
+        $marcasActivas = 42;
+        $totalEquipos = 156;
+        $equiposActivos = 143;
+        $totalClienteEquipos = 289;
+        $equiposConGarantia = 178;
 
-        // Marcas más populares (con más equipos)
-        $marcasPopulares = Marca::withCount(['equipos' => function($query) {
-            $query->where('activo', true);
-        }])
-        ->where('activa', true)
-        ->orderBy('equipos_count', 'desc')
-        ->limit(5)
-        ->get();
+        // Marcas más populares simuladas
+        $marcasPopulares = collect([
+            (object)[
+                'id' => 1,
+                'nombre' => 'Samsung',
+                'logo' => 'samsung-logo.png',
+                'equipos_count' => 45,
+                'activa' => true,
+                'categoria' => 'Dispositivos Móviles/TV'
+            ],
+            (object)[
+                'id' => 2,
+                'nombre' => 'Apple',
+                'logo' => 'apple-logo.png',
+                'equipos_count' => 38,
+                'activa' => true,
+                'categoria' => 'Dispositivos Móviles/Computadores'
+            ],
+            (object)[
+                'id' => 3,
+                'nombre' => 'Sony',
+                'logo' => 'sony-logo.png',
+                'equipos_count' => 32,
+                'activa' => true,
+                'categoria' => 'Consolas/TV'
+            ],
+            (object)[
+                'id' => 4,
+                'nombre' => 'LG',
+                'logo' => 'lg-logo.png',
+                'equipos_count' => 28,
+                'activa' => true,
+                'categoria' => 'Televisores'
+            ],
+            (object)[
+                'id' => 5,
+                'nombre' => 'Huawei',
+                'logo' => 'huawei-logo.png',
+                'equipos_count' => 25,
+                'activa' => true,
+                'categoria' => 'Dispositivos Móviles'
+            ]
+        ]);
 
-        // Equipos que necesitan mantenimiento
-        $equiposMantenimiento = ClienteEquipo::with(['cliente', 'equipo.marca'])
-            ->where('activo', true)
-            ->whereHas('ordenesServicio', function($query) {
-                $query->where('created_at', '<', now()->subMonths(6));
-            }, '=', 0)
-            ->orWhere(function($query) {
-                $query->whereHas('ordenesServicio', function($q) {
-                    $q->where('created_at', '<', now()->subMonths(6))
-                      ->latest('created_at')
-                      ->limit(1);
-                });
-            })
-            ->limit(10)
-            ->get();
+        // Equipos que necesitan reparación simulados
+        $equiposMantenimiento = collect([
+            (object)[
+                'id' => 1,
+                'numero_serie' => 'IPH14-001',
+                'cliente' => (object)['nombre' => 'Juan', 'apellido' => 'Pérez'],
+                'equipo' => (object)[
+                    'modelo' => 'iPhone 14 Pro',
+                    'tipo_equipo' => 'Smartphone',
+                    'marca' => (object)['nombre' => 'Apple'],
+                    'problema' => 'Pantalla quebrada'
+                ],
+                'dias_desde_ingreso' => 3,
+                'estado' => 'En reparación'
+            ],
+            (object)[
+                'id' => 2,
+                'numero_serie' => 'SAM-S23-002',
+                'cliente' => (object)['nombre' => 'María', 'apellido' => 'González'],
+                'equipo' => (object)[
+                    'modelo' => 'Galaxy S23',
+                    'tipo_equipo' => 'Smartphone',
+                    'marca' => (object)['nombre' => 'Samsung'],
+                    'problema' => 'No enciende'
+                ],
+                'dias_desde_ingreso' => 7,
+                'estado' => 'Esperando repuestos'
+            ],
+            (object)[
+                'id' => 3,
+                'numero_serie' => 'PS5-003',
+                'cliente' => (object)['nombre' => 'Carlos', 'apellido' => 'Mendoza'],
+                'equipo' => (object)[
+                    'modelo' => 'PlayStation 5',
+                    'tipo_equipo' => 'Consola',
+                    'marca' => (object)['nombre' => 'Sony'],
+                    'problema' => 'Sobrecalentamiento'
+                ],
+                'dias_desde_ingreso' => 2,
+                'estado' => 'Diagnóstico'
+            ]
+        ]);
 
-        // Categorías de equipos más comunes
-        $categorias = Equipo::select('categoria', DB::raw('COUNT(*) as total'))
-            ->where('activo', true)
-            ->whereNotNull('categoria')
-            ->groupBy('categoria')
-            ->orderBy('total', 'desc')
-            ->limit(8)
-            ->get();
+        // Categorías simuladas con estadísticas
+        $categorias = collect([
+            (object)[
+                'categoria' => 'Computadores',
+                'total' => 35
+            ],
+            (object)[
+                'categoria' => 'Dispositivos Móviles',
+                'total' => 45
+            ],
+            (object)[
+                'categoria' => 'Consolas de Videojuegos',
+                'total' => 28
+            ],
+            (object)[
+                'categoria' => 'Televisores',
+                'total' => 22
+            ],
+            (object)[
+                'categoria' => 'Tablets',
+                'total' => 18
+            ],
+            (object)[
+                'categoria' => 'Laptops',
+                'total' => 32
+            ]
+        ]);
+
+        // Equipos de clientes simulados
+        $clienteEquipos = collect([
+            (object)[
+                'id' => 1,
+                'numero_serie' => 'IPH14001',
+                'fecha_ingreso' => '2024-01-15',
+                'estado_garantia' => 'Activa',
+                'cliente' => (object)[
+                    'nombre' => 'Juan',
+                    'apellido' => 'Pérez'
+                ],
+                'equipo' => (object)[
+                    'modelo' => 'iPhone 14 Pro',
+                    'tipo_equipo' => 'Smartphone',
+                    'marca' => (object)[
+                        'nombre' => 'Apple'
+                    ]
+                ]
+            ],
+            (object)[
+                'id' => 2,
+                'numero_serie' => 'SAM23002',
+                'fecha_ingreso' => '2024-01-20',
+                'estado_garantia' => 'Vencida',
+                'cliente' => (object)[
+                    'nombre' => 'María',
+                    'apellido' => 'González'
+                ],
+                'equipo' => (object)[
+                    'modelo' => 'Galaxy S23',
+                    'tipo_equipo' => 'Smartphone',
+                    'marca' => (object)[
+                        'nombre' => 'Samsung'
+                    ]
+                ]
+            ]
+        ]);
 
         return view('equipos-marcas.index', compact(
             'totalMarcas',
@@ -76,7 +195,8 @@ class GestionEquiposMarcasController extends Controller
             'equiposConGarantia',
             'marcasPopulares',
             'equiposMantenimiento',
-            'categorias'
+            'categorias',
+            'clienteEquipos'
         ));
     }
 

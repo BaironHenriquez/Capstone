@@ -23,56 +23,225 @@ class GestionTecnicosController extends Controller
         $estado = $request->get('estado');
         $servicio = $request->get('servicio');
         
-        $query = User::with(['trabajador', 'role', 'servicioTecnico'])
-                    ->whereHas('role', function($q) {
-                        $q->whereIn('nombre', ['tecnico', 'trabajador']);
-                    });
+        // Datos simulados de técnicos especialistas en reparación
+        $allTecnicos = collect([
+            (object)[
+                'id' => 1,
+                'nombre' => 'Carlos',
+                'apellido' => 'Rodríguez',
+                'email' => 'carlos@repairtech.cl',
+                'telefono' => '+56 9 8765 4321',
+                'rut' => '12.345.678-9',
+                'especialidades' => ['Dispositivos Móviles', 'Tablets'],
+                'estado' => 'activo',
+                'servicioTecnico' => (object)['nombre' => 'Reparación Móviles'],
+                'ordenes_completadas' => 125,
+                'calificacion_promedio' => 4.8,
+                'created_at' => now()->subMonths(6)
+            ],
+            (object)[
+                'id' => 2,
+                'nombre' => 'Ana',
+                'apellido' => 'Martínez',
+                'email' => 'ana@repairtech.cl',
+                'telefono' => '+56 9 7654 3210',
+                'rut' => '11.234.567-8',
+                'especialidades' => ['Computadores', 'Laptops'],
+                'estado' => 'activo',
+                'servicioTecnico' => (object)['nombre' => 'Reparación PC'],
+                'ordenes_completadas' => 89,
+                'calificacion_promedio' => 4.6,
+                'created_at' => now()->subMonths(3)
+            ],
+            (object)[
+                'id' => 3,
+                'nombre' => 'Miguel',
+                'apellido' => 'Silva',
+                'email' => 'miguel@repairtech.cl',
+                'telefono' => '+56 9 6543 2109',
+                'rut' => '10.123.456-7',
+                'especialidades' => ['Televisores', 'Consolas'],
+                'estado' => 'activo',
+                'servicioTecnico' => (object)['nombre' => 'Audio & Video Repair'],
+                'ordenes_completadas' => 67,
+                'calificacion_promedio' => 4.5,
+                'created_at' => now()->subMonth()
+            ],
+            (object)[
+                'id' => 4,
+                'nombre' => 'Sofía',
+                'apellido' => 'Hernández',
+                'email' => 'sofia@repairtech.cl',
+                'telefono' => '+56 9 5432 1098',
+                'rut' => '14.567.890-1',
+                'especialidades' => ['Dispositivos Móviles', 'Consolas'],
+                'estado' => 'activo',
+                'servicioTecnico' => (object)['nombre' => 'Móviles & Gaming'],
+                'ordenes_completadas' => 92,
+                'calificacion_promedio' => 4.9,
+                'created_at' => now()->subMonths(8)
+            ],
+            (object)[
+                'id' => 5,
+                'nombre' => 'Diego',
+                'apellido' => 'Morales',
+                'email' => 'diego@repairtech.cl',
+                'telefono' => '+56 9 4321 0987',
+                'rut' => '16.789.012-3',
+                'especialidades' => ['Tablets', 'Smartwatches'],
+                'estado' => 'activo',
+                'servicioTecnico' => (object)['nombre' => 'Dispositivos Inteligentes'],
+                'ordenes_completadas' => 78,
+                'calificacion_promedio' => 4.7,
+                'created_at' => now()->subMonths(5)
+            ],
+            (object)[
+                'id' => 6,
+                'nombre' => 'Valentina',
+                'apellido' => 'Castro',
+                'email' => 'valentina@repairtech.cl',
+                'telefono' => '+56 9 3210 9876',
+                'rut' => '17.890.123-4',
+                'especialidades' => ['Laptops', 'Computadores'],
+                'estado' => 'activo',
+                'servicioTecnico' => (object)['nombre' => 'Reparación PC'],
+                'ordenes_completadas' => 103,
+                'calificacion_promedio' => 4.8,
+                'created_at' => now()->subMonths(10)
+            ],
+            (object)[
+                'id' => 7,
+                'nombre' => 'Roberto',
+                'apellido' => 'Fuentes',
+                'email' => 'roberto@repairtech.cl',
+                'telefono' => '+56 9 2109 8765',
+                'rut' => '18.901.234-5',
+                'especialidades' => ['Televisores', 'Equipos de Audio'],
+                'estado' => 'activo',
+                'servicioTecnico' => (object)['nombre' => 'Audio & Video Repair'],
+                'ordenes_completadas' => 156,
+                'calificacion_promedio' => 4.6,
+                'created_at' => now()->subMonths(12)
+            ],
+            (object)[
+                'id' => 8,
+                'nombre' => 'Camila',
+                'apellido' => 'Pérez',
+                'email' => 'camila@repairtech.cl',
+                'telefono' => '+56 9 1098 7654',
+                'rut' => '19.012.345-6',
+                'especialidades' => ['Dispositivos Móviles', 'Reparación de Pantallas'],
+                'estado' => 'activo',
+                'servicioTecnico' => (object)['nombre' => 'Especialista en Pantallas'],
+                'ordenes_completadas' => 134,
+                'calificacion_promedio' => 4.9,
+                'created_at' => now()->subMonths(7)
+            ],
+            (object)[
+                'id' => 9,
+                'nombre' => 'Andrés',
+                'apellido' => 'López',
+                'email' => 'andres@repairtech.cl',
+                'telefono' => '+56 9 0987 6543',
+                'rut' => '20.123.456-7',
+                'especialidades' => ['Consolas', 'Equipos Gaming'],
+                'estado' => 'activo',
+                'servicioTecnico' => (object)['nombre' => 'Gaming Specialists'],
+                'ordenes_completadas' => 87,
+                'calificacion_promedio' => 4.7,
+                'created_at' => now()->subMonths(4)
+            ],
+            (object)[
+                'id' => 10,
+                'nombre' => 'Francisca',
+                'apellido' => 'Ramírez',
+                'email' => 'francisca@repairtech.cl',
+                'telefono' => '+56 9 9876 5432',
+                'rut' => '21.234.567-8',
+                'especialidades' => ['Tablets', 'E-readers'],
+                'estado' => 'activo',
+                'servicioTecnico' => (object)['nombre' => 'Dispositivos Portátiles'],
+                'ordenes_completadas' => 65,
+                'calificacion_promedio' => 4.5,
+                'created_at' => now()->subMonths(2)
+            ],
+            (object)[
+                'id' => 11,
+                'nombre' => 'Gonzalo',
+                'apellido' => 'Vargas',
+                'email' => 'gonzalo@repairtech.cl',
+                'telefono' => '+56 9 8765 4321',
+                'rut' => '22.345.678-9',
+                'especialidades' => ['Computadores', 'Servidores'],
+                'estado' => 'inactivo',
+                'servicioTecnico' => (object)['nombre' => 'Soporte Técnico Avanzado'],
+                'ordenes_completadas' => 45,
+                'calificacion_promedio' => 4.3,
+                'created_at' => now()->subMonths(1)
+            ],
+            (object)[
+                'id' => 12,
+                'nombre' => 'Isidora',
+                'apellido' => 'Mendoza',
+                'email' => 'isidora@repairtech.cl',
+                'telefono' => '+56 9 7654 3210',
+                'rut' => '23.456.789-0',
+                'especialidades' => ['Smartphones', 'Cámaras Digitales'],
+                'estado' => 'activo',
+                'servicioTecnico' => (object)['nombre' => 'Fotografía & Móviles'],
+                'ordenes_completadas' => 98,
+                'calificacion_promedio' => 4.8,
+                'created_at' => now()->subMonths(6)
+            ]
+        ]);
         
+        // Filtrar según búsqueda
+        $tecnicos = $allTecnicos;
         if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('apellido', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('rut', 'like', "%{$search}%");
+            $tecnicos = $tecnicos->filter(function($tecnico) use ($search) {
+                return stripos($tecnico->nombre . ' ' . $tecnico->apellido, $search) !== false || 
+                       stripos($tecnico->email, $search) !== false ||
+                       stripos($tecnico->rut, $search) !== false;
             });
         }
         
         if ($estado && $estado !== 'todos') {
-            $query->whereHas('trabajador', function($q) use ($estado) {
-                $q->where('estado', $estado);
+            $tecnicos = $tecnicos->filter(function($tecnico) use ($estado) {
+                return $tecnico->estado === $estado;
             });
         }
         
-        if ($servicio && $servicio !== 'todos') {
-            $query->where('servicio_tecnico_id', $servicio);
-        }
+        // Servicios técnicos especializados simulados
+        $serviciosTecnicos = collect([
+            (object)['id' => 1, 'nombre' => 'Reparación Móviles'],
+            (object)['id' => 2, 'nombre' => 'Reparación PC'],
+            (object)['id' => 3, 'nombre' => 'Audio & Video Repair'],
+            (object)['id' => 4, 'nombre' => 'Móviles & Gaming'],
+            (object)['id' => 5, 'nombre' => 'Dispositivos Inteligentes'],
+            (object)['id' => 6, 'nombre' => 'Especialista en Pantallas'],
+            (object)['id' => 7, 'nombre' => 'Gaming Specialists'],
+            (object)['id' => 8, 'nombre' => 'Dispositivos Portátiles'],
+            (object)['id' => 9, 'nombre' => 'Soporte Técnico Avanzado'],
+            (object)['id' => 10, 'nombre' => 'Fotografía & Móviles']
+        ]);
         
-        $tecnicos = $query->orderBy('created_at', 'desc')->paginate(12);
-        $serviciosTecnicos = ServicioTecnico::all();
-        
-        // Estadísticas
+        // Estadísticas simuladas
         $stats = [
-            'total' => User::whereHas('role', function($q) {
-                $q->whereIn('nombre', ['tecnico', 'trabajador']);
-            })->count(),
-            'activos' => User::whereHas('role', function($q) {
-                $q->whereIn('nombre', ['tecnico', 'trabajador']);
-            })->whereHas('trabajador', function($q) {
-                $q->where('estado', 'activo');
-            })->count(),
-            'inactivos' => User::whereHas('role', function($q) {
-                $q->whereIn('nombre', ['tecnico', 'trabajador']);
-            })->whereHas('trabajador', function($q) {
-                $q->where('estado', 'inactivo');
-            })->count(),
-            'baneados' => User::whereHas('role', function($q) {
-                $q->whereIn('nombre', ['tecnico', 'trabajador']);
-            })->whereHas('trabajador', function($q) {
-                $q->where('estado', 'baneado');
-            })->count(),
+            'total' => $allTecnicos->count(),
+            'activos' => $allTecnicos->where('estado', 'activo')->count(),
+            'inactivos' => $allTecnicos->where('estado', 'inactivo')->count(),
+            'baneados' => $allTecnicos->where('estado', 'baneado')->count()
         ];
         
-        return view('administrador.gestion-tecnicos', compact('tecnicos', 'serviciosTecnicos', 'stats', 'search', 'estado', 'servicio'));
+        // Simular paginación
+        $tecnicos = (object)[
+            'data' => $tecnicos->take(12),
+            'total' => $tecnicos->count(),
+            'current_page' => 1,
+            'last_page' => 1
+        ];
+        
+        return view('tecnicos.gestion-tecnicos', compact('tecnicos', 'serviciosTecnicos', 'stats', 'search', 'estado', 'servicio'));
     }
 
     /**
@@ -84,7 +253,7 @@ class GestionTecnicosController extends Controller
         $serviciosTecnicos = ServicioTecnico::all();
         $tecnicos = Tecnico::all();
         
-        return view('administrador.tecnicos.create', compact('roles', 'serviciosTecnicos', 'tecnicos'));
+        return view('tecnicos.create', compact('roles', 'serviciosTecnicos', 'tecnicos'));
     }
 
     /**

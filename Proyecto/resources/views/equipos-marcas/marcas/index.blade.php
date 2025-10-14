@@ -97,13 +97,13 @@
                             <div class="flex items-center space-x-3">
                                 <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                                     @if($marca->logo)
-                                        <img src="{{ $marca->logo_url }}" alt="{{ $marca->nombre_marca }}" class="w-10 h-10 object-contain">
+                                        <img src="{{ $marca->logo_url }}" alt="{{ $marca->nombre }}" class="w-10 h-10 object-contain">
                                     @else
                                         <i class="fas fa-tag text-blue-600 text-xl"></i>
                                     @endif
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-lg text-gray-900">{{ $marca->nombre_marca }}</h3>
+                                    <h3 class="font-bold text-lg text-gray-900">{{ $marca->nombre }}</h3>
                                     @if($marca->categoria)
                                         <p class="text-sm text-gray-600">{{ ucfirst($marca->categoria) }}</p>
                                     @endif

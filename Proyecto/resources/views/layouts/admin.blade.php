@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Panel Administrativo') - TechService Pro</title>
+    <title>@yield('title', 'Panel Administrativo') - Baieco</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <!-- Font Awesome para íconos -->
@@ -105,96 +105,42 @@
 
     @stack('styles')
 </head>
-<body class="bg-gray-50 font-sans">
+<body class="min-h-screen bg-gradient-to-br from-sky-50 via-teal-50 to-emerald-50 text-gray-800">
 
-    <!-- Navigation Header -->
-    <nav class="bg-tech-dark-blue shadow-lg sticky top-0 z-50 animate-slide-down">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <!-- Logo y navegación principal -->
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 animate-scale-in">
-                        <span class="text-tech-pure-white text-2xl font-bold">TechService Pro</span>
-                    </div>
-                    
-                    <!-- Botón hamburguesa para móvil -->
-                    <button id="mobile-menu-toggle" class="md:hidden ml-4 text-white hover:text-gray-300 focus:outline-none">
-                        <i class="fas fa-bars text-xl"></i>
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-teal-500 to-sky-600 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+            <!-- Logo -->
+            <div class="flex items-center">
+                <div class="w-9 h-9 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-xl font-bold">Baieco - @yield('title', 'Panel Administrativo')</h1>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex items-center space-x-4">
+                <a href="{{ route('dashboard') }}" class="text-sm text-teal-100 hover:text-white transition {{ request()->routeIs('dashboard*') ? 'text-white font-semibold' : '' }}">Dashboard</a>
+                <a href="{{ route('admin.clientes.index') }}" class="text-sm text-teal-100 hover:text-white transition {{ request()->routeIs('admin.clientes*') ? 'text-white font-semibold' : '' }}">Clientes</a>
+                <a href="{{ route('admin.gestion-tecnicos') }}" class="text-sm text-teal-100 hover:text-white transition {{ request()->routeIs('admin.gestion-tecnicos*') ? 'text-white font-semibold' : '' }}">Técnicos</a>
+                <a href="{{ route('admin.equipos-marcas.index') }}" class="text-sm text-teal-100 hover:text-white transition {{ request()->routeIs('admin.equipos-marcas*') ? 'text-white font-semibold' : '' }}">Equipos</a>
+                <a href="{{ route('ordenes.index') }}" class="text-sm text-teal-100 hover:text-white transition {{ request()->routeIs('ordenes*') ? 'text-white font-semibold' : '' }}">Órdenes</a>
+                <form method="POST" action="{{ route('logout') }}" class="inline">
+                    @csrf
+                    <button type="submit" class="p-2 rounded-md hover:bg-white hover:bg-opacity-20 transition">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
                     </button>
-                    
-                    <!-- Navegación desktop -->
-                    <div class="hidden md:ml-10 md:flex md:space-x-8">
-                        <a href="{{ route('dashboard') }}" class="text-tech-pure-white hover:text-tech-electric-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {{ request()->routeIs('dashboard*') ? 'text-tech-electric-blue bg-blue-600' : '' }}">
-                            <i class="fas fa-tachometer-alt mr-1"></i> Dashboard
-                        </a>
-                        <a href="{{ route('clientes.index') }}" class="text-tech-pure-white hover:text-tech-electric-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {{ request()->routeIs('clientes*') ? 'text-tech-electric-blue bg-blue-600' : '' }}">
-                            <i class="fas fa-users mr-1"></i> Clientes
-                        </a>
-                        <a href="{{ route('tecnicos.index') }}" class="text-tech-pure-white hover:text-tech-electric-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {{ request()->routeIs('tecnicos*') ? 'text-tech-electric-blue bg-blue-600' : '' }}">
-                            <i class="fas fa-tools mr-1"></i> Técnicos
-                        </a>
-                        <a href="{{ route('equipos-marcas.index') }}" class="text-tech-pure-white hover:text-tech-electric-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {{ request()->routeIs('equipos-marcas*') ? 'text-tech-electric-blue bg-blue-600' : '' }}">
-                            <i class="fas fa-laptop mr-1"></i> Equipos
-                        </a>
-                        <a href="{{ route('ordenes.index') }}" class="text-tech-pure-white hover:text-tech-electric-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {{ request()->routeIs('ordenes*') ? 'text-tech-electric-blue bg-blue-600' : '' }}">
-                            <i class="fas fa-clipboard-list mr-1"></i> Órdenes
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Usuario y acciones -->
-                <div class="flex items-center space-x-4">
-                    <!-- Notificaciones -->
-                    <div class="relative">
-                        <button class="text-tech-pure-white hover:text-tech-electric-blue p-2 rounded-full transition-colors duration-300">
-                            <i class="fas fa-bell text-lg"></i>
-                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
-                        </button>
-                    </div>
-                    
-                    <!-- Usuario -->
-                    <div class="flex items-center space-x-3">
-                        <div class="hidden sm:block text-tech-pure-white text-sm">
-                            <div class="font-semibold">{{ auth()->user()->name ?? 'Administrador' }}</div>
-                            <div class="text-xs text-gray-300">Panel Técnico Administrador</div>
-                        </div>
-                        <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                            <i class="fas fa-user text-white text-sm"></i>
-                        </div>
-                    </div>
-                    
-                    <!-- Botón volver -->
-                    <a href="{{ route('home') }}" class="text-tech-pure-white hover:text-tech-electric-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">
-                        <i class="fas fa-arrow-left mr-1"></i> <span class="hidden sm:inline">Volver al Inicio</span>
-                    </a>
-                </div>
+                </form>
             </div>
         </div>
+    </header>
 
-        <!-- Menú móvil -->
-        <div id="mobile-menu" class="md:hidden bg-tech-dark-blue border-t border-gray-700 hidden">
-            <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="{{ route('dashboard') }}" class="text-tech-pure-white hover:text-tech-electric-blue block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('dashboard*') ? 'bg-blue-600' : '' }}">
-                    <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
-                </a>
-                <a href="{{ route('clientes.index') }}" class="text-tech-pure-white hover:text-tech-electric-blue block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('clientes*') ? 'bg-blue-600' : '' }}">
-                    <i class="fas fa-users mr-2"></i> Clientes
-                </a>
-                <a href="{{ route('tecnicos.index') }}" class="text-tech-pure-white hover:text-tech-electric-blue block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('tecnicos*') ? 'bg-blue-600' : '' }}">
-                    <i class="fas fa-tools mr-2"></i> Técnicos
-                </a>
-                <a href="{{ route('equipos-marcas.index') }}" class="text-tech-pure-white hover:text-tech-electric-blue block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('equipos-marcas*') ? 'bg-blue-600' : '' }}">
-                    <i class="fas fa-laptop mr-2"></i> Equipos
-                </a>
-                <a href="{{ route('ordenes.index') }}" class="text-tech-pure-white hover:text-tech-electric-blue block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('ordenes*') ? 'bg-blue-600' : '' }}">
-                    <i class="fas fa-clipboard-list mr-2"></i> Órdenes
-                </a>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Contenido Principal -->
-    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
         <!-- Breadcrumb -->
         @if(!request()->routeIs('dashboard'))
