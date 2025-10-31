@@ -1,5 +1,7 @@
+version: "3.9"
+
 services:
-  # Servicio de la aplicación Laravel (para repositorios existentes)
+  # 🧩 Aplicación Laravel (PHP-FPM)
   app:
     build:
       context: .
@@ -8,25 +10,29 @@ services:
     container_name: laravel-app
     restart: unless-stopped
     working_dir: /var/www
+    # ⚡ Usa :cached para mejorar la velocidad de acceso en Windows/macOS
     volumes:
-      - ./:/var/www
+      - ./:/var/www:cached
     networks:
       - laravel
 
-  # Servidor web Nginx
+  # 🌐 Servidor web Nginx
   webserver:
     image: nginx:alpine
     container_name: laravel-webserver
     restart: unless-stopped
     ports:
       - "8080:80"
+    # ⚡ Usa :cached para reducir latencia de lectura de archivos
     volumes:
-      - ./:/var/www
+      - ./:/var/www:cached
       - ./docker-compose/nginx:/etc/nginx/conf.d
     networks:
       - laravel
+    depends_on:
+      - app
 
-  # Base de datos MySQL
+  # 🗄️ Base de datos MySQL
   db:
     image: mysql:8.0
     container_name: laravel-db
@@ -38,6 +44,7 @@ services:
       MYSQL_PASSWORD: capstone_password_2025
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql
+    # ⚡ Volumen persistente de datos + config
     volumes:
       - dbdata:/var/lib/mysql
       - ./docker-compose/mysql/my.cnf:/etc/mysql/my.cnf
@@ -47,7 +54,7 @@ services:
     ports:
       - "3307:3306"
 
-  # Redis para cache y sesiones
+  # ⚡ Redis (cache, sesiones)
   redis:
     image: redis:alpine
     container_name: laravel-redis
@@ -57,14 +64,15 @@ services:
     networks:
       - laravel
 
-  # Servicio Node.js para desarrollo frontend
+  # 💻 Node.js (para Vite y frontend)
   node:
     image: node:18-alpine
     container_name: laravel-node
     restart: "no"
     working_dir: /var/www
+    # ⚡ Usa :cached para lectura rápida desde Windows
     volumes:
-      - ./:/var/www
+      - ./:/var/www:cached
     command: tail -f /dev/null
     ports:
       - "5173:5173"
@@ -73,7 +81,7 @@ services:
     depends_on:
       - app
 
-  # phpMyAdmin para administración de la base de datos
+  # 🧠 phpMyAdmin (administrar MySQL)
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: laravel-phpmyadmin
@@ -91,12 +99,12 @@ services:
     depends_on:
       - db
 
-# Redes
+# 🌉 Red interna
 networks:
   laravel:
     driver: bridge
 
-# Volúmenes
+# 💾 Volumen persistente de MySQL
 volumes:
   dbdata:
     driver: local
