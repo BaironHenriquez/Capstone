@@ -238,45 +238,24 @@ Route::middleware(['auth', 'subscription'])->group(function () {
     });
 });
 
-// Rutas públicas de órdenes
+// Rutas públicas de órdenes (búsqueda y estado)
 Route::prefix('ordenes')->name('ordenes.')->group(function () {
-    // Buscar orden por número (público)
-    Route::get('/buscar', function () {
-        $numeroOrden = request('numero_orden');
-        if ($numeroOrden) {
-            return view('ordenes.estado', compact('numeroOrden'));
-        }
-        return redirect()->route('home')->with('error', 'Número de orden requerido.');
-    })->name('buscar');
+    Route::get('/estado', [OrdenServicioController::class, 'estado'])->name('estado');
+    Route::get('/buscar', [OrdenServicioController::class, 'buscar'])->name('buscar');
 });
+
 
 // Rutas de contacto
 Route::get('/contacto', function () {
     return view('contacto');
 })->name('contacto');
 
-// API Routes para AJAX
+// API real para consulta de estado de órdenes
 Route::prefix('api')->group(function () {
-    Route::get('/orden-estado/{numero}', function ($numero) {
-        // Simulación de estados de órdenes
-        $estados = [
-            'TS-2025-001' => [
-                'estado' => 'En progreso',
-                'descripcion' => 'Su equipo está siendo diagnosticado por nuestros técnicos',
-                'fecha_ingreso' => '2025-09-10',
-                'fecha_estimada' => '2025-09-17'
-            ],
-            'TS-2025-002' => [
-                'estado' => 'Completado',
-                'descripcion' => 'Reparación completada. Equipo listo para retirar',
-                'fecha_ingreso' => '2025-09-08',
-                'fecha_completado' => '2025-09-15'
-            ]
-        ];
-        
-        return response()->json($estados[$numero] ?? ['error' => 'Orden no encontrada']);
-    });
+    Route::get('/orden-estado/{numero_orden}', [OrdenServicioController::class, 'apiEstado'])
+        ->name('api.orden.estado');
 });
+
 
 // Ruta de logout para el dashboard
 Route::post('/logout', function () {
