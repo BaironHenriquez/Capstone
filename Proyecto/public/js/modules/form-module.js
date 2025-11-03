@@ -62,6 +62,44 @@ class FormModule {
                 this.loadDraft(e.target);
             }
         });
+
+        // Verificar existencia antes de agregar addEventListener
+        document.addEventListener('DOMContentLoaded', function() {
+            const tipoServicioInput = document.querySelector('[name="tipo_servicio"]');
+            const prioridadInput = document.querySelector('[name="prioridad"]');
+            const precioInput = document.querySelector('[name="precio_presupuestado"]');
+            const abonoInput = document.querySelector('[name="abono"]');
+
+            if (tipoServicioInput) {
+                tipoServicioInput.addEventListener('change', function() {
+                    const btnIA = document.querySelector('.btn-recomendar-tecnico');
+                    if (btnIA) {
+                        btnIA.dataset.tipoServicio = this.value;
+                    }
+                });
+            }
+
+            if (prioridadInput) {
+                prioridadInput.addEventListener('change', function() {
+                    const btnIA = document.querySelector('.btn-recomendar-tecnico');
+                    if (btnIA) {
+                        btnIA.dataset.prioridad = this.value;
+                    }
+                });
+            }
+
+            if (precioInput && abonoInput) {
+                function calcularSaldo() {
+                    const precio = parseFloat(precioInput.value) || 0;
+                    const abono = parseFloat(abonoInput.value) || 0;
+                    const saldo = precio - abono;
+                    console.log('Saldo calculado:', saldo);
+                }
+
+                precioInput.addEventListener('input', calcularSaldo);
+                abonoInput.addEventListener('input', calcularSaldo);
+            }
+        });
     }
 
     /**

@@ -47,12 +47,14 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     Número de Orden <span class="text-red-500">*</span>
                                 </label>
-                                <input type="text" 
-                                       name="numero_orden" 
-                                       value="{{ 'TS-' . date('Y') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT) }}"
-                                       class="validate-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                                       data-validate="required|alphanumeric"
-                                       readonly>
+                                <label for="numero_orden" class="block font-semibold mb-1">Número de Orden *</label>
+<input type="text" 
+       name="numero_orden" 
+       value="{{ 'TS-' . date('Y') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT) }}"
+       class="validate-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+       data-validate="required"
+       readonly>
+
                             </div>
                             
                             <div class="relative">
