@@ -314,12 +314,19 @@ class FormModule {
         this.showFormLoading(form);
 
         try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            
+            if (!csrfToken) {
+                throw new Error('Token CSRF no encontrado');
+            }
+            
+            // Agregar token CSRF al FormData
+            formData.append('_token', csrfToken);
+            
             const response = await fetch(form.action || window.location.pathname, {
                 method: form.method || 'POST',
                 body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-                }
+                credentials: 'same-origin'
             });
 
             const result = await response.json();

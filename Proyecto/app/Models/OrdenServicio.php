@@ -12,43 +12,49 @@ class OrdenServicio extends Model
     protected $table = 'ordenes_servicio'; // ✅ nombre real de la tabla
 
     protected $fillable = [
-    'numero_orden',
-    'estado',
-    'prioridad',
-    'fecha_programada',
-    'fecha_iniciada',
-    'fecha_completada',
-    'fecha_ingreso',
-    'fecha_aprox_entrega',
-    'fotos_ingreso',
-    'videos_evidencia',
-    'descripcion_problema',
-    'dictamen_tecnico',
-    'medio_de_pago',
-    'tipo_de_trabajo',
-    'precio_presupuestado',
-    'precio_total',
-    'horas_estimadas',
-    'horas_trabajadas',
-    'ubicacion_servicio',
-    'contacto_en_sitio',
-    'telefono_contacto',
-    'equipos_necesarios',
-    'materiales_usados',
-    'observaciones_tecnico',
-    'observaciones_cliente',
-    'calificacion_cliente',
-    'firma_cliente',
-    'fotos_antes',
-    'fotos_despues',
-    'archivos_adjuntos',
-    'requiere_aprobacion',
-    'aprobado_por',
-    'fecha_aprobacion',
-    'motivo_rechazo',
-    'abono',
-    'saldo',
-];
+        'numero_orden',
+        'estado',
+        'prioridad',
+        'fecha_programada',
+        'fecha_iniciada',
+        'fecha_completada',
+        'fecha_ingreso',
+        'fecha_aprox_entrega',
+        'fotos_ingreso',
+        'videos_evidencia',
+        'descripcion_problema',
+        'dictamen_tecnico',
+        'medio_de_pago',
+        'tipo_de_trabajo',
+        'tipo_servicio',
+        'precio_presupuestado',
+        'precio_total',
+        'abono',
+        'saldo',
+        'horas_estimadas',
+        'horas_trabajadas',
+        'ubicacion_servicio',
+        'contacto_en_sitio',
+        'telefono_contacto',
+        'servicio_tecnico_id',
+        'user_id',
+        'tecnico_id',
+        'cliente_id',
+        'equipo_id',
+        'equipos_necesarios',
+        'materiales_usados',
+        'observaciones_tecnico',
+        'observaciones_cliente',
+        'calificacion_cliente',
+        'firma_cliente',
+        'fotos_antes',
+        'fotos_despues',
+        'archivos_adjuntos',
+        'requiere_aprobacion',
+        'aprobado_por',
+        'fecha_aprobacion',
+        'motivo_rechazo',
+    ];
 
 
     protected $casts = [
@@ -78,7 +84,35 @@ class OrdenServicio extends Model
     ];
 
     /**
-     * 🔢 Generar número único de orden
+     * � Relaciones
+     */
+    public function cliente()
+    {
+        return $this->belongsTo(Cliente::class);
+    }
+
+    public function equipo()
+    {
+        return $this->belongsTo(Equipo::class);
+    }
+
+    public function tecnico()
+    {
+        return $this->belongsTo(Tecnico::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function servicioTecnico()
+    {
+        return $this->belongsTo(ServicioTecnico::class);
+    }
+
+    /**
+     * �🔢 Generar número único de orden
      */
     public static function generarNumeroOrden()
     {

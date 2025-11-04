@@ -149,11 +149,9 @@
                                         class="validate-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
                                         data-validate="required">
                                     <option value="">Seleccione un cliente</option>
-                                    <option value="1">Juan García Pérez</option>
-                                    <option value="2">María López Silva</option>
-                                    <option value="3">Carlos Martínez Torres</option>
-                                    <option value="4">Ana Rodríguez López</option>
-                                    <option value="5">Diego Sánchez Morales</option>
+                                    @foreach($clientes as $cliente)
+                                        <option value="{{ $cliente->id }}">{{ $cliente->nombre }} {{ $cliente->apellido }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             
@@ -213,11 +211,11 @@
                                         class="validate-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
                                         data-validate="required">
                                     <option value="">Seleccione un equipo</option>
-                                    <option value="1">Laptop HP Pavilion</option>
-                                    <option value="2">Desktop Dell OptiPlex</option>
-                                    <option value="3">iPhone 14 Pro</option>
-                                    <option value="4">Samsung Galaxy S23</option>
-                                    <option value="5">Impresora Canon MG3600</option>
+                                    @foreach($equipos as $equipo)
+                                        <option value="{{ $equipo->id }}">
+                                            {{ $equipo->marca->nombre ?? 'Sin marca' }} {{ $equipo->modelo }} ({{ $equipo->numero_serie }})
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
                             

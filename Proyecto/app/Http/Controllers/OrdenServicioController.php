@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\OrdenServicio;
+use App\Models\ServicioTecnico;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class OrdenServicioController extends Controller
 {
@@ -12,7 +15,7 @@ class OrdenServicioController extends Controller
      */
     public function index(Request $request)
     {
-        $query = OrdenServicio::query();
+        $query = OrdenServicio::with(['cliente', 'tecnico', 'equipo.marca']);
 
         if ($request->filled('buscar')) {
             $query->where('numero_orden', 'like', "%{$request->buscar}%")
@@ -40,7 +43,10 @@ class OrdenServicioController extends Controller
      */
     public function create()
     {
-        return view('ordenes.create');
+        $clientes = \App\Models\Cliente::orderBy('nombre')->get();
+        $equipos = \App\Models\Equipo::with('marca')->orderBy('modelo')->get();
+        
+        return view('ordenes.create', compact('clientes', 'equipos'));
     }
 
     /**
@@ -64,10 +70,23 @@ class OrdenServicioController extends Controller
                 'fecha_programada'     => 'nullable|date',
                 'fecha_aprox_entrega'  => 'nullable|date',
                 'horas_estimadas'      => 'nullable|numeric',
+                'cliente_id'           => 'required|exists:clientes,id',
+                'equipo_id'            => 'required|exists:equipos,id',
             ]);
 
+            // Obtener IDs requeridos
+            $servicioTecnicoId = $request->servicio_tecnico_id ?? ServicioTecnico::first()?->id;
+            $userId = Auth::check() ? Auth::id() : User::first()?->id;
+            
+            if (!$servicioTecnicoId || !$userId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error: No hay servicios técnicos o usuarios en el sistema'
+                ], 500);
+            }
+
             // Generar número de orden
-            $numeroOrden = OrdenServicio::generarNumeroOrden(1); // 1 = ID del servicio técnico
+            $numeroOrden = $request->numero_orden ?? OrdenServicio::generarNumeroOrden();
 
             $precio = $request->input('precio_presupuestado', 0);
             $abono  = $request->input('abono', 0);
@@ -76,12 +95,14 @@ class OrdenServicioController extends Controller
             // Crear orden
             $orden = OrdenServicio::create([
                 'numero_orden'         => $numeroOrden,
-                'estado'               => $request->estado ?? 'Recibido',
-                'prioridad'            => $request->prioridad,
-                'fecha_ingreso'        => now(),
+                'estado'               => $request->estado ?? 'pendiente',
+                'prioridad'            => $request->prioridad ?? 'media',
+                'fecha_ingreso'        => $request->fecha_ingreso ?? now(),
                 'descripcion_problema' => $request->descripcion_problema,
-                'tipo_de_trabajo'      => $request->tipo_servicio,
+                'tipo_servicio'        => $request->tipo_servicio ?? 'reparacion',
+                'tipo_de_trabajo'      => $request->tipo_de_trabajo,
                 'precio_presupuestado' => $precio,
+                'precio_total'         => $precio,
                 'abono'                => $abono,
                 'saldo'                => $saldo,
                 'medio_de_pago'        => $request->medio_de_pago,
@@ -91,7 +112,10 @@ class OrdenServicioController extends Controller
                 'fecha_programada'     => $request->fecha_programada,
                 'fecha_aprox_entrega'  => $request->fecha_aprox_entrega,
                 'horas_estimadas'      => $request->horas_estimadas,
-                'tipo_de_trabajo'      => $request->tipo_de_trabajo,
+                'servicio_tecnico_id'  => $servicioTecnicoId,
+                'user_id'              => $userId,
+                'cliente_id'           => $request->cliente_id,
+                'equipo_id'            => $request->equipo_id,
             ]);
 
             return response()->json([
