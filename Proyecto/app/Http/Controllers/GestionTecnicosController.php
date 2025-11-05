@@ -8,6 +8,7 @@ use App\Models\Trabajador;
 use App\Models\Tecnico;
 use App\Models\Role;
 use App\Models\ServicioTecnico;
+use App\Models\OrdenServicio;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -23,225 +24,62 @@ class GestionTecnicosController extends Controller
         $estado = $request->get('estado');
         $servicio = $request->get('servicio');
         
-        // Datos simulados de técnicos especialistas en reparación
-        $allTecnicos = collect([
-            (object)[
-                'id' => 1,
-                'nombre' => 'Carlos',
-                'apellido' => 'Rodríguez',
-                'email' => 'carlos@repairtech.cl',
-                'telefono' => '+56 9 8765 4321',
-                'rut' => '12.345.678-9',
-                'especialidades' => ['Dispositivos Móviles', 'Tablets'],
-                'estado' => 'activo',
-                'servicioTecnico' => (object)['nombre' => 'Reparación Móviles'],
-                'ordenes_completadas' => 125,
-                'calificacion_promedio' => 4.8,
-                'created_at' => now()->subMonths(6)
-            ],
-            (object)[
-                'id' => 2,
-                'nombre' => 'Ana',
-                'apellido' => 'Martínez',
-                'email' => 'ana@repairtech.cl',
-                'telefono' => '+56 9 7654 3210',
-                'rut' => '11.234.567-8',
-                'especialidades' => ['Computadores', 'Laptops'],
-                'estado' => 'activo',
-                'servicioTecnico' => (object)['nombre' => 'Reparación PC'],
-                'ordenes_completadas' => 89,
-                'calificacion_promedio' => 4.6,
-                'created_at' => now()->subMonths(3)
-            ],
-            (object)[
-                'id' => 3,
-                'nombre' => 'Miguel',
-                'apellido' => 'Silva',
-                'email' => 'miguel@repairtech.cl',
-                'telefono' => '+56 9 6543 2109',
-                'rut' => '10.123.456-7',
-                'especialidades' => ['Televisores', 'Consolas'],
-                'estado' => 'activo',
-                'servicioTecnico' => (object)['nombre' => 'Audio & Video Repair'],
-                'ordenes_completadas' => 67,
-                'calificacion_promedio' => 4.5,
-                'created_at' => now()->subMonth()
-            ],
-            (object)[
-                'id' => 4,
-                'nombre' => 'Sofía',
-                'apellido' => 'Hernández',
-                'email' => 'sofia@repairtech.cl',
-                'telefono' => '+56 9 5432 1098',
-                'rut' => '14.567.890-1',
-                'especialidades' => ['Dispositivos Móviles', 'Consolas'],
-                'estado' => 'activo',
-                'servicioTecnico' => (object)['nombre' => 'Móviles & Gaming'],
-                'ordenes_completadas' => 92,
-                'calificacion_promedio' => 4.9,
-                'created_at' => now()->subMonths(8)
-            ],
-            (object)[
-                'id' => 5,
-                'nombre' => 'Diego',
-                'apellido' => 'Morales',
-                'email' => 'diego@repairtech.cl',
-                'telefono' => '+56 9 4321 0987',
-                'rut' => '16.789.012-3',
-                'especialidades' => ['Tablets', 'Smartwatches'],
-                'estado' => 'activo',
-                'servicioTecnico' => (object)['nombre' => 'Dispositivos Inteligentes'],
-                'ordenes_completadas' => 78,
-                'calificacion_promedio' => 4.7,
-                'created_at' => now()->subMonths(5)
-            ],
-            (object)[
-                'id' => 6,
-                'nombre' => 'Valentina',
-                'apellido' => 'Castro',
-                'email' => 'valentina@repairtech.cl',
-                'telefono' => '+56 9 3210 9876',
-                'rut' => '17.890.123-4',
-                'especialidades' => ['Laptops', 'Computadores'],
-                'estado' => 'activo',
-                'servicioTecnico' => (object)['nombre' => 'Reparación PC'],
-                'ordenes_completadas' => 103,
-                'calificacion_promedio' => 4.8,
-                'created_at' => now()->subMonths(10)
-            ],
-            (object)[
-                'id' => 7,
-                'nombre' => 'Roberto',
-                'apellido' => 'Fuentes',
-                'email' => 'roberto@repairtech.cl',
-                'telefono' => '+56 9 2109 8765',
-                'rut' => '18.901.234-5',
-                'especialidades' => ['Televisores', 'Equipos de Audio'],
-                'estado' => 'activo',
-                'servicioTecnico' => (object)['nombre' => 'Audio & Video Repair'],
-                'ordenes_completadas' => 156,
-                'calificacion_promedio' => 4.6,
-                'created_at' => now()->subMonths(12)
-            ],
-            (object)[
-                'id' => 8,
-                'nombre' => 'Camila',
-                'apellido' => 'Pérez',
-                'email' => 'camila@repairtech.cl',
-                'telefono' => '+56 9 1098 7654',
-                'rut' => '19.012.345-6',
-                'especialidades' => ['Dispositivos Móviles', 'Reparación de Pantallas'],
-                'estado' => 'activo',
-                'servicioTecnico' => (object)['nombre' => 'Especialista en Pantallas'],
-                'ordenes_completadas' => 134,
-                'calificacion_promedio' => 4.9,
-                'created_at' => now()->subMonths(7)
-            ],
-            (object)[
-                'id' => 9,
-                'nombre' => 'Andrés',
-                'apellido' => 'López',
-                'email' => 'andres@repairtech.cl',
-                'telefono' => '+56 9 0987 6543',
-                'rut' => '20.123.456-7',
-                'especialidades' => ['Consolas', 'Equipos Gaming'],
-                'estado' => 'activo',
-                'servicioTecnico' => (object)['nombre' => 'Gaming Specialists'],
-                'ordenes_completadas' => 87,
-                'calificacion_promedio' => 4.7,
-                'created_at' => now()->subMonths(4)
-            ],
-            (object)[
-                'id' => 10,
-                'nombre' => 'Francisca',
-                'apellido' => 'Ramírez',
-                'email' => 'francisca@repairtech.cl',
-                'telefono' => '+56 9 9876 5432',
-                'rut' => '21.234.567-8',
-                'especialidades' => ['Tablets', 'E-readers'],
-                'estado' => 'activo',
-                'servicioTecnico' => (object)['nombre' => 'Dispositivos Portátiles'],
-                'ordenes_completadas' => 65,
-                'calificacion_promedio' => 4.5,
-                'created_at' => now()->subMonths(2)
-            ],
-            (object)[
-                'id' => 11,
-                'nombre' => 'Gonzalo',
-                'apellido' => 'Vargas',
-                'email' => 'gonzalo@repairtech.cl',
-                'telefono' => '+56 9 8765 4321',
-                'rut' => '22.345.678-9',
-                'especialidades' => ['Computadores', 'Servidores'],
-                'estado' => 'inactivo',
-                'servicioTecnico' => (object)['nombre' => 'Soporte Técnico Avanzado'],
-                'ordenes_completadas' => 45,
-                'calificacion_promedio' => 4.3,
-                'created_at' => now()->subMonths(1)
-            ],
-            (object)[
-                'id' => 12,
-                'nombre' => 'Isidora',
-                'apellido' => 'Mendoza',
-                'email' => 'isidora@repairtech.cl',
-                'telefono' => '+56 9 7654 3210',
-                'rut' => '23.456.789-0',
-                'especialidades' => ['Smartphones', 'Cámaras Digitales'],
-                'estado' => 'activo',
-                'servicioTecnico' => (object)['nombre' => 'Fotografía & Móviles'],
-                'ordenes_completadas' => 98,
-                'calificacion_promedio' => 4.8,
-                'created_at' => now()->subMonths(6)
-            ]
-        ]);
+        // Verificar que el usuario esté autenticado
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('error', 'Debes iniciar sesión.');
+        }
+        
+        // Obtener el servicio técnico del usuario autenticado
+        $user = auth()->user();
+        $servicioTecnico = $user->servicioTecnico;
+        
+        if (!$servicioTecnico) {
+            return redirect()->back()->with('error', 'No tienes un servicio técnico asignado. Contacta al administrador.');
+        }
+        
+        $servicioTecnicoId = $servicioTecnico->id;
+        
+        // Consultar técnicos reales de la base de datos
+        $query = Tecnico::with(['servicioTecnico'])
+            ->withCount('ordenes')
+            ->where('servicio_tecnico_id', $servicioTecnicoId);
         
         // Filtrar según búsqueda
-        $tecnicos = $allTecnicos;
         if ($search) {
-            $tecnicos = $tecnicos->filter(function($tecnico) use ($search) {
-                return stripos($tecnico->nombre . ' ' . $tecnico->apellido, $search) !== false || 
-                       stripos($tecnico->email, $search) !== false ||
-                       stripos($tecnico->rut, $search) !== false;
+            $query->where(function($q) use ($search) {
+                $q->where('nombre', 'like', "%{$search}%")
+                  ->orWhere('apellido', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('rut', 'like', "%{$search}%");
             });
         }
         
+        // Filtrar por estado
         if ($estado && $estado !== 'todos') {
-            $tecnicos = $tecnicos->filter(function($tecnico) use ($estado) {
-                return $tecnico->estado === $estado;
-            });
+            $query->where('estado', $estado);
         }
         
-        // Servicios técnicos especializados simulados
-        $serviciosTecnicos = collect([
-            (object)['id' => 1, 'nombre' => 'Reparación Móviles'],
-            (object)['id' => 2, 'nombre' => 'Reparación PC'],
-            (object)['id' => 3, 'nombre' => 'Audio & Video Repair'],
-            (object)['id' => 4, 'nombre' => 'Móviles & Gaming'],
-            (object)['id' => 5, 'nombre' => 'Dispositivos Inteligentes'],
-            (object)['id' => 6, 'nombre' => 'Especialista en Pantallas'],
-            (object)['id' => 7, 'nombre' => 'Gaming Specialists'],
-            (object)['id' => 8, 'nombre' => 'Dispositivos Portátiles'],
-            (object)['id' => 9, 'nombre' => 'Soporte Técnico Avanzado'],
-            (object)['id' => 10, 'nombre' => 'Fotografía & Móviles']
-        ]);
+        // Filtrar por servicio técnico (si se proporciona)
+        if ($servicio) {
+            $query->where('servicio_tecnico_id', $servicio);
+        }
         
-        // Estadísticas simuladas
+        // Obtener técnicos con paginación
+        $tecnicos = $query->paginate(12);
+        
+        // Obtener servicios técnicos
+        $serviciosTecnicos = ServicioTecnico::all();
+        
+        // Calcular estadísticas
+        $allTecnicos = Tecnico::where('servicio_tecnico_id', $servicioTecnicoId);
         $stats = [
             'total' => $allTecnicos->count(),
-            'activos' => $allTecnicos->where('estado', 'activo')->count(),
-            'inactivos' => $allTecnicos->where('estado', 'inactivo')->count(),
-            'baneados' => $allTecnicos->where('estado', 'baneado')->count()
+            'activos' => (clone $allTecnicos)->where('estado', 'activo')->count(),
+            'inactivos' => (clone $allTecnicos)->where('estado', 'inactivo')->count(),
+            'suspendidos' => (clone $allTecnicos)->where('estado', 'suspendido')->count()
         ];
         
-        // Simular paginación
-        $tecnicos = (object)[
-            'data' => $tecnicos->take(12),
-            'total' => $tecnicos->count(),
-            'current_page' => 1,
-            'last_page' => 1
-        ];
-        
-        return view('tecnicos.gestion-tecnicos', compact('tecnicos', 'serviciosTecnicos', 'stats', 'search', 'estado', 'servicio'));
+        return view('admin.tecnicos.gestion-tecnicos', compact('tecnicos', 'serviciosTecnicos', 'stats', 'search', 'estado', 'servicio'));
     }
 
     /**
@@ -249,11 +87,24 @@ class GestionTecnicosController extends Controller
      */
     public function create()
     {
-        $roles = Role::whereIn('nombre', ['tecnico', 'trabajador'])->get();
-        $serviciosTecnicos = ServicioTecnico::all();
-        $tecnicos = Tecnico::all();
-        
-        return view('tecnicos.create', compact('roles', 'serviciosTecnicos', 'tecnicos'));
+        try {
+            // Verificar que el usuario esté autenticado
+            if (!auth()->check()) {
+                return redirect()->route('login')->with('error', 'Debes iniciar sesión para acceder a esta página.');
+            }
+            
+            // Obtener el servicio técnico del usuario
+            $user = auth()->user();
+            $servicioTecnico = $user->servicioTecnico;
+            
+            if (!$servicioTecnico) {
+                return redirect()->back()->with('error', 'No tienes un servicio técnico asignado. Contacta al administrador.');
+            }
+            
+            return view('admin.tecnicos.create', compact('servicioTecnico'));
+        } catch (\Exception $e) {
+            return redirect()->route('admin.gestion-tecnicos')->with('error', 'Error al cargar el formulario: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -261,22 +112,36 @@ class GestionTecnicosController extends Controller
      */
     public function store(Request $request)
     {
+        // Obtener el servicio técnico del usuario autenticado
+        $servicioTecnico = auth()->user()->servicioTecnico;
+        
+        if (!$servicioTecnico) {
+            return back()->with('error', 'No tienes un servicio técnico asignado.')->withInput();
+        }
+        
+        $servicioTecnicoId = $servicioTecnico->id;
+        
         $validator = Validator::make($request->all(), [
-            'nombre' => 'required|string|max:255',
-            'apellido' => 'required|string|max:255',
-            'rut' => 'required|string|unique:users,rut|max:12',
-            'email' => 'required|string|email|max:255|unique:users',
-            'telefono' => 'required|string|max:15',
+            'nombre' => 'required|string|max:100',
+            'apellido' => 'required|string|max:100',
+            'rut' => 'required|string|unique:tecnicos,rut|max:20',
+            'email' => 'required|string|email|max:150|unique:tecnicos,email',
             'password' => 'required|string|min:6|confirmed',
-            'role_id' => 'required|exists:roles,id',
-            'servicio_tecnico_id' => 'required|exists:servicio_tecnicos,id',
-            'tipo_trabajo' => 'required|string',
-            'habilidades' => 'required|array|min:1',
-            'nivel_experiencia' => 'required|in:junior,intermedio,senior',
-            'zona_trabajo' => 'required|string',
-            'telefono_trabajo' => 'nullable|string|max:15',
-            'horario_trabajo' => 'required|string',
-            'salario_por_hora' => 'required|numeric|min:0',
+            'telefono' => 'required|string|max:20',
+            'fecha_nacimiento' => 'nullable|date',
+            'direccion' => 'nullable|string',
+            'ciudad' => 'nullable|string|max:100',
+            'region' => 'nullable|string|max:100',
+            'especialidades' => 'required|array|min:1',
+            'especialidades.*' => 'required|string',
+            'nivel_experiencia' => 'required|in:junior,semi-senior,senior,experto',
+            'certificaciones' => 'nullable|array',
+            'certificaciones.*' => 'nullable|string',
+            'zona_trabajo' => 'required|string|max:100',
+            'telefono_trabajo' => 'nullable|string|max:20',
+            'horario_trabajo' => 'required|string|max:100',
+            'salario_base' => 'required|numeric|min:0',
+            'comision_por_orden' => 'nullable|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -285,36 +150,34 @@ class GestionTecnicosController extends Controller
 
         DB::beginTransaction();
         try {
-            // Crear usuario
-            $user = User::create([
-                'name' => strtolower($request->nombre . $request->apellido),
+            // Crear técnico con todos sus datos (incluyendo credenciales)
+            // El role_id se asigna por defecto a 2 (técnico)
+            $tecnico = Tecnico::create([
                 'nombre' => $request->nombre,
                 'apellido' => $request->apellido,
                 'rut' => $request->rut,
-                'telefono' => $request->telefono,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'contrasena' => $request->password,
-                'role_id' => $request->role_id,
-                'servicio_tecnico_id' => $request->servicio_tecnico_id,
+                'role_id' => 2, // Rol de técnico por defecto
                 'email_verified_at' => now(),
-            ]);
-
-            // Crear trabajador
-            Trabajador::create([
-                'user_id' => $user->id,
-                'tecnico_id' => $request->tecnico_id,
-                'tipo_trabajo' => $request->tipo_trabajo,
-                'habilidades' => $request->habilidades,
+                'telefono' => $request->telefono,
+                'fecha_nacimiento' => $request->fecha_nacimiento,
+                'direccion' => $request->direccion,
+                'ciudad' => $request->ciudad,
+                'region' => $request->region,
+                'especialidades' => $request->especialidades,
                 'nivel_experiencia' => $request->nivel_experiencia,
+                'certificaciones' => $request->certificaciones ?? [],
                 'zona_trabajo' => $request->zona_trabajo,
                 'disponible' => true,
-                'telefono_trabajo' => $request->telefono_trabajo ?: $request->telefono,
+                'carga_trabajo_actual' => 0,
+                'telefono_trabajo' => $request->telefono_trabajo ?? $request->telefono,
                 'horario_trabajo' => $request->horario_trabajo,
-                'salario_por_hora' => $request->salario_por_hora,
+                'salario_base' => $request->salario_base,
+                'comision_por_orden' => $request->comision_por_orden ?? 0,
                 'estado' => 'activo',
                 'fecha_ingreso' => now(),
-                'servicio_tecnico_id' => $request->servicio_tecnico_id,
+                'servicio_tecnico_id' => $servicioTecnicoId,
             ]);
 
             DB::commit();
@@ -331,12 +194,23 @@ class GestionTecnicosController extends Controller
      */
     public function edit($id)
     {
-        $user = User::with('trabajador', 'role', 'servicioTecnico')->findOrFail($id);
-        $roles = Role::whereIn('nombre', ['tecnico', 'trabajador'])->get();
-        $serviciosTecnicos = ServicioTecnico::all();
-        $tecnicos = Tecnico::all();
+        $tecnico = Tecnico::with('servicioTecnico')->findOrFail($id);
         
-        return view('administrador.tecnicos.edit', compact('user', 'roles', 'serviciosTecnicos', 'tecnicos'));
+        // Obtener el servicio técnico del usuario autenticado
+        $miServicioTecnico = auth()->user()->servicioTecnico;
+        
+        if (!$miServicioTecnico) {
+            return redirect()->back()->with('error', 'No tienes un servicio técnico asignado.');
+        }
+        
+        // Verificar que el técnico pertenece al mismo servicio técnico
+        if ($tecnico->servicio_tecnico_id !== $miServicioTecnico->id) {
+            abort(403, 'No autorizado para editar este técnico.');
+        }
+        
+        $servicioTecnico = $miServicioTecnico;
+        
+        return view('admin.tecnicos.edit', compact('tecnico', 'servicioTecnico'));
     }
 
     /**
@@ -344,25 +218,42 @@ class GestionTecnicosController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $user = User::findOrFail($id);
+        $tecnico = Tecnico::findOrFail($id);
+        
+        // Obtener el servicio técnico del usuario autenticado
+        $miServicioTecnico = auth()->user()->servicioTecnico;
+        
+        if (!$miServicioTecnico) {
+            return back()->with('error', 'No tienes un servicio técnico asignado.');
+        }
+        
+        // Verificar que el técnico pertenece al mismo servicio técnico
+        if ($tecnico->servicio_tecnico_id !== $miServicioTecnico->id) {
+            abort(403, 'No autorizado para editar este técnico.');
+        }
         
         $validator = Validator::make($request->all(), [
-            'nombre' => 'required|string|max:255',
-            'apellido' => 'required|string|max:255',
-            'rut' => 'required|string|max:12|unique:users,rut,' . $id,
-            'email' => 'required|string|email|max:255|unique:users,email,' . $id,
-            'telefono' => 'required|string|max:15',
-            'password' => 'nullable|string|min:6|confirmed',
-            'role_id' => 'required|exists:roles,id',
-            'servicio_tecnico_id' => 'required|exists:servicio_tecnicos,id',
-            'tipo_trabajo' => 'required|string',
-            'habilidades' => 'required|array|min:1',
-            'nivel_experiencia' => 'required|in:junior,intermedio,senior',
-            'zona_trabajo' => 'required|string',
-            'telefono_trabajo' => 'nullable|string|max:15',
-            'horario_trabajo' => 'required|string',
-            'salario_por_hora' => 'required|numeric|min:0',
-            'estado' => 'required|in:activo,inactivo,baneado',
+            'nombre' => 'required|string|max:100',
+            'apellido' => 'required|string|max:100',
+            'rut' => 'required|string|max:20|unique:tecnicos,rut,' . $id,
+            'email' => 'required|string|email|max:150|unique:tecnicos,email,' . $id,
+            'telefono' => 'required|string|max:20',
+            'fecha_nacimiento' => 'nullable|date',
+            'direccion' => 'nullable|string',
+            'ciudad' => 'nullable|string|max:100',
+            'region' => 'nullable|string|max:100',
+            'especialidades' => 'required|array|min:1',
+            'especialidades.*' => 'required|string',
+            'nivel_experiencia' => 'required|in:junior,semi-senior,senior,experto',
+            'certificaciones' => 'nullable|array',
+            'certificaciones.*' => 'nullable|string',
+            'zona_trabajo' => 'required|string|max:100',
+            'telefono_trabajo' => 'nullable|string|max:20',
+            'horario_trabajo' => 'required|string|max:100',
+            'salario_base' => 'required|numeric|min:0',
+            'comision_por_orden' => 'nullable|numeric|min:0',
+            'estado' => 'required|in:activo,inactivo,vacaciones,licencia,suspendido',
+            'notas_admin' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -371,42 +262,28 @@ class GestionTecnicosController extends Controller
 
         DB::beginTransaction();
         try {
-            // Actualizar usuario
-            $userData = [
-                'name' => strtolower($request->nombre . $request->apellido),
+            // Actualizar técnico
+            $tecnico->update([
                 'nombre' => $request->nombre,
                 'apellido' => $request->apellido,
                 'rut' => $request->rut,
-                'telefono' => $request->telefono,
                 'email' => $request->email,
-                'role_id' => $request->role_id,
-                'servicio_tecnico_id' => $request->servicio_tecnico_id,
-            ];
-
-            if ($request->password) {
-                $userData['password'] = Hash::make($request->password);
-                $userData['contrasena'] = $request->password;
-            }
-
-            $user->update($userData);
-
-            // Actualizar o crear trabajador
-            $user->trabajador()->updateOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'tecnico_id' => $request->tecnico_id,
-                    'tipo_trabajo' => $request->tipo_trabajo,
-                    'habilidades' => $request->habilidades,
-                    'nivel_experiencia' => $request->nivel_experiencia,
-                    'zona_trabajo' => $request->zona_trabajo,
-                    'telefono_trabajo' => $request->telefono_trabajo ?: $request->telefono,
-                    'horario_trabajo' => $request->horario_trabajo,
-                    'salario_por_hora' => $request->salario_por_hora,
-                    'estado' => $request->estado,
-                    'servicio_tecnico_id' => $request->servicio_tecnico_id,
-                    'notas_admin' => $request->notas_admin,
-                ]
-            );
+                'telefono' => $request->telefono,
+                'fecha_nacimiento' => $request->fecha_nacimiento,
+                'direccion' => $request->direccion,
+                'ciudad' => $request->ciudad,
+                'region' => $request->region,
+                'especialidades' => $request->especialidades,
+                'nivel_experiencia' => $request->nivel_experiencia,
+                'certificaciones' => $request->certificaciones ?? [],
+                'zona_trabajo' => $request->zona_trabajo,
+                'telefono_trabajo' => $request->telefono_trabajo ?? $request->telefono,
+                'horario_trabajo' => $request->horario_trabajo,
+                'salario_base' => $request->salario_base,
+                'comision_por_orden' => $request->comision_por_orden ?? 0,
+                'estado' => $request->estado,
+                'notas_admin' => $request->notas_admin,
+            ]);
 
             DB::commit();
             return redirect()->route('admin.gestion-tecnicos')->with('success', 'Técnico actualizado exitosamente');
@@ -422,17 +299,24 @@ class GestionTecnicosController extends Controller
      */
     public function toggleBan($id)
     {
-        $user = User::findOrFail($id);
-        $trabajador = $user->trabajador;
+        $tecnico = Tecnico::findOrFail($id);
         
-        if (!$trabajador) {
-            return back()->with('error', 'No se encontró el registro de trabajador');
+        // Obtener el servicio técnico del usuario autenticado
+        $miServicioTecnico = auth()->user()->servicioTecnico;
+        
+        if (!$miServicioTecnico) {
+            return back()->with('error', 'No tienes un servicio técnico asignado.');
+        }
+        
+        // Verificar que el técnico pertenece al mismo servicio técnico
+        if ($tecnico->servicio_tecnico_id !== $miServicioTecnico->id) {
+            abort(403, 'No autorizado para modificar este técnico.');
         }
 
-        $nuevoEstado = $trabajador->estado === 'baneado' ? 'activo' : 'baneado';
-        $trabajador->update(['estado' => $nuevoEstado]);
+        $nuevoEstado = $tecnico->estado === 'suspendido' ? 'activo' : 'suspendido';
+        $tecnico->update(['estado' => $nuevoEstado]);
 
-        $mensaje = $nuevoEstado === 'baneado' ? 'Técnico baneado exitosamente' : 'Técnico desbaneado exitosamente';
+        $mensaje = $nuevoEstado === 'suspendido' ? 'Técnico suspendido exitosamente' : 'Técnico activado exitosamente';
         return back()->with('success', $mensaje);
     }
 
@@ -443,15 +327,22 @@ class GestionTecnicosController extends Controller
     {
         DB::beginTransaction();
         try {
-            $user = User::findOrFail($id);
+            $tecnico = Tecnico::findOrFail($id);
             
-            // Eliminar trabajador asociado
-            if ($user->trabajador) {
-                $user->trabajador->delete();
+            // Obtener el servicio técnico del usuario autenticado
+            $miServicioTecnico = auth()->user()->servicioTecnico;
+            
+            if (!$miServicioTecnico) {
+                return back()->with('error', 'No tienes un servicio técnico asignado.');
             }
             
-            // Eliminar usuario
-            $user->delete();
+            // Verificar que el técnico pertenece al mismo servicio técnico
+            if ($tecnico->servicio_tecnico_id !== $miServicioTecnico->id) {
+                abort(403, 'No autorizado para eliminar este técnico.');
+            }
+            
+            // Eliminar técnico (soft delete)
+            $tecnico->delete();
             
             DB::commit();
             return redirect()->route('admin.gestion-tecnicos')->with('success', 'Técnico eliminado exitosamente');
@@ -459,6 +350,148 @@ class GestionTecnicosController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return back()->with('error', 'Error al eliminar el técnico: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Mostrar vista de asignación de órdenes
+     */
+    public function asignar($id)
+    {
+        try {
+            $tecnico = Tecnico::with(['servicioTecnico', 'ordenes'])->findOrFail($id);
+            
+            // Verificar que el técnico pertenezca al servicio técnico del usuario autenticado
+            $miServicioTecnico = auth()->user()->servicioTecnico;
+            
+            if (!$miServicioTecnico) {
+                return redirect()->back()->with('error', 'No tienes un servicio técnico asignado.');
+            }
+            
+            if ($tecnico->servicio_tecnico_id !== $miServicioTecnico->id) {
+                abort(403, 'No autorizado para gestionar este técnico.');
+            }
+            
+            // Obtener órdenes activas del técnico
+            $ordenesActivas = OrdenServicio::where('tecnico_id', $tecnico->id)
+                ->whereIn('estado', ['asignada', 'en_proceso', 'diagnostico'])
+                ->with(['cliente', 'equipo'])
+                ->get();
+            
+            // Obtener órdenes disponibles para asignar (sin técnico o con estado pendiente)
+            $ordenesDisponibles = OrdenServicio::where('servicio_tecnico_id', $miServicioTecnico->id)
+                ->where(function($query) {
+                    $query->whereNull('tecnico_id')
+                          ->orWhere('estado', 'pendiente');
+                })
+                ->with(['cliente', 'equipo'])
+                ->orderBy('prioridad', 'desc')
+                ->orderBy('fecha_ingreso', 'asc')
+                ->get();
+            
+            // Contar órdenes completadas
+            $ordenesCompletadas = OrdenServicio::where('tecnico_id', $tecnico->id)
+                ->where('estado', 'completado')
+                ->count();
+            
+            return view('admin.tecnicos.asignar', compact(
+                'tecnico', 
+                'ordenesActivas', 
+                'ordenesDisponibles',
+                'ordenesCompletadas'
+            ));
+            
+        } catch (\Exception $e) {
+            return redirect()->route('admin.gestion-tecnicos')->with('error', 'Error al cargar la página de asignación: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Asignar una orden a un técnico
+     */
+    public function asignarStore(Request $request, $id)
+    {
+        try {
+            $tecnico = Tecnico::findOrFail($id);
+            
+            // Verificar permisos
+            $miServicioTecnico = auth()->user()->servicioTecnico;
+            if (!$miServicioTecnico || $tecnico->servicio_tecnico_id !== $miServicioTecnico->id) {
+                abort(403, 'No autorizado.');
+            }
+            
+            $request->validate([
+                'orden_id' => 'required|exists:ordenes_servicio,id'
+            ]);
+            
+            $orden = OrdenServicio::findOrFail($request->orden_id);
+            
+            // Verificar que la orden pertenezca al mismo servicio técnico
+            if ($orden->servicio_tecnico_id !== $miServicioTecnico->id) {
+                return back()->with('error', 'Esta orden no pertenece a tu servicio técnico.');
+            }
+            
+            // Asignar el técnico a la orden y cambiar estado a 'asignada'
+            $orden->update([
+                'tecnico_id' => $tecnico->id,
+                'estado' => 'asignada'
+            ]);
+            
+            // Actualizar carga de trabajo del técnico
+            $ordenesActivas = OrdenServicio::where('tecnico_id', $tecnico->id)
+                ->whereIn('estado', ['asignada', 'en_proceso', 'diagnostico'])
+                ->count();
+            
+            $tecnico->update([
+                'carga_trabajo_actual' => min(100, $ordenesActivas * 20) // Cada orden representa 20% de carga
+            ]);
+            
+            return back()->with('success', 'Orden asignada exitosamente al técnico.');
+            
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al asignar la orden: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Desasignar una orden de un técnico
+     */
+    public function desasignar($tecnicoId, $ordenId)
+    {
+        try {
+            $tecnico = Tecnico::findOrFail($tecnicoId);
+            $orden = OrdenServicio::findOrFail($ordenId);
+            
+            // Verificar permisos
+            $miServicioTecnico = auth()->user()->servicioTecnico;
+            if (!$miServicioTecnico || $tecnico->servicio_tecnico_id !== $miServicioTecnico->id) {
+                abort(403, 'No autorizado.');
+            }
+            
+            // Verificar que la orden esté asignada a este técnico
+            if ($orden->tecnico_id !== $tecnico->id) {
+                return back()->with('error', 'Esta orden no está asignada a este técnico.');
+            }
+            
+            // Desasignar
+            $orden->update([
+                'tecnico_id' => null,
+                'estado' => 'pendiente'
+            ]);
+            
+            // Actualizar carga de trabajo del técnico
+            $ordenesActivas = OrdenServicio::where('tecnico_id', $tecnico->id)
+                ->whereIn('estado', ['asignada', 'en_proceso', 'diagnostico'])
+                ->count();
+            
+            $tecnico->update([
+                'carga_trabajo_actual' => min(100, $ordenesActivas * 20)
+            ]);
+            
+            return back()->with('success', 'Orden desasignada exitosamente.');
+            
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al desasignar la orden: ' . $e->getMessage());
         }
     }
 }

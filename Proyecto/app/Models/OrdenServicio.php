@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BelongsToServicioTecnico;
 
 class OrdenServicio extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToServicioTecnico;
 
     protected $table = 'ordenes_servicio'; // ✅ nombre real de la tabla
 
@@ -112,18 +113,38 @@ class OrdenServicio extends Model
     }
 
     /**
-     * �🔢 Generar número único de orden
+     * 🔢 Generar número único de orden por servicio técnico
      */
-    public static function generarNumeroOrden()
+    public static function generarNumeroOrden($servicioTecnicoId = null)
     {
+        // Si no se proporciona servicio técnico, obtenerlo del usuario autenticado
+        if (!$servicioTecnicoId && \Illuminate\Support\Facades\Auth::check()) {
+            $servicioTecnicoId = \Illuminate\Support\Facades\Auth::user()->servicioTecnico?->id;
+        }
+
+        if (!$servicioTecnicoId) {
+            throw new \Exception('No se puede generar número de orden sin servicio técnico');
+        }
+
         $año = date('Y');
         $mes = date('m');
 
-        $ultimoNumero = self::whereYear('created_at', $año)
+        // Contar órdenes del servicio técnico en el año y mes actual
+        $ultimoNumero = self::withoutGlobalScope('servicio_tecnico')
+            ->where('servicio_tecnico_id', $servicioTecnicoId)
+            ->whereYear('created_at', $año)
             ->whereMonth('created_at', $mes)
             ->count() + 1;
 
-        return "TS-{$año}{$mes}-" . str_pad($ultimoNumero, 3, '0', STR_PAD_LEFT);
+        // Formato: ST-<ID_SERVICIO>-<AÑO><MES>-<CORRELATIVO>
+        // Ejemplo: ST-001-202411-001
+        return sprintf(
+            "ST-%03d-%s%s-%03d",
+            $servicioTecnicoId,
+            $año,
+            $mes,
+            $ultimoNumero
+        );
     }
 
     /**

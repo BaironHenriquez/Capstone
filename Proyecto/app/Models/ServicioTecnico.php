@@ -13,6 +13,7 @@ class ServicioTecnico extends Model
     protected $table = 'servicios_tecnicos';
 
     protected $fillable = [
+        'user_id',
         'nombre_servicio',
         'direccion',
         'telefono',
@@ -26,11 +27,11 @@ class ServicioTecnico extends Model
     ];
 
     /**
-     * Relación con usuarios
+     * Relación con el usuario propietario del servicio técnico
      */
-    public function users()
+    public function user()
     {
-        return $this->hasMany(User::class);
+        return $this->belongsTo(User::class);
     }
 
     /**

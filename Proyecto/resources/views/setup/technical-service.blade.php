@@ -6,8 +6,6 @@
     <title>Configurar Servicio Técnico - TechService Pro</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="{{ asset('css/technical-service-validation.css') }}" rel="stylesheet">
-    <script src="{{ asset('js/technical-service-validation.js') }}" defer></script>
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen font-inter">
     
@@ -55,26 +53,40 @@
 
         <!-- Alert Messages -->
         @if(session('success'))
-            <div class="mb-8 bg-green-50 border-l-4 border-green-400 p-4 rounded-md">
+            <div class="mb-8 bg-green-50 border-l-4 border-green-400 p-4 rounded-md animate-fade-in">
                 <div class="flex">
                     <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                     </svg>
-                    <p class="ml-3 text-sm text-green-700">{{ session('success') }}</p>
+                    <p class="ml-3 text-sm text-green-700 font-medium">{{ session('success') }}</p>
+                </div>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="mb-8 bg-red-50 border-l-4 border-red-400 p-4 rounded-md animate-fade-in">
+                <div class="flex">
+                    <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                    </svg>
+                    <p class="ml-3 text-sm text-red-700 font-medium">{{ session('error') }}</p>
                 </div>
             </div>
         @endif
 
         @if($errors->any())
-            <div class="mb-8 bg-red-50 border-l-4 border-red-400 p-4 rounded-md">
+            <div class="mb-8 bg-red-50 border-l-4 border-red-400 p-4 rounded-md animate-fade-in">
                 <div class="flex">
                     <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
                     </svg>
                     <div class="ml-3">
-                        @foreach ($errors->all() as $error)
-                            <p class="text-sm text-red-700">{{ $error }}</p>
-                        @endforeach
+                        <p class="text-sm font-medium text-red-700">Por favor, corrige los siguientes errores:</p>
+                        <ul class="mt-2 text-sm text-red-600 list-disc list-inside">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -87,8 +99,18 @@
                 <p class="text-gray-600 mt-2">Completa la información de tu servicio técnico</p>
             </div>
 
-            <form method="POST" action="{{ route('setup.technical-service.save') }}" class="px-8 py-6">
+            <form method="POST" action="{{ route('setup.technical-service.save') }}" class="px-8 py-6" id="technicalServiceForm">
                 @csrf
+                
+                <!-- Mensaje de éxito temporal (oculto por defecto) -->
+                <div id="successMessage" class="hidden mb-6 bg-green-50 border-l-4 border-green-400 p-4 rounded-md animate-fade-in">
+                    <div class="flex">
+                        <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <p class="ml-3 text-sm text-green-700 font-medium">✓ Servicio técnico guardado correctamente. Redirigiendo...</p>
+                    </div>
+                </div>
                 
                 <!-- Nombre del Servicio -->
                 <div class="mb-6">
@@ -171,12 +193,20 @@
                 <!-- Submit Button -->
                 <div class="flex justify-end">
                     <button type="submit" 
-                            class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl">
-                        <span class="flex items-center">
+                            id="submitBtn"
+                            class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span id="btnText" class="flex items-center">
                             <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                             Completar Configuración
+                        </span>
+                        <span id="btnLoading" class="hidden flex items-center">
+                            <svg class="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Guardando...
                         </span>
                     </button>
                 </div>
@@ -202,7 +232,113 @@
                             <li><strong>Dirección:</strong> Ubicación física del servicio (máx. 45 caracteres)</li>
                             <li><strong>Teléfono:</strong> Número de contacto principal (máx. 45 caracteres)</li>
                             <li><strong>Correo:</strong> Email de contacto profesional (máx. 45 caracteres)</li>
-                            <li><strong>RUT:</strong> Identificación tributaria del servicio (máx. 45 caracteres)</li>
+                                                        <li><strong>RUT:</strong> Identificación tributaria del servicio (máx. 45 caracteres)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript para manejar el estado del formulario -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('technicalServiceForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoading = document.getElementById('btnLoading');
+            const successMessage = document.getElementById('successMessage');
+            
+            // Función para resetear el botón
+            function resetButton() {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    btnText.classList.remove('hidden');
+                    btnLoading.classList.add('hidden');
+                }
+                if (successMessage) {
+                    successMessage.classList.add('hidden');
+                }
+            }
+            
+            // Función para mostrar estado de carga
+            function showLoading() {
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    btnText.classList.add('hidden');
+                    btnLoading.classList.remove('hidden');
+                }
+            }
+            
+            // Función para mostrar éxito
+            function showSuccess() {
+                if (successMessage) {
+                    successMessage.classList.remove('hidden');
+                    // Scroll hacia arriba para mostrar el mensaje
+                    successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+            
+            if (form && submitBtn) {
+                let formSubmitted = false;
+                
+                form.addEventListener('submit', function(e) {
+                    // Evitar múltiples envíos
+                    if (formSubmitted) {
+                        e.preventDefault();
+                        return false;
+                    }
+                    
+                    // Validar que todos los campos requeridos estén completos
+                    const requiredFields = form.querySelectorAll('[required]');
+                    let allValid = true;
+                    
+                    requiredFields.forEach(field => {
+                        if (!field.value.trim()) {
+                            allValid = false;
+                        }
+                    });
+                    
+                    if (!allValid) {
+                        console.log('Campos requeridos faltantes');
+                        return; // Dejar que la validación HTML nativa se encargue
+                    }
+                    
+                    // Marcar como enviado y mostrar estado de carga
+                    formSubmitted = true;
+                    showLoading();
+                    
+                    console.log('Formulario enviado correctamente');
+                    
+                    // Mostrar mensaje de éxito después de 1 segundo (simulando guardado)
+                    setTimeout(function() {
+                        if (formSubmitted) {
+                            showSuccess();
+                            console.log('Mostrando mensaje de éxito');
+                        }
+                    }, 1000);
+                    
+                    // Timeout de seguridad: si después de 15 segundos no se redirige, resetear
+                    setTimeout(function() {
+                        if (formSubmitted) {
+                            console.warn('Timeout: Reseteando botón después de 15 segundos');
+                            alert('El guardado está tomando más tiempo del esperado. Por favor, verifica tu conexión.');
+                            resetButton();
+                            formSubmitted = false;
+                        }
+                    }, 15000);
+                });
+                
+                // Resetear si la página se carga con errores
+                @if($errors->any() || session('error'))
+                    resetButton();
+                @endif
+            }
+        });
+    </script>
+</body>
+</html>
+
                         </ul>
                     </div>
                 </div>

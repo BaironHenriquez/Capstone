@@ -29,6 +29,7 @@ Route::get('/', function () {
 // Registro y autenticación personalizada
 Route::middleware('guest')->group(function () {
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register.form');
+    Route::get('/login', [RegisterController::class, 'showLoginForm'])->name('login.form');
     Route::post('/register', [RegisterController::class, 'register'])->name('register');
     Route::post('/login', [RegisterController::class, 'login'])->name('login');
 });
@@ -144,6 +145,9 @@ Route::middleware(['auth', 'subscription'])->group(function () {
     Route::post('ordenes/{orden}/cambiar-estado', [OrdenServicioController::class, 'cambiarEstado'])->name('ordenes.cambiar-estado');
     Route::get('ordenes/{orden}/historial', [OrdenServicioController::class, 'historial'])->name('ordenes.historial');
 
+    // Alias para crear equipos desde modales
+    Route::post('equipos', [GestionEquiposMarcasController::class, 'equiposStore'])->name('equipos.store');
+
     // Rutas de funcionalidades IA
     Route::prefix('ia')->name('ia.')->group(function () {
         Route::post('recomendar-tecnico', [IAController::class, 'recomendarTecnico'])->name('recomendar-tecnico');
@@ -199,6 +203,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/{id}', [GestionTecnicosController::class, 'update'])->name('update');
         Route::patch('/{id}/toggle-ban', [GestionTecnicosController::class, 'toggleBan'])->name('toggle-ban');
         Route::delete('/{id}', [GestionTecnicosController::class, 'destroy'])->name('destroy');
+        
+        // Rutas de asignación de órdenes
+        Route::get('/{id}/asignar', [GestionTecnicosController::class, 'asignar'])->name('asignar');
+        Route::post('/{id}/asignar', [GestionTecnicosController::class, 'asignarStore'])->name('asignar.store');
+        Route::delete('/{tecnicoId}/desasignar/{ordenId}', [GestionTecnicosController::class, 'desasignar'])->name('desasignar');
     });
 
     // Gestión de Clientes

@@ -44,9 +44,6 @@ class RegisterController extends Controller
         }
 
         try {
-            // Obtener el rol de Administrador
-            $adminRole = \App\Models\Role::where('nombre_rol', 'Administrador')->first();
-            
             // Crear el usuario con todos los campos necesarios
             $user = User::create([
                 'name' => $request->nombre . ' ' . $request->apellido, // Combinar nombre y apellido para el campo name
@@ -60,7 +57,7 @@ class RegisterController extends Controller
                 'email_verified' => false,
                 'trial_ends_at' => now()->addDays(30), // 30 días de prueba
                 'is_subscribed' => false,
-                'role_id' => $adminRole ? $adminRole->id : null, // Asignar rol de Administrador por defecto
+                'role_id' => 3, // Asignar rol de Administrador por defecto (nivel más alto)
             ]);
 
             // Autenticar al usuario

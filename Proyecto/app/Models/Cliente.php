@@ -5,17 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\BelongsToServicioTecnico;
 
 class Cliente extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToServicioTecnico;
 
     protected $table = 'clientes';
 
     protected $fillable = [
         'nombre',
         'apellido',
-        'email',
+        'correo',
         'telefono',
         'direccion',
         'rut',
@@ -77,7 +78,7 @@ class Cliente extends Model
         return $query->where(function($q) use ($termino) {
             $q->where('nombre', 'LIKE', "%{$termino}%")
               ->orWhere('apellido', 'LIKE', "%{$termino}%")
-              ->orWhere('email', 'LIKE', "%{$termino}%")
+              ->orWhere('correo', 'LIKE', "%{$termino}%")
               ->orWhere('rut', 'LIKE', "%{$termino}%")
               ->orWhere('empresa', 'LIKE', "%{$termino}%");
         });

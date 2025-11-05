@@ -67,6 +67,7 @@ class SocialAuthController extends Controller
                         'provider' => 'google',
                         'email_verified' => true,
                         'password' => Hash::make(Str::random(16)), // Password temporal
+                        'role_id' => 3, // Asignar rol de Administrador por defecto (nivel más alto)
                         'trial_ends_at' => now()->addDays(7), // 7 días de prueba gratis
                     ]);
                 }

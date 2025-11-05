@@ -83,27 +83,17 @@
                     </div>
                 </form>
                 
-                <!-- Credenciales Demo -->
-                <div class="mt-6 p-4 demo-alert rounded-xl border">
-                    <h3 class="text-sm font-semibold text-blue-800 mb-3 flex items-center">
+                <!-- Información de ayuda -->
+                <div class="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                    <h3 class="text-sm font-semibold text-blue-800 mb-2 flex items-center">
                         <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                         </svg>
-                        🎯 Acceso Demo
+                        ℹ️ Información de Acceso
                     </h3>
-                    <p class="text-xs text-blue-700 mb-3">Prueba el sistema con estas credenciales:</p>
-                    
-                    <div class="grid grid-cols-1 gap-2 text-xs">
-                        <button type="button" data-demo-user="admin" class="text-left p-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-                            <strong>Administrador:</strong> admin@baieco.cl / admin123
-                        </button>
-                        <button type="button" data-demo-user="tecnico" class="text-left p-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-                            <strong>Técnico:</strong> tecnico@techfixpro.cl / tecnico123
-                        </button>
-                        <button type="button" data-demo-user="demo" class="text-left p-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-                            <strong>Demo:</strong> demo@baieco.cl / 123456
-                        </button>
-                    </div>
+                    <p class="text-xs text-blue-700">
+                        Si no tienes una cuenta, contacta al administrador del sistema para que te cree un usuario con acceso.
+                    </p>
                 </div>
             </div>
             

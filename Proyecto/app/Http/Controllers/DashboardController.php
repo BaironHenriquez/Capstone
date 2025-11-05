@@ -43,7 +43,7 @@ class DashboardController extends Controller
     public function adminDashboard()
     {
         $user = auth()->user();
-        $servicioTecnicoId = $user ? $user->servicio_tecnico_id : null;
+        $servicioTecnicoId = $user && $user->servicioTecnico ? $user->servicioTecnico->id : null;
         
         // Estadísticas de clientes reales
         $estadisticasClientes = [

@@ -17,15 +17,11 @@ export default defineConfig({
         postcss: './postcss.config.js',
     },
     server: {
-        host: '0.0.0.0',
+        host: 'localhost',
         port: 5173,
-        strictPort: true,
-        watch: {
-            usePolling: true,
-        },
+        strictPort: false,
         hmr: {
             host: 'localhost',
-            port: 5173,
         },
     },
 });

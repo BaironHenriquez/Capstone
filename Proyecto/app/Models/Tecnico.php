@@ -13,7 +13,18 @@ class Tecnico extends Model
     protected $table = 'tecnicos';
 
     protected $fillable = [
-        'user_id',
+        'nombre',
+        'apellido',
+        'rut',
+        'email',
+        'password',
+        'role_id',
+        'email_verified_at',
+        'telefono',
+        'fecha_nacimiento',
+        'direccion',
+        'ciudad',
+        'region',
         'especialidades',
         'nivel_experiencia',
         'certificaciones',
@@ -27,7 +38,12 @@ class Tecnico extends Model
         'estado',
         'fecha_ingreso',
         'notas_admin',
-        'servicio_tecnico_id'
+        'servicio_tecnico_id',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
     ];
 
     protected $casts = [
@@ -38,15 +54,16 @@ class Tecnico extends Model
         'salario_base' => 'decimal:2',
         'comision_por_orden' => 'decimal:2',
         'fecha_ingreso' => 'date',
+        'fecha_nacimiento' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime'
     ];
 
     // Relaciones
-    public function user()
+    public function role()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Role::class);
     }
 
     public function servicioTecnico()
@@ -67,7 +84,7 @@ class Tecnico extends Model
     // Accessors
     public function getNombreCompletoAttribute()
     {
-        return $this->user ? $this->user->name : 'Sin usuario';
+        return trim($this->nombre . ' ' . $this->apellido);
     }
 
     public function getEspecialidadesTextoAttribute()

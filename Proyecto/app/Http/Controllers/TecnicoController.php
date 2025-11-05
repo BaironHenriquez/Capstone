@@ -18,7 +18,12 @@ class TecnicoController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $servicioTecnicoId = $user->servicio_tecnico_id;
+        $servicioTecnicoId = $user->servicioTecnico ? $user->servicioTecnico->id : null;
+        
+        if (!$servicioTecnicoId) {
+            return redirect()->route('setup.technical-service')
+                ->with('error', 'Debes configurar tu servicio técnico primero.');
+        }
         
         $query = Tecnico::where('servicio_tecnico_id', $servicioTecnicoId)
             ->with(['user', 'ordenes' => function($q) {

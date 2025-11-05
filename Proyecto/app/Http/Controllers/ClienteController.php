@@ -15,7 +15,12 @@ class ClienteController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $servicioTecnicoId = $user->servicio_tecnico_id;
+        $servicioTecnicoId = $user->servicioTecnico ? $user->servicioTecnico->id : null;
+        
+        if (!$servicioTecnicoId) {
+            return redirect()->route('setup.technical-service')
+                ->with('error', 'Debes configurar tu servicio técnico primero.');
+        }
         
         $query = Cliente::where('servicio_tecnico_id', $servicioTecnicoId)
             ->with(['ordenes' => function($q) {
@@ -77,21 +82,35 @@ class ClienteController extends Controller
         $request->validate([
             'nombre' => 'required|string|max:45',
             'apellido' => 'nullable|string|max:45',
-            'email' => 'nullable|email|max:45',
+            'correo' => 'nullable|email|max:45',
             'telefono' => 'nullable|string|max:45',
             'direccion' => 'nullable|string|max:45',
             'rut' => 'nullable|string|max:45|unique:clientes,rut',
             'empresa' => 'nullable|string|max:100',
-            'tipo_cliente' => 'required|in:regular,vip,corporativo',
-            'estado' => 'required|in:activo,inactivo,vip,moroso',
+            'tipo_cliente' => 'nullable|in:regular,vip,corporativo',
+            'estado' => 'nullable|in:activo,inactivo,vip,moroso',
             'notas' => 'nullable|string|max:1000'
         ]);
 
         $user = Auth::user();
         
-        $cliente = Cliente::create(array_merge($request->all(), [
-            'servicio_tecnico_id' => $user->servicio_tecnico_id
-        ]));
+        // Establecer valores por defecto
+        $data = array_merge($request->all(), [
+            'servicio_tecnico_id' => $user->servicioTecnico->id,
+            'tipo_cliente' => $request->tipo_cliente ?? 'regular',
+            'estado' => $request->estado ?? 'activo'
+        ]);
+        
+        $cliente = Cliente::create($data);
+
+        // Si es una petición AJAX, devolver JSON
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Cliente creado exitosamente',
+                'cliente' => $cliente
+            ], 201);
+        }
 
         return redirect()->route('clientes.index')
             ->with('success', 'Cliente creado exitosamente.');
@@ -154,7 +173,7 @@ class ClienteController extends Controller
         $request->validate([
             'nombre' => 'required|string|max:45',
             'apellido' => 'nullable|string|max:45',
-            'email' => 'nullable|email|max:45',
+            'correo' => 'nullable|email|max:45',
             'telefono' => 'nullable|string|max:45',
             'direccion' => 'nullable|string|max:45',
             'rut' => [
@@ -209,12 +228,12 @@ class ClienteController extends Controller
         $clientes = Cliente::where('servicio_tecnico_id', $user->servicio_tecnico_id)
             ->buscar($termino)
             ->limit(10)
-            ->get(['id', 'nombre', 'apellido', 'email', 'telefono'])
+            ->get(['id', 'nombre', 'apellido', 'correo', 'telefono'])
             ->map(function($cliente) {
                 return [
                     'id' => $cliente->id,
                     'text' => $cliente->nombre_completo,
-                    'email' => $cliente->email,
+                    'correo' => $cliente->correo,
                     'telefono' => $cliente->telefono
                 ];
             });

@@ -4,18 +4,20 @@ Proyecto Laravel 11 completo con sistema de gestión de órdenes de servicio té
 
 ## 📋 Requisitos
 
-- [Docker](https://www.docker.com/get-started)
-- [Docker Compose](https://docs.docker.com/compose/install/)
+- **PHP 8.2 o superior**
+- **Composer**
+- **Node.js 18 o superior**
+- **MySQL 8.0 o superior**
+- **NPM**
+
+> **Nota:** Este proyecto ya no utiliza Docker. Para la guía completa de instalación sin Docker, consulta [INSTALACION-SIN-DOCKER.md](INSTALACION-SIN-DOCKER.md)
 
 ## 🏗️ Servicios y Tecnologías Incluidas
 
 - **Laravel 11** (PHP 8.2 + Composer)
-- **MySQL 8.0** (Base de datos con configuración específica del proyecto)
-- **Redis** (Cache y sesiones)
-- **Nginx** (Servidor web)
-- **Node.js 18** (Frontend/NPM)
-- **phpMyAdmin** (Administración de BD)
+- **MySQL 8.0** (Base de datos local)
 - **Tailwind CSS v3.4.17** (Framework CSS con configuración personalizada)
+- **Vite** (Build tool y dev server)
 - **PayPal SDK v8.4.2** (Integración completa de pagos)
 - **Bunny.net SDK v0.0.31** (CDN y servicios multimedia)
 - **Font Awesome** (Iconografía)
@@ -27,52 +29,58 @@ Proyecto Laravel 11 completo con sistema de gestión de órdenes de servicio té
 - **Gestión de Suscripciones:** Sistema completo de planes y pagos con PayPal
 - **Procesamiento de Pagos:** Integración completa con PayPal SDK v8.4.2
 - **Dashboard Administrativo:** Panel de control con métricas, estadísticas y gráficos
-- **Gestión de Técnicos:** CRUD completo para técnicos de servicio con panel administrativo (crear, editar, listar, suspender/activar, eliminar), gestión de especialidades, asignaciones automáticas y estadísticas
-- **Gestión de Clientes:** CRUD completo para clientes con panel administrativo (crear, editar, listar, activar/desactivar, eliminar), relación cliente-órdenes, historial completo, filtrado avanzado y estadísticas detalladas
-- **Gestión de Equipos y Marcas:** Sistema completo de catálogo de equipos y marcas con asociaciones cliente-equipo, seguimiento de garantías, mantenimiento programado, especificaciones técnicas y estadísticas de servicio
+- **Gestión de Técnicos:** CRUD completo con datos reales, filtros avanzados y estadísticas
+- **Gestión de Clientes:** CRUD completo con historial y relación cliente-órdenes
+- **Gestión de Equipos y Marcas:** Sistema completo de catálogo con seguimiento
 - **Órdenes de Servicio:** Creación, seguimiento y gestión completa del flujo
-- **Sistema de Roles:** Diferenciación completa entre admin, técnico y cliente
+- **Sistema de Roles:** Diferenciación completa entre admin, técnico y trabajador
 - **Notificaciones:** Sistema de alertas y comunicación en tiempo real
 - **Reportes:** Generación de informes y estadísticas avanzadas
 
-## 🚀 Inicio Rápido para Colaboradores
+## 🚀 Inicio Rápido
 
-### Si CLONASTE este repositorio desde GitHub:
+### Instalación Automática (Recomendado)
 
 ```powershell
-# Solo necesitas ejecutar este comando:
-.\init-existing.bat
+# Ejecuta el script de instalación:
+.\instalar-proyecto.bat
 ```
 
 **Esto configurará automáticamente:**
-- Docker y todos los contenedores
-- MySQL con base de datos `capstone_laravel`
-- Laravel 11 con todas las dependencias
-- Tailwind CSS v3.4.17 completamente configurado
-- PayPal SDK v8.4.2 y Bunny.net SDK v0.0.31
-- Migraciones de base de datos ejecutadas
-- Seeder de datos de prueba
-- Optimización de cache y configuración
+- Dependencias de Composer y NPM
+- Archivo .env con configuración local
+- Key de la aplicación
+- Opción para ejecutar migraciones
+### Instalación Manual
 
-### Configuración de Base de Datos Incluida
+Para instrucciones detalladas de instalación manual, consulta [INSTALACION-SIN-DOCKER.md](INSTALACION-SIN-DOCKER.md)
 
-**Base de Datos:**
-- Base de datos: `capstone_laravel`
-- Usuario: `capstone_user`
-- Contraseña: `capstone_password_2025`
-- Base de datos de testing: `capstone_laravel_testing`
+```bash
+# 1. Instalar dependencias
+composer install
+npm install
 
-**SDKs de Terceros:**
-- PayPal SDK v8.4.2 (@paypal/sdk-js) para procesamiento completo de pagos
-- Bunny.net SDK v0.0.31 (bunnynet) para CDN y servicios multimedia
+# 2. Configurar entorno
+copy .env.example .env
+php artisan key:generate
+
+# 3. Configurar base de datos en .env
+# DB_HOST=localhost
+# DB_PORT=3306
+# DB_DATABASE=capstone
+# DB_USERNAME=root
+# DB_PASSWORD=tu_contraseña
+
+# 4. Ejecutar migraciones
+php artisan migrate
+
+# 5. Ejecutar seeders (opcional)
+php artisan db:seed
+```
 
 ## 🌐 URLs Disponibles
 
 - **Aplicación Laravel:** http://localhost:8080
-- **phpMyAdmin:** http://localhost:8081
-  - Usuario: `capstone_user`
-  - Contraseña: `capstone_password_2025`
-  - Host de BD: `db` (puerto interno 3306, externo 3307)
 - **Vite Dev Server:** http://localhost:5173
 
 ## 🎨 Desarrollo Frontend con Tailwind CSS
@@ -86,12 +94,13 @@ Proyecto Laravel 11 completo con sistema de gestión de órdenes de servicio té
   - Paleta Tech: `tech-50` a `tech-900` (grises tecnológicos)
 - **Fuente personalizada:** Inter configurada
 - **Autoprefixer** para compatibilidad con navegadores
+- **Vite** como build tool y dev server
 
 Para trabajar con Tailwind CSS en modo desarrollo:
 
 ```powershell
 # Iniciar servidor de desarrollo con hot reload
-docker-compose -f docker-compose.existing.yml exec node npm run dev
+npm run dev
 ```
 
 ### SDKs Integrados
@@ -131,102 +140,115 @@ const bunny = new BunnySDK({
 
 ## 🔧 Comandos Útiles para Desarrollo
 
-### Comandos Básicos de Docker
+### Iniciar/Detener Servicios
 
 ```powershell
-# Iniciar servicios
-docker-compose -f docker-compose.existing.yml up -d
+# Iniciar servicios (Laravel + Vite)
+.\iniciar-servicios.bat
 
 # Detener servicios
-docker-compose -f docker-compose.existing.yml down
+.\detener-servicios.bat
 
-# Ver logs
-docker-compose -f docker-compose.existing.yml logs -f
-
-# Reiniciar servicios
-docker-compose -f docker-compose.existing.yml restart
+# Verificar estado de servicios
+.\verificar-estado.bat
 ```
 
-### Comandos de Laravel
+### Comandos Básicos de Laravel
 
 ```powershell
-# Ejecutar comandos Artisan
-docker-compose -f docker-compose.existing.yml exec app php artisan [comando]
-
-# Ejemplos comunes:
-docker-compose -f docker-compose.existing.yml exec app php artisan migrate
-docker-compose -f docker-compose.existing.yml exec app php artisan make:controller HomeController
-docker-compose -f docker-compose.existing.yml exec app php artisan cache:clear
-
-# Acceder al contenedor
-docker-compose -f docker-compose.existing.yml exec app bash
-```
-
-### Comandos de Frontend
-
+# Iniciar servidor de desarrollo
+php artisan serve --host=localhost --port=8080
 ```powershell
-# Instalar nuevas dependencias de NPM
-docker-compose -f docker-compose.existing.yml exec node npm install [paquete]
+# Iniciar servidor de desarrollo
+php artisan serve --host=localhost --port=8080
 
-# Compilar assets para producción
-docker-compose -f docker-compose.existing.yml exec node npm run build
+# Limpiar caché
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
 
-# Modo desarrollo con hot reload
-docker-compose -f docker-compose.existing.yml exec node npm run dev
+# Crear controlador
+php artisan make:controller NombreController
 
-# Instalar SDKs adicionales
-docker-compose -f docker-compose.existing.yml exec node npm install [nombre-del-sdk]
+# Crear modelo con migración
+php artisan make:model NombreModelo -m
+
+# Ver rutas
+php artisan route:list
 ```
 
 ### Comandos de Base de Datos
 
 ```powershell
 # Ejecutar migraciones
-docker-compose -f docker-compose.existing.yml exec app php artisan migrate
+php artisan migrate
 
 # Rollback de migraciones
-docker-compose -f docker-compose.existing.yml exec app php artisan migrate:rollback
+php artisan migrate:rollback
 
 # Ejecutar seeders
-docker-compose -f docker-compose.existing.yml exec app php artisan db:seed
+php artisan db:seed
+
+# Seeder específico
+php artisan db:seed --class=TecnicoSeeder
 
 # Limpiar y recrear base de datos
-docker-compose -f docker-compose.existing.yml exec app php artisan migrate:fresh --seed
+php artisan migrate:fresh --seed
+```
+
+### Comandos de Frontend
+
+```powershell
+# Iniciar dev server con hot reload
+npm run dev
+
+# Compilar assets para producción
+npm run build
+
+# Instalar nuevas dependencias
+npm install [paquete]
 ```
 
 ## 🏗️ Estructura del Proyecto
 
 ```
 Proyecto/
-├── docker-compose.existing.yml     # Configuración Docker principal
-├── Dockerfile.existing             # Imagen Docker optimizada
-├── init-existing.bat               # Script de inicialización único
-├── tailwind.config.js              # Configuración Tailwind CSS con paletas duales
-├── postcss.config.js               # Configuración PostCSS
-├── package.json                    # Dependencias Node.js (incluye SDKs actualizados)
-├── vite.config.js                  # Configuración Vite
-├── .env.example                    # Variables de entorno
+├── instalar-proyecto.bat          # Script de instalación
+├── iniciar-servicios.bat          # Script para iniciar servicios
+├── detener-servicios.bat          # Script para detener servicios
+├── verificar-estado.bat           # Script para verificar estado
+├── tailwind.config.js             # Configuración Tailwind CSS con paletas duales
+├── postcss.config.js              # Configuración PostCSS
+├── package.json                   # Dependencias Node.js (incluye SDKs)
+├── vite.config.js                 # Configuración Vite
+├── .env.example                   # Variables de entorno
 ├── resources/
-│   ├── css/app.css                 # CSS principal con Tailwind
-│   ├── js/app.js                   # JavaScript principal
-│   └── views/                      # Templates Blade organizados por módulos
-│       ├── administrador/          # Vistas administrativas
-│       ├── auth/                   # Autenticación y registro
-│       ├── clientes/               # Gestión de clientes
-│       ├── dashboard/              # Dashboards generales
-│       ├── layouts/                # Layouts base
-│       ├── ordenes/                # Órdenes de servicio
-│       ├── paypal/                 # Integración PayPal
-│       ├── setup/                  # Configuración inicial
-      ├── subscription/           # Sistema de suscripciones
-      ├── tecnico/                # Panel técnico
-      ├── tecnicos/               # Gestión de técnicos
-      └── equipos-marcas/         # Gestión de equipos y marcas
-└── docker-compose/
-    ├── nginx/app.conf              # Configuración Nginx
-    └── mysql/
-        ├── my.cnf                  # Configuración MySQL
-        └── init.sql                # Script inicialización BD
+│   ├── css/app.css                # CSS principal con Tailwind
+│   ├── js/app.js                  # JavaScript principal
+│   └── views/                     # Templates Blade organizados por módulos
+│       ├── administrador/         # Vistas administrativas
+│       ├── auth/                  # Autenticación y registro
+│       ├── clientes/              # Gestión de clientes
+│       ├── dashboard/             # Dashboards generales
+│       ├── layouts/               # Layouts base
+│       ├── ordenes/               # Órdenes de servicio
+│       ├── paypal/                # Integración PayPal
+│       ├── setup/                 # Configuración inicial
+│       ├── subscription/          # Sistema de suscripciones
+│       ├── tecnico/               # Panel técnico
+│       └── tecnicos/              # Gestión de técnicos
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/           # Controladores del sistema
+│   │   └── Middleware/            # Middleware personalizado
+│   └── Models/                    # Modelos Eloquent
+├── database/
+│   ├── migrations/                # Migraciones de base de datos
+│   └── seeders/                   # Seeders de datos
+└── public/
+    ├── css/                       # CSS compilado
+    └── js/                        # JavaScript compilado
 ```
 
 ## 📊 Módulos del Sistema

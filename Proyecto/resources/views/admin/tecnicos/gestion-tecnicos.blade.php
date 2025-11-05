@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('shared.layouts.admin')
 
 @section('title', 'Gestión de Técnicos')
 
@@ -119,7 +119,7 @@
 
         <!-- Lista de técnicos -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @forelse($tecnicos->data ?? [] as $tecnico)
+            @forelse($tecnicos as $tecnico)
                 <div class="tecnico-card bg-white rounded-lg shadow-sm p-6">
                     <div class="flex items-start justify-between mb-4">
                         <div class="flex-1">
@@ -135,19 +135,27 @@
 
                     <div class="space-y-2 mb-4">
                         <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-phone w-4 mr-2"></i>
-                            {{ $tecnico->telefono }}
+                            <i class="fas fa-phone w-4 mr-2 text-sky-500"></i>
+                            <span class="truncate">{{ $tecnico->telefono }}</span>
                         </div>
                         <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-id-card w-4 mr-2"></i>
+                            <i class="fas fa-id-card w-4 mr-2 text-blue-500"></i>
                             {{ $tecnico->rut }}
                         </div>
-                        @if($tecnico->servicioTecnico)
-                            <div class="flex items-center text-sm text-gray-600">
-                                <i class="fas fa-building w-4 mr-2"></i>
-                                {{ $tecnico->servicioTecnico->nombre }}
-                            </div>
-                        @endif
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-briefcase w-4 mr-2 text-purple-500"></i>
+                            <span class="capitalize">{{ $tecnico->nivel_experiencia }}</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-map-marker-alt w-4 mr-2 text-red-500"></i>
+                            <span class="truncate">{{ $tecnico->zona_trabajo ?? 'Sin zona' }}</span>
+                        </div>
+                        <div class="flex items-center text-sm">
+                            <i class="fas fa-tasks w-4 mr-2 text-orange-500"></i>
+                            <span class="font-semibold {{ $tecnico->disponible ? 'text-green-600' : 'text-gray-400' }}">
+                                {{ $tecnico->disponible ? 'Disponible' : 'No disponible' }}
+                            </span>
+                        </div>
                     </div>
 
                     <!-- Especialidades -->
@@ -165,25 +173,57 @@
                     @endif
 
                     <!-- Estadísticas -->
-                    <div class="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
+                    <div class="grid grid-cols-3 gap-2 mb-4 p-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg">
                         <div class="text-center">
-                            <p class="text-lg font-bold text-blue-600">{{ $tecnico->ordenes_completadas ?? 0 }}</p>
+                            <p class="text-lg font-bold text-blue-600">{{ $tecnico->ordenes_count ?? 0 }}</p>
                             <p class="text-xs text-gray-500">Órdenes</p>
                         </div>
                         <div class="text-center">
-                            <p class="text-lg font-bold text-green-600">{{ number_format($tecnico->calificacion_promedio ?? 0, 1) }}</p>
-                            <p class="text-xs text-gray-500">Calificación</p>
+                            <p class="text-lg font-bold text-orange-600">{{ $tecnico->carga_trabajo_actual ?? 0 }}%</p>
+                            <p class="text-xs text-gray-500">Carga</p>
                         </div>
+                        <div class="text-center">
+                            <p class="text-lg font-bold text-green-600">
+                                ${{ number_format($tecnico->salario_base ?? 0, 0, ',', '.') }}
+                            </p>
+                            <p class="text-xs text-gray-500">Salario</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Información adicional -->
+                    <div class="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-gray-600">
+                                <i class="fas fa-calendar-alt mr-1 text-blue-500"></i>
+                                Ingreso: {{ $tecnico->fecha_ingreso ? \Carbon\Carbon::parse($tecnico->fecha_ingreso)->format('d/m/Y') : 'N/A' }}
+                            </span>
+                        </div>
+                        @if($tecnico->horario_trabajo)
+                            <div class="mt-2 text-xs text-gray-600">
+                                <i class="fas fa-clock mr-1 text-blue-500"></i>
+                                {{ $tecnico->horario_trabajo }}
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Acciones -->
-                    <div class="flex justify-between space-x-2">
+                    <div class="grid grid-cols-2 gap-2">
                         <a href="{{ route('admin.tecnicos.edit', $tecnico->id) }}" 
-                           class="flex-1 bg-yellow-100 text-yellow-700 hover:bg-yellow-200 px-3 py-2 rounded-lg text-sm font-medium text-center transition-colors duration-200">
+                           class="bg-yellow-100 text-yellow-700 hover:bg-yellow-200 px-3 py-2 rounded-lg text-sm font-medium text-center transition-colors duration-200">
                             <i class="fas fa-edit mr-1"></i>Editar
                         </a>
                         
-                        <form method="POST" action="{{ route('admin.tecnicos.toggle-ban', $tecnico->id) }}" class="flex-1">
+                        <a href="{{ route('admin.tecnicos.asignar', $tecnico->id) }}" 
+                           class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-2 rounded-lg text-sm font-medium text-center transition-colors duration-200">
+                            <i class="fas fa-tasks mr-1"></i>Asignar
+                        </a>
+                        
+                        <button onclick="verDetalle({{ $tecnico->id }})" 
+                                class="bg-purple-100 text-purple-700 hover:bg-purple-200 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                            <i class="fas fa-eye mr-1"></i>Ver más
+                        </button>
+                        
+                        <form method="POST" action="{{ route('admin.tecnicos.toggle-ban', $tecnico->id) }}">
                             @csrf
                             @method('PATCH')
                             <button type="submit" 
@@ -209,4 +249,11 @@
             @endforelse
         </div>
     </div>
+
+<script>
+function verDetalle(tecnicoId) {
+    // Aquí puedes implementar un modal con más detalles del técnico
+    alert('Ver detalle del técnico #' + tecnicoId);
+}
+</script>
 @endsection

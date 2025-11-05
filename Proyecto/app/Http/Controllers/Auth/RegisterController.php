@@ -24,6 +24,14 @@ class RegisterController extends Controller
     }
 
     /**
+     * Mostrar el formulario de login
+     */
+    public function showLoginForm(): View
+    {
+        return view('auth.login');
+    }
+
+    /**
      * Manejar una solicitud de registro
      */
     public function register(Request $request): RedirectResponse
@@ -64,6 +72,7 @@ class RegisterController extends Controller
             'contrasena' => Hash::make($request->password), // Para compatibilidad
             'email_verified_at' => Carbon::now(),
             'email_verified' => true,
+            'role_id' => 3, // Asignar rol de Administrador por defecto (nivel más alto)
             'is_subscribed' => false,
             'trial_ends_at' => Carbon::now()->addDays(7),
         ]);

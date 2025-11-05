@@ -17,6 +17,7 @@ class OrdenServicioController extends Controller
      */
     public function index(Request $request)
     {
+        // El trait BelongsToServicioTecnico filtra automáticamente por servicio técnico
         $query = OrdenServicio::with(['cliente', 'tecnico', 'equipo.marca']);
 
         if ($request->filled('buscar')) {
@@ -37,14 +38,14 @@ class OrdenServicioController extends Controller
 
         $ordenes = $query->orderBy($ordenPor, $direccion)->paginate(10);
 
-        // Calcular estadísticas
+        // Calcular estadísticas solo del servicio técnico actual
         $estadisticas = [
             'total' => OrdenServicio::count(),
-            'pendientes' => OrdenServicio::where('estado', 'pendiente')->count(),
-            'en_progreso' => OrdenServicio::where('estado', 'en_progreso')->count(),
-            'completadas' => OrdenServicio::where('estado', 'completada')->count(),
+            'pendientes' => OrdenServicio::where('estado', 'Pendiente')->count(),
+            'en_progreso' => OrdenServicio::where('estado', 'En Progreso')->count(),
+            'completadas' => OrdenServicio::where('estado', 'Completada')->count(),
             'retrasadas' => OrdenServicio::whereDate('fecha_aprox_entrega', '<', now())
-                                        ->whereNotIn('estado', ['completada', 'cancelada'])
+                                        ->whereNotIn('estado', ['Completada', 'Cancelada'])
                                         ->count()
         ];
 
@@ -56,10 +57,23 @@ class OrdenServicioController extends Controller
      */
     public function create()
     {
-        $clientes = \App\Models\Cliente::orderBy('nombre')->get();
-        $equipos = \App\Models\Equipo::with('marca')->orderBy('modelo')->get();
+        // Obtener solo los clientes del servicio técnico del usuario autenticado
+        // El trait BelongsToServicioTecnico filtra automáticamente
+        $clientes = Cliente::orderBy('nombre')->get();
         
-        return view('admin.ordenes.create', compact('clientes', 'equipos'));
+        // Obtener equipos que pertenecen a clientes del servicio técnico
+        $servicioTecnicoId = Auth::user()->servicioTecnico->id;
+        $equipos = Equipo::with('marca')
+            ->whereHas('clienteEquipos.cliente', function($query) use ($servicioTecnicoId) {
+                $query->where('servicio_tecnico_id', $servicioTecnicoId);
+            })
+            ->orderBy('modelo')
+            ->get();
+        
+        // Generar número de orden sugerido
+        $numeroOrdenSugerido = OrdenServicio::generarNumeroOrden($servicioTecnicoId);
+        
+        return view('admin.ordenes.create', compact('clientes', 'equipos', 'numeroOrdenSugerido'));
     }
 
     /**
@@ -71,7 +85,7 @@ class OrdenServicioController extends Controller
             $request->validate([
                 'tipo_servicio'        => 'required|string|max:100',
                 'descripcion_problema' => 'required|string|min:5',
-                'prioridad'            => 'required|string|in:baja,media,alta,urgente',
+                'prioridad'            => 'required|string|in:Baja,Media,Alta,Urgente',
                 'estado'               => 'nullable|string|max:45',
                 'precio_presupuestado' => 'nullable|numeric',
                 'abono'                => 'nullable|numeric',
@@ -87,32 +101,45 @@ class OrdenServicioController extends Controller
                 'equipo_id'            => 'required|exists:equipos,id',
             ]);
 
-            // Obtener IDs requeridos
-            $servicioTecnicoId = $request->servicio_tecnico_id ?? ServicioTecnico::first()?->id;
-            $userId = Auth::check() ? Auth::id() : User::first()?->id;
-            
-            if (!$servicioTecnicoId || !$userId) {
+            // Obtener servicio técnico del usuario autenticado
+            $user = Auth::user();
+            if (!$user || !$user->servicioTecnico) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Error: No hay servicios técnicos o usuarios en el sistema'
-                ], 500);
+                    'message' => 'Error: Usuario no tiene servicio técnico asociado'
+                ], 403);
             }
 
-            // Generar número de orden
-            $numeroOrden = $request->numero_orden ?? OrdenServicio::generarNumeroOrden();
+            $servicioTecnicoId = $user->servicioTecnico->id;
+
+            // Verificar que el cliente pertenece al servicio técnico
+            $cliente = Cliente::withoutGlobalScope('servicio_tecnico')
+                ->where('id', $request->cliente_id)
+                ->where('servicio_tecnico_id', $servicioTecnicoId)
+                ->first();
+
+            if (!$cliente) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error: El cliente seleccionado no pertenece a su servicio técnico'
+                ], 403);
+            }
+
+            // Generar número de orden correlativo por servicio técnico
+            $numeroOrden = $request->numero_orden ?? OrdenServicio::generarNumeroOrden($servicioTecnicoId);
 
             $precio = $request->input('precio_presupuestado', 0);
             $abono  = $request->input('abono', 0);
             $saldo  = $precio - $abono;
 
-            // Crear orden
+            // Crear orden (el trait asigna automáticamente servicio_tecnico_id)
             $orden = OrdenServicio::create([
                 'numero_orden'         => $numeroOrden,
-                'estado'               => $request->estado ?? 'pendiente',
-                'prioridad'            => $request->prioridad ?? 'media',
+                'estado'               => $request->estado ?? 'Pendiente',
+                'prioridad'            => $request->prioridad ?? 'Media',
                 'fecha_ingreso'        => $request->fecha_ingreso ?? now(),
                 'descripcion_problema' => $request->descripcion_problema,
-                'tipo_servicio'        => $request->tipo_servicio ?? 'reparacion',
+                'tipo_servicio'        => $request->tipo_servicio ?? 'Reparación',
                 'tipo_de_trabajo'      => $request->tipo_de_trabajo,
                 'precio_presupuestado' => $precio,
                 'precio_total'         => $precio,
@@ -126,7 +153,7 @@ class OrdenServicioController extends Controller
                 'fecha_aprox_entrega'  => $request->fecha_aprox_entrega,
                 'horas_estimadas'      => $request->horas_estimadas,
                 'servicio_tecnico_id'  => $servicioTecnicoId,
-                'user_id'              => $userId,
+                'user_id'              => $user->id,
                 'cliente_id'           => $request->cliente_id,
                 'equipo_id'            => $request->equipo_id,
             ]);
@@ -137,6 +164,12 @@ class OrdenServicioController extends Controller
                 'orden'   => $orden,
             ]);
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '❌ Error de validación',
+                'errors'  => $e->errors(),
+            ], 422);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,

@@ -27,7 +27,6 @@ class User extends Authenticatable
         'password',
         'contrasena',
         'role_id',
-        'servicio_tecnico_id',
         'google_id',
         'avatar',
         'email_verified',
@@ -72,11 +71,12 @@ class User extends Authenticatable
     }
 
     /**
-     * Relación con la tabla servicios_tecnicos
+     * Relación con el servicio técnico que posee este usuario
+     * Un usuario puede tener un servicio técnico
      */
     public function servicioTecnico()
     {
-        return $this->belongsTo(ServicioTecnico::class);
+        return $this->hasOne(ServicioTecnico::class);
     }
 
     /**
@@ -104,6 +104,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Relación con técnico
+     */
+    public function tecnico()
+    {
+        return $this->hasOne(Tecnico::class);
+    }
+
+    /**
+     * Relación con trabajador
+     */
+    public function trabajador()
+    {
+        return $this->hasOne(Trabajador::class);
+    }
+
+    /**
      * Verificar si el usuario tiene una suscripción activa
      */
     public function hasActiveSubscription(): bool
@@ -125,5 +141,32 @@ class User extends Authenticatable
     public function canAccessSystem(): bool
     {
         return $this->hasActiveSubscription() || $this->onTrial();
+    }
+
+    /**
+     * Verificar si el usuario tiene un perfil de servicio técnico completo
+     */
+    public function hasCompleteProfile(): bool
+    {
+        // Cargar la relación si no está cargada
+        if (!$this->relationLoaded('servicioTecnico')) {
+            $this->load('servicioTecnico');
+        }
+
+        // Verificar si tiene un servicio técnico asociado
+        if (!$this->servicioTecnico) {
+            return false;
+        }
+
+        // Verificar que todos los campos requeridos estén completos
+        $requiredFields = ['nombre_servicio', 'direccion', 'telefono', 'correo', 'rut'];
+        
+        foreach ($requiredFields as $field) {
+            if (empty($this->servicioTecnico->$field)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

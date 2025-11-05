@@ -34,31 +34,30 @@ class LoginController extends Controller
             'timestamp' => now()
         ]);
 
-        // Verificar credenciales demo hardcodeadas PRIMERO
-        if ($this->attemptDemoLogin($credentials)) {
-            $request->session()->regenerate();
-            
-            // Obtener el rol del usuario demo para redirección
-            $user = session('demo_user');
-            $redirectUrl = $this->getRedirectByRole($user['role']);
-            
-            \Log::info('DEMO LOGIN SUCCESS', [
-                'user' => $user,
-                'redirect_url' => $redirectUrl,
-                'role' => $user['role']
-            ]);
-            
-            return redirect($redirectUrl)->with('success', '¡Bienvenido a Baieco!');
-        }
-
-        // Solo intentar login con base de datos si NO es un usuario demo
-        // Comentado temporalmente para usar solo sistema demo
-        /*
+        // Intentar login con la base de datos
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            return redirect()->intended('/dashboard')->with('success', '¡Bienvenido de vuelta!');
+            
+            $user = Auth::user();
+            
+            \Log::info('LOGIN SUCCESS', [
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'role_id' => $user->role_id,
+                'servicio_tecnico_id' => $user->servicio_tecnico_id
+            ]);
+            
+            // Obtener el rol del usuario para redirección
+            $role = $user->role;
+            $redirectUrl = $this->getRedirectByRole($role ? $role->nombre_rol : 'user');
+            
+            return redirect($redirectUrl)->with('success', '¡Bienvenido ' . $user->nombre . '!');
         }
-        */
+
+        \Log::warning('LOGIN FAILED', [
+            'email' => $credentials['email'],
+            'timestamp' => now()
+        ]);
 
         throw ValidationException::withMessages([
             'email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
@@ -66,78 +65,24 @@ class LoginController extends Controller
     }
 
     /**
-     * Verificar credenciales demo
-     */
-    private function attemptDemoLogin($credentials)
-    {
-        $demoUsers = [
-            [
-                'email' => 'admin@baieco.cl',
-                'password' => '123',
-                'role' => 'admin',
-                'name' => 'Carlos Administrador'
-            ],
-            [
-                'email' => 'tecnico@techfixpro.cl',
-                'password' => '123',
-                'role' => 'tecnico',
-                'name' => 'Juan Pérez'
-            ],
-            [
-                'email' => 'maria@techfixpro.cl',
-                'password' => '123',
-                'role' => 'trabajador',
-                'name' => 'María González'
-            ],
-            [
-                'email' => 'pedro@repairzone.cl',
-                'password' => '123',
-                'role' => 'tecnico',
-                'name' => 'Pedro Martínez'
-            ],
-            [
-                'email' => 'demo@baieco.cl',
-                'password' => '123',
-                'role' => 'admin',
-                'name' => 'Usuario Demo'
-            ]
-        ];
-
-        foreach ($demoUsers as $user) {
-            if ($user['email'] === $credentials['email'] && 
-                $user['password'] === $credentials['password']) {
-                
-                // Simular usuario autenticado en sesión
-                session([
-                    'demo_user' => $user,
-                    'authenticated' => true
-                ]);
-                
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Determinar redirección según el rol del usuario
      */
-    private function getRedirectByRole($role)
+    private function getRedirectByRole($roleNombre)
     {
         \Log::info('GET REDIRECT BY ROLE', [
-            'role' => $role,
+            'role' => $roleNombre,
             'timestamp' => now()
         ]);
 
-        $redirectUrl = match ($role) {
-            'admin' => '/dashboard-admin',
-            'tecnico', 'trabajador' => '/dashboard_tecnico',
+        $redirectUrl = match ($roleNombre) {
+            'admin', 'administrador' => '/admin/gestion-tecnicos',
+            'tecnico' => '/dashboard_tecnico',
+            'trabajador' => '/dashboard_tecnico',
             default => '/home'
         };
 
         \Log::info('REDIRECT URL DETERMINED', [
-            'role' => $role,
+            'role' => $roleNombre,
             'redirect_url' => $redirectUrl
         ]);
 
@@ -151,8 +96,6 @@ class LoginController extends Controller
     {
         Auth::logout();
         
-        // Limpiar sesión demo
-        $request->session()->forget(['demo_user', 'authenticated']);
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

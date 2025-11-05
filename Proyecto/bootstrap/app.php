@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'subscription' => \App\Http\Middleware\CheckSubscription::class,
             'technical.service' => \App\Http\Middleware\CheckTechnicalServiceComplete::class,
+            'servicio.tecnico' => \App\Http\Middleware\EnsureUserHasServicioTecnico::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -523,18 +523,18 @@ class GestionEquiposMarcasController extends Controller
             'modelo' => 'required|string|max:45',
             'marca_id' => 'required|exists:marcas,id',
             'descripcion' => 'nullable|string|max:1000',
-            'categoria' => 'required|string|max:50',
+            'numero_serie' => 'nullable|string|max:100',
+            'categoria' => 'nullable|string|max:50',
             'precio_referencial' => 'nullable|numeric|min:0|max:999999999.99',
             'garantia_meses' => 'nullable|integer|min:0|max:120',
             'manual_url' => 'nullable|url|max:255',
-            'activo' => 'required|boolean',
+            'activo' => 'nullable|boolean',
             'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ], [
             'tipo_equipo.required' => 'El tipo de equipo es obligatorio.',
             'modelo.required' => 'El modelo es obligatorio.',
             'marca_id.required' => 'Debe seleccionar una marca.',
             'marca_id.exists' => 'La marca seleccionada no existe.',
-            'categoria.required' => 'La categoría es obligatoria.',
             'precio_referencial.numeric' => 'El precio debe ser un número.',
             'garantia_meses.integer' => 'La garantía debe ser un número entero.',
             'manual_url.url' => 'La URL del manual debe ser válida.',
@@ -543,6 +543,15 @@ class GestionEquiposMarcasController extends Controller
         ]);
 
         if ($validator->fails()) {
+            // Si es petición AJAX, devolver JSON
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error de validación',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
@@ -553,9 +562,11 @@ class GestionEquiposMarcasController extends Controller
 
             $data = $request->only([
                 'tipo_equipo', 'modelo', 'marca_id', 'descripcion',
-                'categoria', 'precio_referencial', 'garantia_meses',
-                'manual_url', 'activo'
+                'numero_serie', 'categoria', 'precio_referencial', 'garantia_meses',
+                'manual_url'
             ]);
+            
+            $data['activo'] = $request->input('activo', 1);
 
             // Procesar imagen si se subió
             if ($request->hasFile('imagen')) {
@@ -563,9 +574,19 @@ class GestionEquiposMarcasController extends Controller
                 $data['imagen'] = basename($imagenPath);
             }
 
-            Equipo::create($data);
+            $equipo = Equipo::create($data);
+            $equipo->load('marca'); // Cargar la relación marca
 
             DB::commit();
+
+            // Si es petición AJAX, devolver JSON
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Equipo creado exitosamente',
+                    'equipo' => $equipo
+                ], 201);
+            }
 
             return redirect()->route('admin.equipos-marcas.equipos.index')
                 ->with('success', 'Equipo creado exitosamente.');
