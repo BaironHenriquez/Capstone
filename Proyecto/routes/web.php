@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\OrdenServicioController;
+use App\Http\Controllers\TecnicoOrdenController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\TecnicoController;
 use App\Http\Controllers\SubscriptionController;
@@ -135,15 +136,21 @@ Route::middleware(['auth', 'subscription'])->group(function () {
 
     // Rutas para Técnicos
     Route::resource('tecnicos', TecnicoController::class);
-    Route::get('tecnicos/{tecnico}/ordenes', [TecnicoController::class, 'ordenes'])->name('tecnicos.ordenes');
+// Esta sección se ha movido más arriba en el archivo
     Route::post('tecnicos/{tecnico}/activar', [TecnicoController::class, 'activar'])->name('tecnicos.activar');
     Route::post('tecnicos/{tecnico}/desactivar', [TecnicoController::class, 'desactivar'])->name('tecnicos.desactivar');
 
-    // Rutas para Órdenes de Servicio (CRUD completo)
-    Route::resource('ordenes', OrdenServicioController::class);
-    Route::post('ordenes/{orden}/asignar-tecnico', [OrdenServicioController::class, 'asignarTecnico'])->name('ordenes.asignar-tecnico');
-    Route::post('ordenes/{orden}/cambiar-estado', [OrdenServicioController::class, 'cambiarEstado'])->name('ordenes.cambiar-estado');
-    Route::get('ordenes/{orden}/historial', [OrdenServicioController::class, 'historial'])->name('ordenes.historial');
+    // Rutas generales para Órdenes de Servicio (CRUD completo para admin)
+    Route::prefix('admin')->group(function() {
+        Route::resource('ordenes', OrdenServicioController::class);
+        Route::post('ordenes/{orden}/asignar-tecnico', [OrdenServicioController::class, 'asignarTecnico'])->name('ordenes.asignar-tecnico');
+        Route::post('ordenes/{orden}/cambiar-estado', [OrdenServicioController::class, 'cambiarEstado'])->name('ordenes.cambiar-estado');
+        Route::get('ordenes/{orden}/historial', [OrdenServicioController::class, 'historial'])->name('ordenes.historial');
+    });
+
+    // Rutas para actualización inline de órdenes
+    Route::put('/ordenes/{id}/estado', [OrdenServicioController::class, 'updateEstado'])->name('ordenes.update-estado');
+    Route::put('/ordenes/{id}/prioridad', [OrdenServicioController::class, 'updatePrioridad'])->name('ordenes.update-prioridad');
 
     // Alias para crear equipos desde modales
     Route::post('equipos', [GestionEquiposMarcasController::class, 'equiposStore'])->name('equipos.store');
@@ -161,6 +168,52 @@ Route::middleware(['auth', 'subscription'])->group(function () {
 Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/estado', [OrdenServicioController::class, 'estado'])->name('estado');
     Route::get('/buscar', [OrdenServicioController::class, 'buscar'])->name('buscar');
+});
+
+// Ruta de prueba temporal
+Route::get('/test-ordenes', function() {
+    $ordenes = \App\Models\OrdenServicio::select('id', 'numero_orden', 'estado', 'cliente_id', 'equipo_id')
+        ->orderBy('id', 'desc')
+        ->limit(10)
+        ->get();
+    
+    $busqueda = \App\Models\OrdenServicio::where('numero_orden', 'TS-2025-3956')->first();
+    
+    return response()->json([
+        'total' => \App\Models\OrdenServicio::count(),
+        'ordenes_recientes' => $ordenes,
+        'busqueda_TS-2025-3956' => $busqueda ? [
+            'encontrada' => true,
+            'id' => $busqueda->id,
+            'numero_orden' => $busqueda->numero_orden,
+            'estado' => $busqueda->estado
+        ] : ['encontrada' => false],
+        'tiene_cliente' => $busqueda ? ($busqueda->cliente ? true : false) : false,
+        'tiene_equipo' => $busqueda ? ($busqueda->equipo ? true : false) : false,
+    ]);
+});
+
+// Ruta de prueba directa de búsqueda
+Route::get('/test-buscar/{codigo}', function($codigo) {
+    $orden = \App\Models\OrdenServicio::with(['cliente', 'tecnico', 'equipo.marca'])
+        ->where('numero_orden', $codigo)
+        ->first();
+    
+    if (!$orden) {
+        return response()->json([
+            'encontrada' => false,
+            'codigo_buscado' => $codigo,
+            'total_ordenes' => \App\Models\OrdenServicio::count()
+        ]);
+    }
+    
+    return response()->json([
+        'encontrada' => true,
+        'orden' => $orden,
+        'tiene_cliente' => $orden->cliente ? true : false,
+        'tiene_equipo' => $orden->equipo ? true : false,
+        'tiene_tecnico' => $orden->tecnico ? true : false,
+    ]);
 });
 
 
@@ -257,12 +310,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
-Route::prefix('tecnico')->group(function () {
-    Route::view('/resumen', 'tecnico.resumen')->name('tecnico.resumen');
-    Route::view('/clientes', 'tecnico.clientes')->name('tecnico.clientes');
-    Route::view('/equipos', 'tecnico.equipos')->name('tecnico.equipos');
-    Route::view('/marcas', 'tecnico.marcas')->name('tecnico.marcas');
-    Route::view('/ordenes', 'tecnico.ordenes')->name('tecnico.ordenes');
-    Route::view('/modificaciones', 'tecnico.modificaciones')->name('tecnico.modificaciones');
-    Route::view('/ingresar_orden', 'tecnico.ingresar_orden')->name('tecnico.ingresar_orden');
+// Rutas para el técnico (asegúrate de que estas rutas estén antes de las rutas de vista)
+Route::middleware(['auth'])->prefix('tecnico')->name('tecnico.')->group(function () {
+    // Órdenes
+    Route::get('/ordenes', [TecnicoOrdenController::class, 'index'])->name('ordenes.index');
+    Route::get('/ordenes/{id}', [TecnicoOrdenController::class, 'show'])->name('ordenes.show');
+    Route::get('/ordenes/{id}/editar', [TecnicoOrdenController::class, 'edit'])->name('ordenes.edit');
+    Route::put('/ordenes/{id}', [TecnicoOrdenController::class, 'update'])->name('ordenes.update');
+    Route::put('/ordenes/{orden}/estado', [TecnicoOrdenController::class, 'actualizarEstado'])->name('ordenes.estado');
+    Route::put('/ordenes/{orden}/prioridad', [TecnicoOrdenController::class, 'actualizarPrioridad'])->name('ordenes.prioridad');
+
+    // Vistas estáticas
+    Route::view('/resumen', 'tecnico.resumen')->name('resumen');
+    Route::view('/clientes', 'tecnico.clientes')->name('clientes');
+    Route::view('/equipos', 'tecnico.equipos')->name('equipos');
+    Route::view('/marcas', 'tecnico.marcas')->name('marcas');
+    Route::view('/modificaciones', 'tecnico.modificaciones')->name('modificaciones');
+    Route::view('/ingresar_orden', 'tecnico.ingresar_orden')->name('ingresar_orden');
 });

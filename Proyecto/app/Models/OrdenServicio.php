@@ -85,7 +85,7 @@ class OrdenServicio extends Model
     ];
 
     /**
-     * � Relaciones
+     * 🔗 Relaciones
      */
     public function cliente()
     {
@@ -110,6 +110,16 @@ class OrdenServicio extends Model
     public function servicioTecnico()
     {
         return $this->belongsTo(ServicioTecnico::class);
+    }
+
+    public function comentarios()
+    {
+        return $this->hasMany(ComentarioOrden::class, 'orden_servicio_id');
+    }
+
+    public function historial()
+    {
+        return $this->hasMany(HistorialOrden::class, 'orden_servicio_id');
     }
 
     /**

@@ -189,18 +189,64 @@ class OrdenServicioController extends Controller
     }
 
     /**
-     * 🔎 Buscar orden por número
+     * 🔎 Buscar orden por número (vista pública)
      */
     public function buscar(Request $request)
     {
-        $numeroOrden = $request->input('numero_orden');
-        $orden = OrdenServicio::where('numero_orden', $numeroOrden)->first();
+        $request->validate([
+            'order_code' => 'required|string|max:20'
+        ]);
+
+        $numeroOrden = trim($request->input('order_code'));
+        
+        // Log para debug
+        \Log::info('Buscando orden: ' . $numeroOrden);
+        
+        // Buscar la orden con todas sus relaciones disponibles
+        $orden = OrdenServicio::with([
+            'cliente',
+            'tecnico',
+            'equipo.marca'
+        ])
+        ->where(function($query) use ($numeroOrden) {
+            $query->where('numero_orden', $numeroOrden)
+                  ->orWhere('numero_orden', strtoupper($numeroOrden))
+                  ->orWhere('numero_orden', 'LIKE', '%' . $numeroOrden . '%');
+        })
+        ->first();
+        
+        \Log::info('Orden encontrada: ' . ($orden ? $orden->id : 'No encontrada'));
 
         if (!$orden) {
-            return response()->json(['error' => 'Orden no encontrada'], 404);
+            // Verificar cuántas órdenes hay en total
+            $total = OrdenServicio::count();
+            $ultimasOrdenes = OrdenServicio::select('numero_orden')->orderBy('id', 'desc')->limit(3)->pluck('numero_orden')->toArray();
+            
+            $mensaje = "No se encontró ninguna orden con el código: {$numeroOrden}. ";
+            $mensaje .= "Total de órdenes en BD: {$total}. ";
+            if (!empty($ultimasOrdenes)) {
+                $mensaje .= "Últimas órdenes: " . implode(', ', $ultimasOrdenes);
+            }
+            
+            return back()
+                ->with('error', $mensaje)
+                ->withInput();
         }
 
-        return response()->json($orden);
+        // Cargar relaciones opcionales si existen
+        try {
+            $orden->load(['comentarios', 'historial']);
+        } catch (\Exception $e) {
+            \Log::warning('Error cargando relaciones: ' . $e->getMessage());
+        }
+
+        // Si es una petición AJAX, devolver JSON
+        if ($request->wantsJson()) {
+            return response()->json($orden);
+        }
+
+        // Si es una petición normal, devolver vista
+        return view('shared.orden-publica', compact('orden'));
     }
 
     /**
@@ -222,5 +268,61 @@ class OrdenServicioController extends Controller
             'fecha_estimada'   => optional($orden->fecha_aprox_entrega)->format('Y-m-d'),
             'fecha_completada' => optional($orden->fecha_completada)->format('Y-m-d'),
         ]);
+    }
+
+    /**
+     * 🔄 Actualizar estado de una orden (inline)
+     */
+    public function updateEstado(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'estado' => 'required|string|in:pendiente,asignado,en_progreso,completada,entregada,cancelada'
+            ]);
+
+            $orden = OrdenServicio::findOrFail($id);
+            $orden->estado = $request->estado;
+            $orden->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Estado actualizado correctamente',
+                'orden' => $orden
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el estado: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * ⚡ Actualizar prioridad de una orden (inline)
+     */
+    public function updatePrioridad(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'prioridad' => 'required|string|in:baja,media,alta,urgente'
+            ]);
+
+            $orden = OrdenServicio::findOrFail($id);
+            $orden->prioridad = $request->prioridad;
+            $orden->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Prioridad actualizada correctamente',
+                'orden' => $orden
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la prioridad: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

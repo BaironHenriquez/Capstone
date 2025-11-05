@@ -209,14 +209,56 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $orden->estado_badge ?? 'bg-gray-100 text-gray-800' }}">
-                            {{ ucfirst(str_replace('_', ' ', $orden->estado ?? 'pendiente')) }}
-                        </span>
+                        <div class="relative inline-block" x-data="{ open: false }">
+                            <button @click="open = !open" type="button" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $orden->estado_badge ?? 'bg-gray-100 text-gray-800' }} hover:opacity-80 transition-opacity cursor-pointer">
+                                <span class="mr-1">{{ ucfirst(str_replace('_', ' ', $orden->estado ?? 'pendiente')) }}</span>
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </button>
+                            
+                            <div x-show="open" @click.away="open = false" x-cloak class="absolute z-10 mt-1 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-40">
+                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'pendiente')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+                                    <span class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold">Pendiente</span>
+                                </button>
+                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'asignado')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+                                    <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold">Asignado</span>
+                                </button>
+                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'en_progreso')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+                                    <span class="px-2 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-semibold">En Progreso</span>
+                                </button>
+                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'completada')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+                                    <span class="px-2 py-1 rounded-full bg-green-100 text-green-800 text-xs font-semibold">Completada</span>
+                                </button>
+                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'entregada')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+                                    <span class="px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">Entregada</span>
+                                </button>
+                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'cancelada')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+                                    <span class="px-2 py-1 rounded-full bg-red-100 text-red-800 text-xs font-semibold">Cancelada</span>
+                                </button>
+                            </div>
+                        </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $orden->prioridad_badge ?? 'bg-gray-100 text-gray-800' }}">
-                            {{ ucfirst($orden->prioridad ?? 'media') }}
-                        </span>
+                        <div class="relative inline-block" x-data="{ open: false }">
+                            <button @click="open = !open" type="button" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $orden->prioridad_badge ?? 'bg-gray-100 text-gray-800' }} hover:opacity-80 transition-opacity cursor-pointer">
+                                <span class="mr-1">{{ ucfirst($orden->prioridad ?? 'media') }}</span>
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </button>
+                            
+                            <div x-show="open" @click.away="open = false" x-cloak class="absolute z-10 mt-1 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-32">
+                                <button type="button" onclick="cambiarPrioridad({{ $orden->id }}, 'baja')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+                                    <span class="px-2 py-1 rounded-full bg-gray-100 text-gray-800 text-xs font-semibold">Baja</span>
+                                </button>
+                                <button type="button" onclick="cambiarPrioridad({{ $orden->id }}, 'media')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+                                    <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold">Media</span>
+                                </button>
+                                <button type="button" onclick="cambiarPrioridad({{ $orden->id }}, 'alta')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+                                    <span class="px-2 py-1 rounded-full bg-orange-100 text-orange-800 text-xs font-semibold">Alta</span>
+                                </button>
+                                <button type="button" onclick="cambiarPrioridad({{ $orden->id }}, 'urgente')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+                                    <span class="px-2 py-1 rounded-full bg-red-100 text-red-800 text-xs font-semibold">Urgente</span>
+                                </button>
+                            </div>
+                        </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {{ $orden->created_at ? $orden->created_at->format('d/m/Y') : 'N/A' }}
@@ -283,6 +325,59 @@ function confirmarEliminar(ordenId) {
         document.body.appendChild(form);
         form.submit();
     }
+}
+
+// Funciones para actualizar estado y prioridad inline
+function cambiarEstado(ordenId, nuevoEstado) {
+    fetch(`/ordenes/${ordenId}/estado`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({ estado: nuevoEstado })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Mostrar notificación de éxito
+            showNotification('Estado actualizado correctamente', 'success');
+            // Recargar la página para actualizar el badge
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            throw new Error(data.message || 'Error al actualizar');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error al actualizar el estado', 'error');
+    });
+}
+
+function cambiarPrioridad(ordenId, nuevaPrioridad) {
+    fetch(`/ordenes/${ordenId}/prioridad`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({ prioridad: nuevaPrioridad })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Mostrar notificación de éxito
+            showNotification('Prioridad actualizada correctamente', 'success');
+            // Recargar la página para actualizar el badge
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            throw new Error(data.message || 'Error al actualizar');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error al actualizar la prioridad', 'error');
+    });
 }
 
 // Auto-submit en cambio de filtros

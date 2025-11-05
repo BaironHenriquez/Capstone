@@ -120,13 +120,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!form || !input || !button) return;
 
-        // Validación en tiempo real
+        // Validación en tiempo real - aceptar múltiples formatos
         input.addEventListener('input', function() {
             const value = this.value.toUpperCase().trim();
             this.value = value;
             
-            // Formato esperado: BA-YYYY-NNN
-            const isValid = /^BA-\d{4}-\d{3}$/.test(value) || value === '';
+            // Formatos aceptados: BA-YYYY-NNN, TS-YYYY-NNNN, o similar
+            const isValid = /^[A-Z]{2,3}-\d{4}-\d{3,4}$/.test(value) || value === '';
             
             if (isValid || value === '') {
                 this.classList.remove('border-red-500', 'ring-red-500');
@@ -135,18 +135,30 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 this.classList.remove('border-green-500', 'ring-green-500');
                 this.classList.add('border-red-500', 'ring-red-500');
-                button.disabled = true;
+                button.disabled = value.length > 0; // Solo deshabilitar si hay texto inválido
             }
         });
 
-        // Envío del formulario
+        // Permitir el envío normal del formulario
         form.addEventListener('submit', function(e) {
-            e.preventDefault();
             const orderCode = input.value.trim();
             
-            if (orderCode) {
-                searchOrder(orderCode);
+            if (!orderCode) {
+                e.preventDefault();
+                alert('Por favor ingresa un código de orden');
+                return;
             }
+            
+            // Validar formato antes de enviar
+            if (!/^[A-Z]{2,3}-\d{4}-\d{3,4}$/.test(orderCode)) {
+                e.preventDefault();
+                alert('Formato inválido. Usa: TS-2025-3956 o BA-2025-001');
+                return;
+            }
+            
+            // Dejar que el formulario se envíe normalmente (no preventDefault)
+            button.disabled = true;
+            button.innerHTML = '<div class="loading-spinner inline-block mr-2"></div> Buscando...';
         });
     }
 
