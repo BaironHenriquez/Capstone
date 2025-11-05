@@ -357,7 +357,7 @@
                             <p class="text-gray-600">Ingresa el código de tu orden de servicio para consultar su estado</p>
                         </div>
                         
-                        <form id="order-lookup-form" class="space-y-6">
+                        <form id="order-lookup-form" action="{{ route('ordenes.buscar') }}" method="GET" class="space-y-6">
                             <div>
                                 <label for="order-code" class="block text-sm font-semibold text-baieco-primary mb-3">
                                     Código de Orden de Servicio
@@ -365,8 +365,9 @@
                                 <input type="text" id="order-code" name="order_code" 
                                        class="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-baieco-secondary focus:ring-opacity-20 focus:border-baieco-secondary transition-all duration-300 text-lg focus-ring"
                                        placeholder="Ej: BA-2025-001"
-                                       maxlength="11">
-                                <p class="text-sm text-gray-500 mt-2">Formato: BA-YYYY-NNN</p>
+                                       maxlength="20"
+                                       required>
+                                <p class="text-sm text-gray-500 mt-2">Formato: BA-YYYY-NNN o TS-YYYY-NNNN</p>
                             </div>
                             <button type="submit" 
                                     class="w-full bg-gradient-to-r from-baieco-secondary to-baieco-primary hover:from-blue-600 hover:to-blue-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">
@@ -375,10 +376,26 @@
                                 </svg>
                                 Buscar Orden
                             </button>
+                            
+                            @if(session('error'))
+                                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mt-4" role="alert">
+                                    <p class="font-bold">❌ Error</p>
+                                    <p>{{ session('error') }}</p>
+                                    <p class="text-sm mt-2">💡 Intenta con uno de estos formatos:</p>
+                                    <ul class="text-sm list-disc list-inside">
+                                        <li>TS-2025-3956</li>
+                                        <li>BA-2025-001</li>
+                                    </ul>
+                                </div>
+                            @endif
+                            
+                            @if(session('success'))
+                                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mt-4" role="alert">
+                                    <p class="font-bold">✅ Éxito</p>
+                                    <p>{{ session('success') }}</p>
+                                </div>
+                            @endif
                         </form>
-                        
-                        <!-- Resultado de búsqueda -->
-                        <div id="order-result" class="mt-8 hidden"></div>
                     </div>
                 </div>
                 

@@ -147,6 +147,10 @@ Route::middleware(['auth', 'subscription'])->group(function () {
         Route::get('ordenes/{orden}/historial', [OrdenServicioController::class, 'historial'])->name('ordenes.historial');
     });
 
+    // Rutas para actualización inline de órdenes
+    Route::put('/ordenes/{id}/estado', [OrdenServicioController::class, 'updateEstado'])->name('ordenes.update-estado');
+    Route::put('/ordenes/{id}/prioridad', [OrdenServicioController::class, 'updatePrioridad'])->name('ordenes.update-prioridad');
+
     // Rutas de funcionalidades IA
     Route::prefix('ia')->name('ia.')->group(function () {
         Route::post('recomendar-tecnico', [IAController::class, 'recomendarTecnico'])->name('recomendar-tecnico');
@@ -160,6 +164,52 @@ Route::middleware(['auth', 'subscription'])->group(function () {
 Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/estado', [OrdenServicioController::class, 'estado'])->name('estado');
     Route::get('/buscar', [OrdenServicioController::class, 'buscar'])->name('buscar');
+});
+
+// Ruta de prueba temporal
+Route::get('/test-ordenes', function() {
+    $ordenes = \App\Models\OrdenServicio::select('id', 'numero_orden', 'estado', 'cliente_id', 'equipo_id')
+        ->orderBy('id', 'desc')
+        ->limit(10)
+        ->get();
+    
+    $busqueda = \App\Models\OrdenServicio::where('numero_orden', 'TS-2025-3956')->first();
+    
+    return response()->json([
+        'total' => \App\Models\OrdenServicio::count(),
+        'ordenes_recientes' => $ordenes,
+        'busqueda_TS-2025-3956' => $busqueda ? [
+            'encontrada' => true,
+            'id' => $busqueda->id,
+            'numero_orden' => $busqueda->numero_orden,
+            'estado' => $busqueda->estado
+        ] : ['encontrada' => false],
+        'tiene_cliente' => $busqueda ? ($busqueda->cliente ? true : false) : false,
+        'tiene_equipo' => $busqueda ? ($busqueda->equipo ? true : false) : false,
+    ]);
+});
+
+// Ruta de prueba directa de búsqueda
+Route::get('/test-buscar/{codigo}', function($codigo) {
+    $orden = \App\Models\OrdenServicio::with(['cliente', 'tecnico', 'equipo.marca'])
+        ->where('numero_orden', $codigo)
+        ->first();
+    
+    if (!$orden) {
+        return response()->json([
+            'encontrada' => false,
+            'codigo_buscado' => $codigo,
+            'total_ordenes' => \App\Models\OrdenServicio::count()
+        ]);
+    }
+    
+    return response()->json([
+        'encontrada' => true,
+        'orden' => $orden,
+        'tiene_cliente' => $orden->cliente ? true : false,
+        'tiene_equipo' => $orden->equipo ? true : false,
+        'tiene_tecnico' => $orden->tecnico ? true : false,
+    ]);
 });
 
 
