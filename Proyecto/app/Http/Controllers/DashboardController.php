@@ -40,20 +40,25 @@ class DashboardController extends Controller
     /**
      * Dashboard para Administrador
      */
-    private function adminDashboard($user)
+    public function adminDashboard()
     {
-        $servicioTecnicoId = $user->servicio_tecnico_id;
+        $user = auth()->user();
+        $servicioTecnicoId = $user ? $user->servicio_tecnico_id : null;
         
         // Estadísticas de clientes reales
         $estadisticasClientes = [
-            'total' => Cliente::where('servicio_tecnico_id', $servicioTecnicoId)->count(),
-            'nuevos_mes' => Cliente::where('servicio_tecnico_id', $servicioTecnicoId)
-                ->whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
-                ->count(),
-            'nuevos_semana' => Cliente::where('servicio_tecnico_id', $servicioTecnicoId)
-                ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
-                ->count(),
+            'total' => Cliente::when($servicioTecnicoId, function($query) use ($servicioTecnicoId) {
+                return $query->where('servicio_tecnico_id', $servicioTecnicoId);
+            })->count(),
+            'nuevos_mes' => Cliente::when($servicioTecnicoId, function($query) use ($servicioTecnicoId) {
+                return $query->where('servicio_tecnico_id', $servicioTecnicoId);
+            })->whereMonth('created_at', now()->month)
+              ->whereYear('created_at', now()->year)
+              ->count(),
+            'nuevos_semana' => Cliente::when($servicioTecnicoId, function($query) use ($servicioTecnicoId) {
+                return $query->where('servicio_tecnico_id', $servicioTecnicoId);
+            })->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+              ->count(),
         ];
 
         // Datos para gráfico de clientes por mes (últimos 6 meses)
@@ -160,7 +165,7 @@ class DashboardController extends Controller
             'ocupados' => 5
         ];
 
-        return view('dashboard.admin', compact(
+        return view('admin.dashboard', compact(
             'user', 
             'estadisticasClientes',
             'clientesPorMes',

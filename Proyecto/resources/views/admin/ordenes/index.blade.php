@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('shared.layouts.admin')
 
 @section('title', 'Órdenes de Servicio')
 @section('breadcrumb', 'Órdenes de Servicio')

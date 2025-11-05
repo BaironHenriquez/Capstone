@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('shared.layouts.admin')
 
 @section('title', 'Nueva Orden de Servicio')
 
@@ -150,7 +150,7 @@
                                         data-validate="required">
                                     <option value="">Seleccione un cliente</option>
                                     @foreach($clientes as $cliente)
-                                        <option value="{{ $cliente->id }}">{{ $cliente->nombre }} {{ $cliente->apellido }}</option>
+                                        <option value="{{ $cliente->id }}">{{ $cliente->nombre_completo ?? $cliente->nombre . ' ' . $cliente->apellido }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -279,7 +279,7 @@
                                 </label>
                                 <input type="date" 
                                        name="fecha_aprox_entrega" 
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                      
                             </div>
                         </div>
 

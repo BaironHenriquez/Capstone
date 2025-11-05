@@ -97,7 +97,7 @@ class SocialAuthController extends Controller
             return view('oauth.setup-required');
         }
         
-        return view('auth.social-auth');
+        return view('login.social-auth');
     }
     
     /**

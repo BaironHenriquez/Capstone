@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\OrdenServicio;
+use App\Models\Cliente;
+use App\Models\Equipo;
 use App\Models\ServicioTecnico;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -35,7 +37,18 @@ class OrdenServicioController extends Controller
 
         $ordenes = $query->orderBy($ordenPor, $direccion)->paginate(10);
 
-        return view('ordenes.index', compact('ordenes'));
+        // Calcular estadísticas
+        $estadisticas = [
+            'total' => OrdenServicio::count(),
+            'pendientes' => OrdenServicio::where('estado', 'pendiente')->count(),
+            'en_progreso' => OrdenServicio::where('estado', 'en_progreso')->count(),
+            'completadas' => OrdenServicio::where('estado', 'completada')->count(),
+            'retrasadas' => OrdenServicio::whereDate('fecha_aprox_entrega', '<', now())
+                                        ->whereNotIn('estado', ['completada', 'cancelada'])
+                                        ->count()
+        ];
+
+        return view('admin.ordenes.index', compact('ordenes', 'estadisticas'));
     }
 
     /**
@@ -46,7 +59,7 @@ class OrdenServicioController extends Controller
         $clientes = \App\Models\Cliente::orderBy('nombre')->get();
         $equipos = \App\Models\Equipo::with('marca')->orderBy('modelo')->get();
         
-        return view('ordenes.create', compact('clientes', 'equipos'));
+        return view('admin.ordenes.create', compact('clientes', 'equipos'));
     }
 
     /**
@@ -139,7 +152,7 @@ class OrdenServicioController extends Controller
     public function show($id)
     {
         $orden = OrdenServicio::findOrFail($id);
-        return view('ordenes.show', compact('orden'));
+        return view('admin.ordenes.show', compact('orden'));
     }
 
     /**

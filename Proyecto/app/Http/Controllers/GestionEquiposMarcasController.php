@@ -186,7 +186,7 @@ class GestionEquiposMarcasController extends Controller
             ]
         ]);
 
-        return view('equipos-marcas.index', compact(
+        return view('admin.equipos-marcas.index', compact(
             'totalMarcas',
             'marcasActivas',
             'totalEquipos',
@@ -251,7 +251,7 @@ class GestionEquiposMarcasController extends Controller
             ->orderBy('categoria')
             ->pluck('categoria');
 
-        return view('equipos-marcas.marcas.index', compact('marcas', 'categorias'));
+        return view('admin.equipos-marcas.marcas.index', compact('marcas', 'categorias'));
     }
 
     /**
@@ -501,7 +501,7 @@ class GestionEquiposMarcasController extends Controller
             ->orderBy('categoria')
             ->pluck('categoria');
 
-        return view('equipos-marcas.equipos.index', compact('equipos', 'marcas', 'categorias'));
+        return view('admin.equipos-marcas.equipos.index', compact('equipos', 'marcas', 'categorias'));
     }
 
     /**
