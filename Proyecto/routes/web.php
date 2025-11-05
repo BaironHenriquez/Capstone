@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\OrdenServicioController;
+use App\Http\Controllers\TecnicoOrdenController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\TecnicoController;
 use App\Http\Controllers\SubscriptionController;
@@ -134,15 +135,17 @@ Route::middleware(['auth', 'subscription'])->group(function () {
 
     // Rutas para Técnicos
     Route::resource('tecnicos', TecnicoController::class);
-    Route::get('tecnicos/{tecnico}/ordenes', [TecnicoController::class, 'ordenes'])->name('tecnicos.ordenes');
+// Esta sección se ha movido más arriba en el archivo
     Route::post('tecnicos/{tecnico}/activar', [TecnicoController::class, 'activar'])->name('tecnicos.activar');
     Route::post('tecnicos/{tecnico}/desactivar', [TecnicoController::class, 'desactivar'])->name('tecnicos.desactivar');
 
-    // Rutas para Órdenes de Servicio (CRUD completo)
-    Route::resource('ordenes', OrdenServicioController::class);
-    Route::post('ordenes/{orden}/asignar-tecnico', [OrdenServicioController::class, 'asignarTecnico'])->name('ordenes.asignar-tecnico');
-    Route::post('ordenes/{orden}/cambiar-estado', [OrdenServicioController::class, 'cambiarEstado'])->name('ordenes.cambiar-estado');
-    Route::get('ordenes/{orden}/historial', [OrdenServicioController::class, 'historial'])->name('ordenes.historial');
+    // Rutas generales para Órdenes de Servicio (CRUD completo para admin)
+    Route::prefix('admin')->group(function() {
+        Route::resource('ordenes', OrdenServicioController::class);
+        Route::post('ordenes/{orden}/asignar-tecnico', [OrdenServicioController::class, 'asignarTecnico'])->name('ordenes.asignar-tecnico');
+        Route::post('ordenes/{orden}/cambiar-estado', [OrdenServicioController::class, 'cambiarEstado'])->name('ordenes.cambiar-estado');
+        Route::get('ordenes/{orden}/historial', [OrdenServicioController::class, 'historial'])->name('ordenes.historial');
+    });
 
     // Rutas de funcionalidades IA
     Route::prefix('ia')->name('ia.')->group(function () {
@@ -248,12 +251,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
-Route::prefix('tecnico')->group(function () {
-    Route::view('/resumen', 'tecnico.resumen')->name('tecnico.resumen');
-    Route::view('/clientes', 'tecnico.clientes')->name('tecnico.clientes');
-    Route::view('/equipos', 'tecnico.equipos')->name('tecnico.equipos');
-    Route::view('/marcas', 'tecnico.marcas')->name('tecnico.marcas');
-    Route::view('/ordenes', 'tecnico.ordenes')->name('tecnico.ordenes');
-    Route::view('/modificaciones', 'tecnico.modificaciones')->name('tecnico.modificaciones');
-    Route::view('/ingresar_orden', 'tecnico.ingresar_orden')->name('tecnico.ingresar_orden');
+// Rutas para el técnico (asegúrate de que estas rutas estén antes de las rutas de vista)
+Route::middleware(['auth'])->prefix('tecnico')->name('tecnico.')->group(function () {
+    // Órdenes
+    Route::get('/ordenes', [TecnicoOrdenController::class, 'index'])->name('ordenes.index');
+    Route::get('/ordenes/{id}', [TecnicoOrdenController::class, 'show'])->name('ordenes.show');
+    Route::get('/ordenes/{id}/editar', [TecnicoOrdenController::class, 'edit'])->name('ordenes.edit');
+    Route::put('/ordenes/{id}', [TecnicoOrdenController::class, 'update'])->name('ordenes.update');
+    Route::put('/ordenes/{orden}/estado', [TecnicoOrdenController::class, 'actualizarEstado'])->name('ordenes.estado');
+    Route::put('/ordenes/{orden}/prioridad', [TecnicoOrdenController::class, 'actualizarPrioridad'])->name('ordenes.prioridad');
+
+    // Vistas estáticas
+    Route::view('/resumen', 'tecnico.resumen')->name('resumen');
+    Route::view('/clientes', 'tecnico.clientes')->name('clientes');
+    Route::view('/equipos', 'tecnico.equipos')->name('equipos');
+    Route::view('/marcas', 'tecnico.marcas')->name('marcas');
+    Route::view('/modificaciones', 'tecnico.modificaciones')->name('modificaciones');
+    Route::view('/ingresar_orden', 'tecnico.ingresar_orden')->name('ingresar_orden');
 });

@@ -74,13 +74,14 @@ class DashboardController extends Controller
             ];
         }
 
-        // Simulación de órdenes de servicio (ya que no tenemos tabla real)
+        
         $resumenOrdenes = [
-            'total' => 45 + $estadisticasClientes['total'] * 2,
-            'pendientes' => rand(5, 15),
-            'en_progreso' => rand(10, 20),
-            'completadas' => 30 + $estadisticasClientes['total'],
-            'canceladas' => rand(1, 5)
+            'total' => 67,
+            'pendientes' => 6,
+            'en_progreso' => 17,
+            'completadas' => 41,
+            'canceladas' => 3,
+            'revision_necesaria' => 5
         ];
         
         $tecnicos = [
@@ -160,17 +161,52 @@ class DashboardController extends Controller
 
         // Datos simulados de técnicos
         $tecnicos = [
-            'activos' => 8,
-            'disponibles' => 3,
-            'ocupados' => 5
+            [
+                'id' => 1,
+                'nombre' => 'Carlos Rodriguez',
+                'ordenes_asignadas' => 8,
+                'ordenes_completadas' => 12,
+                'carga_trabajo' => 85,
+                'especialidad' => 'Computadoras',
+                'estado' => 'activo'
+            ],
+            [
+                'id' => 2,
+                'nombre' => 'Maria González',
+                'ordenes_asignadas' => 6,
+                'ordenes_completadas' => 15,
+                'carga_trabajo' => 65,
+                'especialidad' => 'Móviles',
+                'estado' => 'activo'
+            ],
+            [
+                'id' => 3,
+                'nombre' => 'Diego Sánchez',
+                'ordenes_asignadas' => 10,
+                'ordenes_completadas' => 8,
+                'carga_trabajo' => 95,
+                'especialidad' => 'Soporte',
+                'estado' => 'sobrecargado'
+            ],
+            [
+                'id' => 4,
+                'nombre' => 'Ana Torres',
+                'ordenes_asignadas' => 4,
+                'ordenes_completadas' => 18,
+                'carga_trabajo' => 45,
+                'especialidad' => 'Reparaciones',
+                'estado' => 'disponible'
+            ]
         ];
 
-        return view('admin.dashboard', compact(
+        return view('admin.dashboard-admin', compact(
             'user', 
             'estadisticasClientes',
             'clientesPorMes',
             'resumenOrdenes', 
-            'tecnicos'
+            'tecnicos',
+            'alertas',
+            'metricas'
         ));
     }
 
