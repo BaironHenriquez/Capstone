@@ -74,6 +74,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('subscription')->prefix('setup')->name('setup.')->group(function () {
         Route::get('/technical-service', [\App\Http\Controllers\SetupController::class, 'showTechnicalServiceForm'])->name('technical-service');
         Route::post('/technical-service', [\App\Http\Controllers\SetupController::class, 'saveTechnicalService'])->name('technical-service.save');
+        Route::post('/check-availability', [\App\Http\Controllers\SetupController::class, 'checkAvailability'])->name('check-availability');
     });
     
     // Dashboard requiere suscripción activa Y servicio técnico completo

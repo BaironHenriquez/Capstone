@@ -55,6 +55,56 @@ class SetupController extends Controller
 
         $user = Auth::user();
 
+        // Validar que no existan duplicados (excluyendo el servicio del usuario actual)
+        $duplicados = [];
+        
+        // Verificar nombre de servicio duplicado
+        $nombreExiste = ServicioTecnico::where('nombre_servicio', $request->nombre_servicio)
+            ->where('user_id', '!=', $user->id)
+            ->exists();
+        if ($nombreExiste) {
+            $duplicados['nombre_servicio'] = 'Este nombre de servicio técnico ya está en uso por otro usuario.';
+        }
+        
+        // Verificar correo duplicado
+        $correoExiste = ServicioTecnico::where('correo', $request->correo)
+            ->where('user_id', '!=', $user->id)
+            ->exists();
+        if ($correoExiste) {
+            $duplicados['correo'] = 'Este correo ya está registrado por otro servicio técnico.';
+        }
+        
+        // Verificar teléfono duplicado
+        $telefonoExiste = ServicioTecnico::where('telefono', $request->telefono)
+            ->where('user_id', '!=', $user->id)
+            ->exists();
+        if ($telefonoExiste) {
+            $duplicados['telefono'] = 'Este teléfono ya está registrado por otro servicio técnico.';
+        }
+        
+        // Verificar dirección duplicada
+        $direccionExiste = ServicioTecnico::where('direccion', $request->direccion)
+            ->where('user_id', '!=', $user->id)
+            ->exists();
+        if ($direccionExiste) {
+            $duplicados['direccion'] = 'Esta dirección ya está registrada por otro servicio técnico.';
+        }
+        
+        // Verificar RUT duplicado
+        $rutExiste = ServicioTecnico::where('rut', $request->rut)
+            ->where('user_id', '!=', $user->id)
+            ->exists();
+        if ($rutExiste) {
+            $duplicados['rut'] = 'Este RUT ya está registrado por otro servicio técnico.';
+        }
+        
+        // Si hay duplicados, retornar con errores
+        if (!empty($duplicados)) {
+            return back()
+                ->withErrors($duplicados)
+                ->withInput();
+        }
+
         try {
             DB::beginTransaction();
             
@@ -106,5 +156,43 @@ class SetupController extends Controller
                 ->withErrors(['error' => 'Error al guardar la configuración: ' . $e->getMessage()])
                 ->withInput();
         }
+    }
+    
+    /**
+     * Verificar disponibilidad de campo en tiempo real (API)
+     */
+    public function checkAvailability(Request $request)
+    {
+        $field = $request->input('field');
+        $value = $request->input('value');
+        $user = Auth::user();
+        
+        if (empty($field) || empty($value)) {
+            return response()->json(['available' => true]);
+        }
+        
+        // Verificar que el campo sea válido
+        $validFields = ['nombre_servicio', 'correo', 'telefono', 'direccion', 'rut'];
+        if (!in_array($field, $validFields)) {
+            return response()->json(['available' => true]);
+        }
+        
+        // Verificar si ya existe (excluyendo el servicio del usuario actual)
+        $exists = ServicioTecnico::where($field, $value)
+            ->where('user_id', '!=', $user->id)
+            ->exists();
+        
+        $messages = [
+            'nombre_servicio' => 'Este nombre de servicio ya está en uso',
+            'correo' => 'Este correo ya está registrado',
+            'telefono' => 'Este teléfono ya está registrado',
+            'direccion' => 'Esta dirección ya está registrada',
+            'rut' => 'Este RUT ya está registrado',
+        ];
+        
+        return response()->json([
+            'available' => !$exists,
+            'message' => $exists ? $messages[$field] : 'Disponible'
+        ]);
     }
 }
