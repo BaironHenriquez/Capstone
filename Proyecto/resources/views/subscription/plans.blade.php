@@ -39,11 +39,13 @@
         <!-- Header -->
         <div class="text-center mb-16">
             <h1 class="text-4xl font-bold text-gray-900 mb-4">
-                Elige tu Plan
+                {{ $subscription['name'] }}
             </h1>
             <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                Selecciona el plan que mejor se adapte a las necesidades de tu negocio. 
-                Todos los planes incluyen todas las funcionalidades principales.
+                {{ $subscription['description'] }}
+            </p>
+            <p class="text-lg text-gray-500 mt-4">
+                Elige el período de pago que mejor se adapte a tu negocio
             </p>
             
             @if($user->onTrial())
@@ -103,7 +105,7 @@
                     </div>
                     <div class="ml-4">
                         <h3 class="text-lg font-medium text-blue-900">
-                            Suscripción Activa: {{ ucfirst($currentSubscription->plan_type) }}
+                            Suscripción Activa
                         </h3>
                         <p class="text-blue-700">
                             Tu suscripción está activa hasta {{ $currentSubscription->ends_at->format('d/m/Y H:i') }}
@@ -120,105 +122,79 @@
         @endif
 
         <!-- Plans Grid -->
-        <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             
-            @foreach($plans as $planType => $plan)
+            @foreach($periods as $periodType => $period)
                 <div class="relative bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden transform transition-all duration-200 hover:scale-[1.02] hover:shadow-2xl
-                            {{ $planType === 'premium' ? 'ring-2 ring-blue-600' : '' }}">
+                            {{ $periodType === 'yearly' ? 'ring-2 ring-blue-600' : '' }}">
                     
-                    @if($planType === 'premium')
+                    @if($periodType === 'yearly')
                         <div class="absolute top-0 left-0 right-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-center py-2 text-sm font-medium">
-                            ⭐ Más Popular
+                            ⭐ Ahorra {{ $period['discount'] }}%
+                        </div>
+                    @elseif($periodType === 'quarterly')
+                        <div class="absolute top-0 left-0 right-0 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-center py-2 text-sm font-medium">
+                            💰 Ahorra {{ $period['discount'] }}%
                         </div>
                     @endif
                     
-                    <div class="p-8 {{ $planType === 'premium' ? 'pt-12' : '' }}">
+                    <div class="p-8 {{ isset($period['discount']) && $period['discount'] > 0 ? 'pt-12' : '' }}">
                         <!-- Plan Header -->
                         <div class="text-center mb-8">
                             <h3 class="text-2xl font-bold text-gray-900 mb-2">
-                                {{ $plan['name'] }}
+                                {{ $period['name'] }}
                             </h3>
-                            <div class="flex items-center justify-center mb-4">
+                            
+                            @if(isset($period['original_price']))
+                                <div class="text-sm text-gray-500 line-through mb-1">
+                                    ${{ number_format($period['original_price'], 0, ',', '.') }}
+                                </div>
+                            @endif
+                            
+                            <div class="flex items-center justify-center mb-2">
                                 <span class="text-4xl font-bold text-gray-900">
-                                    ${{ $plan['price'] }}
+                                    ${{ number_format($period['price'], 0, ',', '.') }}
                                 </span>
-                                <span class="text-gray-600 ml-2">/ mes</span>
-                            </div>
-                            <p class="text-gray-600">
-                                {{ $plan['description'] }}
-                            </p>
-                        </div>
-
-                        <!-- Features -->
-                        <div class="space-y-4 mb-8">
-                            <div class="flex items-start">
-                                <svg class="h-5 w-5 text-green-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span class="text-gray-700">Gestión completa de órdenes de servicio</span>
-                            </div>
-                            <div class="flex items-start">
-                                <svg class="h-5 w-5 text-green-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span class="text-gray-700">Control de inventario y equipos</span>
-                            </div>
-                            <div class="flex items-start">
-                                <svg class="h-5 w-5 text-green-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span class="text-gray-700">Gestión de clientes</span>
-                            </div>
-                            <div class="flex items-start">
-                                <svg class="h-5 w-5 text-green-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span class="text-gray-700">Reportes básicos</span>
                             </div>
                             
-                            @if($planType === 'premium')
-                                <div class="flex items-start">
-                                    <svg class="h-5 w-5 text-blue-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    <span class="text-gray-700"><strong>Analytics avanzados</strong></span>
-                                </div>
-                                <div class="flex items-start">
-                                    <svg class="h-5 w-5 text-blue-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    <span class="text-gray-700"><strong>Integraciones API</strong></span>
-                                </div>
-                                <div class="flex items-start">
-                                    <svg class="h-5 w-5 text-blue-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    <span class="text-gray-700"><strong>Soporte prioritario 24/7</strong></span>
-                                </div>
-                                <div class="flex items-start">
-                                    <svg class="h-5 w-5 text-blue-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    <span class="text-gray-700"><strong>Usuarios ilimitados</strong></span>
+                            <p class="text-gray-600 text-sm">
+                                {{ $period['currency'] }} / {{ $period['interval_count'] > 1 ? $period['interval_count'] . ' ' : '' }}
+                                {{ $period['interval'] === 'month' ? 'mes(es)' : 'año' }}
+                            </p>
+                            
+                            @if(isset($period['discount']) && $period['discount'] > 0)
+                                <div class="mt-2 inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
+                                    Descuento del {{ $period['discount'] }}%
                                 </div>
                             @endif
                         </div>
 
+                        <!-- Features -->
+                        <div class="space-y-4 mb-8">
+                            @foreach($subscription['features'] as $feature)
+                                <div class="flex items-start">
+                                    <svg class="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span class="text-gray-700">{{ $feature }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+
                         <!-- CTA Button -->
-                        @if($currentSubscription && $currentSubscription->plan_type === $planType && $currentSubscription->isActive())
-                            <button class="w-full py-3 px-6 bg-gray-100 text-gray-500 font-medium rounded-xl cursor-not-allowed" disabled>
-                                Plan Actual
-                            </button>
-                        @else
-                            <a href="{{ route('subscription.checkout', $planType) }}" 
+                        @if($currentSubscription && $currentSubscription->isActive())
+                            <a href="{{ route('subscription.checkout', $periodType) }}" 
                                class="block w-full py-3 px-6 bg-gradient-to-r 
-                                      {{ $planType === 'premium' ? 'from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' : 'from-gray-800 to-gray-900 hover:from-gray-900 hover:to-black' }} 
+                                      {{ $periodType === 'yearly' ? 'from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' : 'from-gray-800 to-gray-900 hover:from-gray-900 hover:to-black' }} 
                                       text-white font-semibold rounded-xl text-center transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl">
-                                @if($user->canAccessSystem())
-                                    Cambiar a {{ $plan['name'] }}
-                                @else
-                                    Comenzar con {{ $plan['name'] }}
-                                @endif
+                                Cambiar a {{ $period['name'] }}
+                            </a>
+                        @else
+                            <a href="{{ route('subscription.checkout', $periodType) }}" 
+                               class="block w-full py-3 px-6 bg-gradient-to-r 
+                                      {{ $periodType === 'yearly' ? 'from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' : 'from-gray-800 to-gray-900 hover:from-gray-900 hover:to-black' }} 
+                                      text-white font-semibold rounded-xl text-center transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl">
+                                Comenzar Ahora
                             </a>
                         @endif
                     </div>
@@ -241,12 +217,16 @@
             <h2 class="text-2xl font-bold text-gray-900 text-center mb-8">Preguntas Frecuentes</h2>
             <div class="space-y-6">
                 <div class="bg-white rounded-lg p-6 shadow-md">
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">¿Puedo cambiar de plan en cualquier momento?</h3>
-                    <p class="text-gray-600">Sí, puedes actualizar o cambiar tu plan en cualquier momento. Los cambios se aplicarán en tu próximo ciclo de facturación.</p>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">¿Puedo cambiar de período de pago en cualquier momento?</h3>
+                    <p class="text-gray-600">Sí, puedes cambiar entre períodos (mensual, trimestral o anual) en cualquier momento. Los cambios se aplicarán en tu próximo ciclo de facturación.</p>
                 </div>
                 <div class="bg-white rounded-lg p-6 shadow-md">
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">¿Qué incluye el período de prueba gratuito?</h3>
-                    <p class="text-gray-600">El período de prueba de 7 días incluye acceso completo a todas las funcionalidades del sistema sin limitaciones.</p>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">¿Qué incluye el sistema?</h3>
+                    <p class="text-gray-600">El sistema incluye gestión completa de órdenes de servicio, control de inventario, gestión de clientes y técnicos, reportes, estadísticas y soporte técnico.</p>
+                </div>
+                <div class="bg-white rounded-lg p-6 shadow-md">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">¿Hay límite de usuarios o órdenes?</h3>
+                    <p class="text-gray-600">No, el sistema no tiene límites de usuarios, clientes u órdenes de servicio. Puedes gestionar tu taller sin restricciones.</p>
                 </div>
                 <div class="bg-white rounded-lg p-6 shadow-md">
                     <h3 class="text-lg font-medium text-gray-900 mb-2">¿Cómo funciona la garantía de reembolso?</h3>

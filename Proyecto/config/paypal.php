@@ -24,20 +24,45 @@ return [
         'log.LogLevel' => 'ERROR',
     ],
 
-    'plans' => [
-        'basic' => [
-            'name' => 'Servicio Técnico Básico',
-            'description' => 'Acceso al sistema de gestión de servicio técnico',
-            'price' => 29.99,
-            'currency' => 'USD',
-            'interval' => 'month',
+    'subscription' => [
+        'name' => 'Servicio Técnico - Sistema de Gestión',
+        'description' => 'Acceso completo al sistema de gestión de órdenes de servicio técnico',
+        'features' => [
+            'Gestión completa de órdenes de servicio',
+            'Control de inventario y equipos',
+            'Gestión de clientes y técnicos',
+            'Reportes y estadísticas',
+            'Soporte técnico',
+            'Actualizaciones gratuitas',
         ],
-        'premium' => [
-            'name' => 'Servicio Técnico Premium',
-            'description' => 'Acceso completo con funcionalidades avanzadas',
-            'price' => 49.99,
-            'currency' => 'USD',
+    ],
+
+    'periods' => [
+        'monthly' => [
+            'name' => 'Mensual',
+            'price' => 29990,
+            'currency' => 'CLP',
             'interval' => 'month',
+            'interval_count' => 1,
+            'discount' => 0,
+        ],
+        'quarterly' => [
+            'name' => 'Trimestral',
+            'price' => 79990,
+            'currency' => 'CLP',
+            'interval' => 'month',
+            'interval_count' => 3,
+            'discount' => 10, // 10% descuento
+            'original_price' => 89970,
+        ],
+        'yearly' => [
+            'name' => 'Anual',
+            'price' => 299990,
+            'currency' => 'CLP',
+            'interval' => 'year',
+            'interval_count' => 1,
+            'discount' => 16, // 16% descuento
+            'original_price' => 359880,
         ],
     ],
 ];
