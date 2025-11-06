@@ -39,7 +39,6 @@
                         <option value="pendiente" {{ $orden->estado === 'pendiente' ? 'selected' : '' }}>Pendiente</option>
                         <option value="en_progreso" {{ $orden->estado === 'en_progreso' ? 'selected' : '' }}>En Progreso</option>
                         <option value="completada" {{ $orden->estado === 'completada' ? 'selected' : '' }}>Completada</option>
-                        <option value="retrasada" {{ $orden->estado === 'retrasada' ? 'selected' : '' }}>Retrasada</option>
                     </select>
                 </div>
 

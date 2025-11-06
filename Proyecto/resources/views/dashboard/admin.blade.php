@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('shared.layouts.admin')
 
 @section('title', 'Dashboard Principal')
 @section('breadcrumb', 'Panel de Control')

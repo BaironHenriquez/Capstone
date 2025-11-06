@@ -41,11 +41,11 @@ class OrdenServicioController extends Controller
         // Calcular estadísticas solo del servicio técnico actual
         $estadisticas = [
             'total' => OrdenServicio::count(),
-            'pendientes' => OrdenServicio::where('estado', 'Pendiente')->count(),
-            'en_progreso' => OrdenServicio::where('estado', 'En Progreso')->count(),
-            'completadas' => OrdenServicio::where('estado', 'Completada')->count(),
+            'pendientes' => OrdenServicio::where('estado', 'pendiente')->count(),
+            'en_progreso' => OrdenServicio::where('estado', 'en_progreso')->count(),
+            'completadas' => OrdenServicio::where('estado', 'completada')->count(),
             'retrasadas' => OrdenServicio::whereDate('fecha_aprox_entrega', '<', now())
-                                        ->whereNotIn('estado', ['Completada', 'Cancelada'])
+                                        ->whereNotIn('estado', ['completada', 'cancelada'])
                                         ->count()
         ];
 
@@ -85,7 +85,7 @@ class OrdenServicioController extends Controller
             $request->validate([
                 'tipo_servicio'        => 'required|string|max:100',
                 'descripcion_problema' => 'required|string|min:5',
-                'prioridad'            => 'required|string|in:Baja,Media,Alta,Urgente',
+                'prioridad'            => 'required|string|in:baja,media,alta,urgente',
                 'estado'               => 'nullable|string|max:45',
                 'precio_presupuestado' => 'nullable|numeric',
                 'abono'                => 'nullable|numeric',
@@ -277,7 +277,7 @@ class OrdenServicioController extends Controller
     {
         try {
             $request->validate([
-                'estado' => 'required|string|in:pendiente,asignado,en_progreso,completada,entregada,cancelada'
+                'estado' => 'required|string|in:pendiente,en_progreso,completada'
             ]);
 
             $orden = OrdenServicio::findOrFail($id);

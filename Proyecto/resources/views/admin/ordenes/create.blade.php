@@ -223,11 +223,11 @@
                                     required 
                                     class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all">
                                 <option value="">Seleccione...</option>
-                                <option value="Reparación">🔧 Reparación</option>
-                                <option value="Mantenimiento">⚙️ Mantenimiento</option>
-                                <option value="Instalación">📦 Instalación</option>
-                                <option value="Revisión">🔍 Revisión</option>
-                                <option value="Diagnóstico">💡 Diagnóstico</option>
+                                <option value="reparacion">🔧 Reparación</option>
+                                <option value="mantenimiento">⚙️ Mantenimiento</option>
+                                <option value="instalacion">📦 Instalación</option>
+                                <option value="consultoria">🔍 Consultoría</option>
+                                <option value="soporte">💡 Soporte Técnico</option>
                             </select>
                         </div>
 
@@ -240,10 +240,10 @@
                             <select name="prioridad" 
                                     required 
                                     class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all">
-                                <option value="Baja">🟢 Baja</option>
-                                <option value="Media" selected>🟡 Media</option>
-                                <option value="Alta">🔴 Alta</option>
-                                <option value="Urgente">⚠️ Urgente</option>
+                                <option value="baja">🟢 Baja</option>
+                                <option value="media" selected>🟡 Media</option>
+                                <option value="alta">🔴 Alta</option>
+                                <option value="urgente">⚠️ Urgente</option>
                             </select>
                         </div>
 
@@ -255,7 +255,7 @@
                             </label>
                             <select name="estado" 
                                     class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all bg-gray-50">
-                                <option value="Pendiente" selected>⏳ Pendiente</option>
+                                <option value="pendiente" selected>⏳ Pendiente</option>
                             </select>
                         </div>
 
