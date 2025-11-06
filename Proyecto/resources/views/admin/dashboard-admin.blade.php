@@ -197,7 +197,7 @@
             </a>
 
             {{-- Configuración del Servicio Técnico --}}
-            <a href="#" class="block stat-card bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white hover:shadow-xl">
+            <a href="{{ route('configuracion.index') }}" class="block stat-card bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white hover:shadow-xl">
                 <div class="flex justify-between items-start mb-4">
                     <div class="bg-white bg-opacity-20 rounded-lg p-3">
                         <i class="fas fa-cog text-2xl"></i>

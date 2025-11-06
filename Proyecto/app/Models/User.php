@@ -94,6 +94,17 @@ class User extends Authenticatable
     {
         return $this->hasOne(Subscription::class)->where('status', 'active');
     }
+    
+    /**
+     * Accessor para obtener la suscripción activa (singular)
+     */
+    public function getSubscriptionAttribute()
+    {
+        return $this->subscriptions()
+            ->where('status', 'active')
+            ->where('ends_at', '>', now())
+            ->first();
+    }
 
     /**
      * Relación con pagos

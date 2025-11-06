@@ -100,6 +100,11 @@ class PayPalController extends Controller
             $period = $periods[$periodType];
             $subscription = config('paypal.subscription');
 
+            // Desactivar suscripciones anteriores del usuario
+            Subscription::where('user_id', $user->id)
+                ->where('status', 'active')
+                ->update(['status' => 'cancelled']);
+
             // Calcular fecha de fin según el período
             $endsAt = now();
             if ($period['interval'] === 'month') {

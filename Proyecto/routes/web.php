@@ -17,6 +17,7 @@ use App\Http\Controllers\IAController;
 use App\Http\Controllers\GestionTecnicosController;
 use App\Http\Controllers\GestionClientesController;
 use App\Http\Controllers\GestionEquiposMarcasController;
+use App\Http\Controllers\ConfiguracionController;
 
 // Página principal
 Route::get('/', function () {
@@ -79,6 +80,13 @@ Route::middleware('auth')->group(function () {
     
     // Dashboard requiere suscripción activa Y servicio técnico completo
     Route::middleware(['subscription', 'technical.service'])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Rutas de configuración (requieren suscripción y servicio técnico)
+    Route::middleware(['subscription', 'technical.service'])->prefix('configuracion')->name('configuracion.')->group(function () {
+        Route::get('/', [ConfiguracionController::class, 'index'])->name('index');
+        Route::put('/servicio', [ConfiguracionController::class, 'updateServicio'])->name('update-servicio');
+        Route::put('/personal', [ConfiguracionController::class, 'updatePersonal'])->name('update-personal');
+    });
 });
 
 // Rutas demo (sin middleware auth para pruebas)
