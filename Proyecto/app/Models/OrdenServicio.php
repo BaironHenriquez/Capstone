@@ -199,4 +199,36 @@ class OrdenServicio extends Model
     {
         // Ejemplo: puedes implementar registro de acciones aquí
     }
+
+    /**
+     * 🎨 Accessor para el badge de estado con colores
+     */
+    public function getEstadoBadgeAttribute()
+    {
+        $badges = [
+            'pendiente' => 'bg-yellow-100 text-yellow-800',
+            'asignado' => 'bg-blue-100 text-blue-800',
+            'en_progreso' => 'bg-indigo-100 text-indigo-800',
+            'completada' => 'bg-green-100 text-green-800',
+            'entregada' => 'bg-teal-100 text-teal-800',
+            'cancelada' => 'bg-red-100 text-red-800',
+        ];
+
+        return $badges[$this->estado] ?? 'bg-gray-100 text-gray-800';
+    }
+
+    /**
+     * 🎨 Accessor para el badge de prioridad con colores
+     */
+    public function getPrioridadBadgeAttribute()
+    {
+        $badges = [
+            'baja' => 'bg-gray-100 text-gray-800',
+            'media' => 'bg-blue-100 text-blue-800',
+            'alta' => 'bg-orange-100 text-orange-800',
+            'urgente' => 'bg-red-100 text-red-800',
+        ];
+
+        return $badges[$this->prioridad] ?? 'bg-blue-100 text-blue-800';
+    }
 }

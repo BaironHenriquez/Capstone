@@ -36,8 +36,63 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 mb-1">Panel de Control Técnico</h1>
                 <p class="text-gray-600">Resumen general del estado del servicio técnico</p>
-                <p class="text-sm text-gray-500 mt-2">Última actualización: {{ now()->format('d/m/Y H:i') }}</p>
+                <p class="text-sm text-gray-500 mt-2">Última actualización: <span id="last-update">{{ now()->format('d/m/Y H:i') }}</span></p>
             </div>
+            <button onclick="location.reload()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center transition-colors">
+                <i class="fas fa-sync-alt mr-2"></i>
+                Actualizar
+            </button>
+        </div>
+    </div>
+
+    {{-- Métricas en Tiempo Real --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {{-- Total Órdenes --}}
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                    <i class="fas fa-clipboard-list text-2xl"></i>
+                </div>
+                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">Total</span>
+            </div>
+            <p class="text-3xl font-bold mb-1" id="metric-total">{{ $resumenOrdenes['total'] ?? 0 }}</p>
+            <p class="text-sm text-blue-100">Órdenes de Servicio</p>
+        </div>
+
+        {{-- Órdenes Pendientes --}}
+        <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                    <i class="fas fa-clock text-2xl"></i>
+                </div>
+                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">Activas</span>
+            </div>
+            <p class="text-3xl font-bold mb-1" id="metric-pendientes">{{ $resumenOrdenes['pendientes'] ?? 0 }}</p>
+            <p class="text-sm text-yellow-100">Pendientes</p>
+        </div>
+
+        {{-- Órdenes en Progreso --}}
+        <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                    <i class="fas fa-tools text-2xl"></i>
+                </div>
+                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">En Curso</span>
+            </div>
+            <p class="text-3xl font-bold mb-1" id="metric-progreso">{{ $resumenOrdenes['en_progreso'] ?? 0 }}</p>
+            <p class="text-sm text-indigo-100">En Progreso</p>
+        </div>
+
+        {{-- Órdenes Completadas --}}
+        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                    <i class="fas fa-check-circle text-2xl"></i>
+                </div>
+                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">Este Mes</span>
+            </div>
+            <p class="text-3xl font-bold mb-1" id="metric-completadas">{{ $metricas['ordenes_mes_actual'] ?? 0 }}</p>
+            <p class="text-sm text-green-100">Completadas</p>
         </div>
     </div>
 
@@ -149,19 +204,19 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {{-- Gestión de Técnicos --}}
-            <a href="{{ route('tecnicos.index') }}" class="block stat-card bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white hover:shadow-xl">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="bg-white bg-opacity-20 rounded-lg p-3">
-                        <i class="fas fa-user-cog text-2xl"></i>
-                    </div>
-                    <span class="bg-white bg-opacity-20 text-xs px-2 py-1 rounded-full">NUEVO</span>
+            <a href="{{ url('/admin/ordenes') }}" class="block stat-card bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white hover:shadow-xl">
+            <div class="flex justify-between items-start mb-4">
+                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                <i class="fas fa-user-cog text-2xl"></i>
                 </div>
-                <h3 class="text-lg font-bold mb-2">Gestión de Técnicos</h3>
-                <p class="text-sm text-blue-100 mb-4">Crear, editar y administrar técnicos del sistema</p>
-                <div class="flex items-center text-sm">
-                    <span>Ver todos</span>
-                    <i class="fas fa-arrow-right ml-2"></i>
-                </div>
+                <span class="bg-white bg-opacity-20 text-xs px-2 py-1 rounded-full">NUEVO</span>
+            </div>
+            <h3 class="text-lg font-bold mb-2">Gestión de Técnicos</h3>
+            <p class="text-sm text-blue-100 mb-4">Crear, editar y administrar técnicos del sistema</p>
+            <div class="flex items-center text-sm">
+                <span>Ver todos</span>
+                <i class="fas fa-arrow-right ml-2"></i>
+            </div>
             </a>
 
             {{-- Órdenes de Servicio --}}
@@ -218,9 +273,20 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {{-- Productividad Semanal --}}
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-            <div class="flex items-center mb-6">
-                <i class="fas fa-chart-line text-blue-500 text-xl mr-3"></i>
-                <h2 class="text-xl font-bold text-gray-900">Productividad Semanal</h2>
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center">
+                    <i class="fas fa-chart-line text-blue-500 text-xl mr-3"></i>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900">Órdenes Creadas por Día</h2>
+                        <p class="text-xs text-gray-500">
+                            {{ now()->startOfWeek()->format('d/m') }} - {{ now()->endOfWeek()->format('d/m/Y') }}
+                        </p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-2xl font-bold text-blue-600">{{ array_sum($productividadSemanal) }}</p>
+                    <p class="text-xs text-gray-500">Órdenes creadas esta semana</p>
+                </div>
             </div>
             <div style="height: 300px;">
                 <canvas id="productividadChart"></canvas>
@@ -393,27 +459,52 @@ document.addEventListener('DOMContentLoaded', function() {
         data: {
             labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
             datasets: [{
-                label: 'Órdenes Completadas',
-                data: [12, 15, 18, 18, 20, 8, 5],
+                label: 'Órdenes Creadas',
+                data: [
+                    @foreach($productividadSemanal as $ordenes)
+                        {{ $ordenes }},
+                    @endforeach
+                ],
                 borderColor: '#3b82f6',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
                 fill: true,
                 tension: 0.4,
-                borderWidth: 2
+                borderWidth: 2,
+                pointBackgroundColor: '#3b82f6',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false }
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: { size: 14, weight: 'bold' },
+                    bodyFont: { size: 13 },
+                    callbacks: {
+                        label: function(context) {
+                            return 'Órdenes: ' + context.parsed.y;
+                        }
+                    }
+                }
             },
             scales: {
                 y: {
                     beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        font: { size: 12 }
+                    },
                     grid: { color: 'rgba(0,0,0,0.05)' }
                 },
                 x: {
+                    ticks: { font: { size: 12 } },
                     grid: { display: false }
                 }
             }
@@ -423,7 +514,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Gráfico de Carga Laboral
     @if(count($tecnicos) > 0)
     const ctxBar = document.getElementById('cargaChart').getContext('2d');
-    new Chart(ctxBar, {
+    window.cargaTecnicosChart = new Chart(ctxBar, {
         type: 'bar',
         data: {
             labels: [
@@ -466,5 +557,55 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     @endif
 });
+</script>
+
+<script>
+// Función para actualizar el dashboard
+function refreshDashboard() {
+    const icon = document.getElementById('refresh-icon');
+    icon.classList.add('fa-spin');
+    
+    fetch('{{ route("dashboard.metrics") }}')
+        .then(response => response.json())
+        .then(data => {
+            // Actualizar métricas de órdenes
+            document.getElementById('metric-total').textContent = data.resumenOrdenes.total;
+            document.getElementById('metric-pendientes').textContent = data.resumenOrdenes.pendientes;
+            document.getElementById('metric-progreso').textContent = data.resumenOrdenes.en_progreso;
+            document.getElementById('metric-completadas').textContent = data.resumenOrdenes.completadas;
+            
+            // Actualizar gráfico de carga laboral de técnicos si existe
+            if (window.cargaTecnicosChart && data.tecnicos) {
+                const labels = data.tecnicos.map(t => t.nombre.split(' ')[0]);
+                const cargaData = data.tecnicos.map(t => t.carga_trabajo);
+                const colores = data.tecnicos.map(t => 
+                    t.carga_trabajo >= 90 ? '#ef4444' : 
+                    (t.carga_trabajo >= 70 ? '#f59e0b' : '#10b981')
+                );
+                
+                window.cargaTecnicosChart.data.labels = labels;
+                window.cargaTecnicosChart.data.datasets[0].data = cargaData;
+                window.cargaTecnicosChart.data.datasets[0].backgroundColor = colores;
+                window.cargaTecnicosChart.update();
+            }
+            
+            // Actualizar timestamp
+            const now = new Date();
+            document.getElementById('last-update').textContent = 
+                now.toLocaleDateString('es-CL') + ' ' + now.toLocaleTimeString('es-CL');
+            
+            // Detener animación
+            setTimeout(() => {
+                icon.classList.remove('fa-spin');
+            }, 500);
+        })
+        .catch(error => {
+            console.error('Error al actualizar:', error);
+            icon.classList.remove('fa-spin');
+        });
+}
+
+// Actualización automática cada 30 segundos
+setInterval(refreshDashboard, 30000);
 </script>
 @endpush

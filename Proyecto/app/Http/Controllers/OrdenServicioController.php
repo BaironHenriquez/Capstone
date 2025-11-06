@@ -325,4 +325,31 @@ class OrdenServicioController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * 🗑️ Eliminar una orden de servicio
+     */
+    public function destroy($id)
+    {
+        try {
+            $orden = OrdenServicio::findOrFail($id);
+            
+            // Guardar información para el mensaje
+            $numeroOrden = $orden->numero_orden;
+            
+            // Eliminar la orden (esto también eliminará registros relacionados si hay cascada)
+            $orden->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Orden {$numeroOrden} eliminada correctamente"
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar la orden: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -92,6 +92,11 @@ Route::get('/dashboard-admin', [DashboardController::class, 'adminDashboard'])
     ->middleware('auth')
     ->name('dashboard-admin');
 
+// API endpoint para métricas en tiempo real
+Route::get('/dashboard/metrics', [DashboardController::class, 'getMetrics'])
+    ->middleware('auth')
+    ->name('dashboard.metrics');
+
 // Dashboard técnico (requiere autenticación y suscripción)
 Route::middleware(['auth', 'subscription'])->get('/dashboard_tecnico', function () {
     return view('tecnico.dashboard_tecnico');
