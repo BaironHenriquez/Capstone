@@ -3,6 +3,31 @@
 @section('title', 'Órdenes de Servicio')
 @section('breadcrumb', 'Órdenes de Servicio')
 
+@push('styles')
+<style>
+    /* Asegurar que los dropdowns no se corten */
+    .tabla-ordenes-container {
+        overflow: visible !important;
+    }
+    .tabla-ordenes-container table {
+        overflow: visible !important;
+    }
+    .tabla-ordenes-container tbody {
+        overflow: visible !important;
+    }
+    tbody tr {
+        position: relative;
+    }
+    tbody td {
+        overflow: visible !important;
+    }
+    /* Asegurar que el contenedor padre no corte el contenido */
+    .bg-white.rounded-lg {
+        overflow: visible !important;
+    }
+</style>
+@endpush
+
 @section('content')
 <!-- Header de la página -->
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
@@ -144,8 +169,8 @@
 </div>
 
 <!-- Lista de órdenes -->
-<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-    <div class="overflow-x-auto">
+<div class="bg-white rounded-lg shadow-sm border border-gray-200" style="overflow: visible !important;">
+    <div class="overflow-x-auto tabla-ordenes-container" style="overflow-y: visible !important;">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
@@ -210,29 +235,20 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="relative inline-block" x-data="{ open: false }">
-                            <button @click="open = !open" type="button" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $orden->estado_badge ?? 'bg-gray-100 text-gray-800' }} hover:opacity-80 transition-opacity cursor-pointer">
-                                <span class="mr-1">{{ ucfirst(str_replace('_', ' ', $orden->estado ?? 'pendiente')) }}</span>
-                                <i class="fas fa-chevron-down text-xs"></i>
+                            <button @click="open = !open" type="button" class="px-3 py-1.5 inline-flex items-center text-xs leading-5 font-semibold rounded-full {{ $orden->estado_badge ?? 'bg-gray-100 text-gray-800' }} hover:opacity-80 transition-opacity cursor-pointer min-w-[120px] justify-between">
+                                <span>{{ ucfirst(str_replace('_', ' ', $orden->estado ?? 'pendiente')) }}</span>
+                                <i class="fas fa-chevron-down text-xs ml-2"></i>
                             </button>
                             
-                            <div x-show="open" @click.away="open = false" x-cloak class="absolute z-10 mt-1 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-40">
-                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'pendiente')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
-                                    <span class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold">Pendiente</span>
+                            <div x-show="open" @click.away="open = false" x-cloak class="absolute z-50 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[140px] left-0">
+                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'pendiente')" class="block w-full text-center px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors">
+                                    <span class="inline-block px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold">Pendiente</span>
                                 </button>
-                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'asignado')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
-                                    <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold">Asignado</span>
+                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'en_progreso')" class="block w-full text-center px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors">
+                                    <span class="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-semibold">En Progreso</span>
                                 </button>
-                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'en_progreso')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
-                                    <span class="px-2 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-semibold">En Progreso</span>
-                                </button>
-                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'completada')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
-                                    <span class="px-2 py-1 rounded-full bg-green-100 text-green-800 text-xs font-semibold">Completada</span>
-                                </button>
-                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'entregada')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
-                                    <span class="px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">Entregada</span>
-                                </button>
-                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'cancelada')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
-                                    <span class="px-2 py-1 rounded-full bg-red-100 text-red-800 text-xs font-semibold">Cancelada</span>
+                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'completada')" class="block w-full text-center px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors">
+                                    <span class="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 text-xs font-semibold">Completada</span>
                                 </button>
                             </div>
                         </div>

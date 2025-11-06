@@ -26,7 +26,6 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('admin123'),
                 'contrasena' => 'admin123',
                 'role_id' => 3, // Administrador
-                'servicio_tecnico_id' => 1, // TechFix Pro
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -42,7 +41,6 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('tecnico123'),
                 'contrasena' => 'tecnico123',
                 'role_id' => 2, // Técnico
-                'servicio_tecnico_id' => 1, // TechFix Pro
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -58,7 +56,6 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('trabajador123'),
                 'contrasena' => 'trabajador123',
                 'role_id' => 1, // Trabajador
-                'servicio_tecnico_id' => 1, // TechFix Pro
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -74,7 +71,6 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('demo123'),
                 'contrasena' => 'demo123',
                 'role_id' => 2, // Técnico
-                'servicio_tecnico_id' => 2, // RepairZone
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -90,7 +86,6 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('123456'),
                 'contrasena' => '123456',
                 'role_id' => 2, // Técnico
-                'servicio_tecnico_id' => 1, // TechFix Pro
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),

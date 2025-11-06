@@ -81,7 +81,7 @@ class DashboardController extends Controller
             'en_progreso' => 17,
             'completadas' => 41,
             'canceladas' => 3,
-            'revision_necesaria' => 5
+            'en_revision' => 5
         ];
         
         $tecnicos = [
