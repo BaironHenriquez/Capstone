@@ -240,7 +240,7 @@
         </div>
     </div>
 
-    <!-- JavaScript para manejar el estado del formulario -->
+    <!-- JavaScript para manejar el estado del formulario y validación en tiempo real -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('technicalServiceForm');
@@ -249,10 +249,159 @@
             const btnLoading = document.getElementById('btnLoading');
             const successMessage = document.getElementById('successMessage');
             
+            // Campos a validar en tiempo real
+            const fieldsToValidate = {
+                'nombre_servicio': document.getElementById('nombre_servicio'),
+                'correo': document.getElementById('correo'),
+                'telefono': document.getElementById('telefono'),
+                'direccion': document.getElementById('direccion'),
+                'rut': document.getElementById('rut')
+            };
+            
+            // Objeto para almacenar el estado de disponibilidad de cada campo
+            const availabilityStatus = {};
+            
+            // Función para crear mensaje de feedback
+            function createFeedbackElement(fieldName) {
+                const field = fieldsToValidate[fieldName];
+                if (!field) return null;
+                
+                // Eliminar feedback previo si existe
+                const existingFeedback = field.parentElement.querySelector('.availability-feedback');
+                if (existingFeedback) {
+                    existingFeedback.remove();
+                }
+                
+                // Crear nuevo elemento de feedback
+                const feedback = document.createElement('div');
+                feedback.className = 'availability-feedback mt-2 text-sm';
+                field.parentElement.appendChild(feedback);
+                
+                return feedback;
+            }
+            
+            // Función para verificar disponibilidad de un campo
+            async function checkAvailability(fieldName, value) {
+                if (!value || value.trim() === '') {
+                    availabilityStatus[fieldName] = true;
+                    const feedback = createFeedbackElement(fieldName);
+                    if (feedback) feedback.innerHTML = '';
+                    updateSubmitButton();
+                    return;
+                }
+                
+                const feedback = createFeedbackElement(fieldName);
+                if (!feedback) return;
+                
+                // Mostrar "Consultando disponibilidad..."
+                feedback.innerHTML = `
+                    <div class="flex items-center text-gray-600">
+                        <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Consultando disponibilidad...
+                    </div>
+                `;
+                
+                try {
+                    const response = await fetch('{{ route("setup.check-availability") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            field: fieldName,
+                            value: value
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    availabilityStatus[fieldName] = data.available;
+                    
+                    if (data.available) {
+                        feedback.innerHTML = `
+                            <div class="flex items-center text-green-600">
+                                <svg class="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                ✓ Disponible
+                            </div>
+                        `;
+                        fieldsToValidate[fieldName].classList.remove('border-red-500');
+                        fieldsToValidate[fieldName].classList.add('border-green-500');
+                    } else {
+                        feedback.innerHTML = `
+                            <div class="flex items-center text-red-600">
+                                <svg class="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                </svg>
+                                ✗ ${data.message}
+                            </div>
+                        `;
+                        fieldsToValidate[fieldName].classList.remove('border-green-500');
+                        fieldsToValidate[fieldName].classList.add('border-red-500');
+                    }
+                } catch (error) {
+                    console.error('Error al verificar disponibilidad:', error);
+                    feedback.innerHTML = `
+                        <div class="text-gray-500 text-xs">
+                            Error al verificar disponibilidad
+                        </div>
+                    `;
+                    availabilityStatus[fieldName] = true; // Permitir continuar si hay error de red
+                }
+                
+                updateSubmitButton();
+            }
+            
+            // Función para actualizar el estado del botón de envío
+            function updateSubmitButton() {
+                const allAvailable = Object.values(availabilityStatus).every(status => status === true);
+                
+                if (submitBtn) {
+                    submitBtn.disabled = !allAvailable;
+                    if (!allAvailable) {
+                        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                        submitBtn.title = 'Corrige los campos duplicados antes de continuar';
+                    } else {
+                        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        submitBtn.title = '';
+                    }
+                }
+            }
+            
+            // Agregar listeners a cada campo
+            Object.keys(fieldsToValidate).forEach(fieldName => {
+                const field = fieldsToValidate[fieldName];
+                if (field) {
+                    let timeoutId;
+                    
+                    field.addEventListener('input', function() {
+                        // Limpiar timeout anterior
+                        clearTimeout(timeoutId);
+                        
+                        // Esperar 800ms después de que el usuario deja de escribir
+                        timeoutId = setTimeout(() => {
+                            checkAvailability(fieldName, this.value);
+                        }, 800);
+                    });
+                    
+                    // Verificar al cargar si hay valor (para edición)
+                    if (field.value) {
+                        checkAvailability(fieldName, field.value);
+                    } else {
+                        availabilityStatus[fieldName] = true;
+                    }
+                }
+            });
+            
             // Función para resetear el botón
             function resetButton() {
                 if (submitBtn) {
                     submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                     btnText.classList.remove('hidden');
                     btnLoading.classList.add('hidden');
                 }
@@ -274,7 +423,6 @@
             function showSuccess() {
                 if (successMessage) {
                     successMessage.classList.remove('hidden');
-                    // Scroll hacia arriba para mostrar el mensaje
                     successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }
@@ -283,6 +431,15 @@
                 let formSubmitted = false;
                 
                 form.addEventListener('submit', function(e) {
+                    // Verificar que todos los campos estén disponibles
+                    const allAvailable = Object.values(availabilityStatus).every(status => status === true);
+                    
+                    if (!allAvailable) {
+                        e.preventDefault();
+                        alert('Por favor, corrige los campos duplicados antes de continuar.');
+                        return false;
+                    }
+                    
                     // Evitar múltiples envíos
                     if (formSubmitted) {
                         e.preventDefault();
@@ -301,7 +458,7 @@
                     
                     if (!allValid) {
                         console.log('Campos requeridos faltantes');
-                        return; // Dejar que la validación HTML nativa se encargue
+                        return;
                     }
                     
                     // Marcar como enviado y mostrar estado de carga
@@ -310,7 +467,7 @@
                     
                     console.log('Formulario enviado correctamente');
                     
-                    // Mostrar mensaje de éxito después de 1 segundo (simulando guardado)
+                    // Mostrar mensaje de éxito después de 1 segundo
                     setTimeout(function() {
                         if (formSubmitted) {
                             showSuccess();

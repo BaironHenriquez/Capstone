@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - {{ $plan['name'] }}</title>
+    <title>Checkout - {{ $subscription['name'] }} ({{ $selectedPeriod['name'] }})</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -87,16 +87,29 @@
                         <!-- Plan Details -->
                         <div class="border-b border-gray-200 pb-6 mb-6">
                             <h3 class="text-lg font-semibold text-gray-900 mb-2">
-                                {{ $plan['name'] }}
+                                {{ $subscription['name'] }}
                             </h3>
-                            <p class="text-gray-600 mb-4">
-                                {{ $plan['description'] }}
+                            <p class="text-gray-600 mb-2">
+                                Período: <strong>{{ $selectedPeriod['name'] }}</strong>
                             </p>
+                            <p class="text-gray-600 mb-4">
+                                {{ $subscription['description'] }}
+                            </p>
+                            
+                            @if(isset($selectedPeriod['original_price']))
+                                <div class="text-sm text-gray-500 line-through mb-1">
+                                    ${{ number_format($selectedPeriod['original_price'], 0, ',', '.') }} {{ $selectedPeriod['currency'] }}
+                                </div>
+                                <div class="inline-block px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-semibold mb-2">
+                                    Ahorro: ${{ number_format($selectedPeriod['original_price'] - $selectedPeriod['price'], 0, ',', '.') }} ({{ $selectedPeriod['discount'] }}% desc)
+                                </div>
+                            @endif
+                            
                             <div class="flex items-center justify-between">
                                 <span class="text-2xl font-bold text-gray-900">
-                                    ${{ $plan['price'] }}
+                                    ${{ number_format($selectedPeriod['price'], 0, ',', '.') }}
                                 </span>
-                                <span class="text-gray-600">/ mes</span>
+                                <span class="text-gray-600">{{ $selectedPeriod['currency'] }} / {{ $selectedPeriod['interval_count'] > 1 ? $selectedPeriod['interval_count'] . ' ' : '' }}{{ $selectedPeriod['interval'] === 'month' ? 'mes(es)' : 'año' }}</span>
                             </div>
                         </div>
 
@@ -104,44 +117,14 @@
                         <div class="mb-6">
                             <h4 class="font-medium text-gray-900 mb-3">Incluye:</h4>
                             <div class="space-y-2">
-                                <div class="flex items-center">
-                                    <svg class="h-4 w-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    <span class="text-sm text-gray-700">Gestión completa de órdenes</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <svg class="h-4 w-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    <span class="text-sm text-gray-700">Control de inventario</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <svg class="h-4 w-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    <span class="text-sm text-gray-700">Gestión de clientes</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <svg class="h-4 w-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    <span class="text-sm text-gray-700">Reportes y analytics</span>
-                                </div>
-                                @if($plan['type'] === 'premium')
+                                @foreach($subscription['features'] as $feature)
                                     <div class="flex items-center">
-                                        <svg class="h-4 w-4 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="h-4 w-4 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                         </svg>
-                                        <span class="text-sm text-gray-700"><strong>Funcionalidades premium</strong></span>
+                                        <span class="text-sm text-gray-700">{{ $feature }}</span>
                                     </div>
-                                    <div class="flex items-center">
-                                        <svg class="h-4 w-4 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                        <span class="text-sm text-gray-700"><strong>Soporte prioritario 24/7</strong></span>
-                                    </div>
-                                @endif
+                                @endforeach
                             </div>
                         </div>
 
@@ -149,16 +132,16 @@
                         <div class="bg-gray-50 rounded-lg p-4">
                             <div class="flex items-center justify-between mb-2">
                                 <span class="text-sm text-gray-600">Subtotal</span>
-                                <span class="text-sm font-medium text-gray-900">${{ $plan['price'] }}</span>
+                                <span class="text-sm font-medium text-gray-900">${{ number_format($selectedPeriod['price'], 0, ',', '.') }}</span>
                             </div>
                             <div class="flex items-center justify-between mb-2">
-                                <span class="text-sm text-gray-600">Impuestos</span>
-                                <span class="text-sm font-medium text-gray-900">$0.00</span>
+                                <span class="text-sm text-gray-600">Impuestos (IVA 19%)</span>
+                                <span class="text-sm font-medium text-gray-900">${{ number_format($selectedPeriod['price'] * 0.19, 0, ',', '.') }}</span>
                             </div>
                             <div class="border-t border-gray-200 pt-2">
                                 <div class="flex items-center justify-between">
                                     <span class="text-base font-medium text-gray-900">Total</span>
-                                    <span class="text-xl font-bold text-gray-900">${{ $plan['price'] }}</span>
+                                    <span class="text-xl font-bold text-gray-900">${{ number_format($selectedPeriod['price'] * 1.19, 0, ',', '.') }} {{ $selectedPeriod['currency'] }}</span>
                                 </div>
                             </div>
                         </div>
@@ -249,7 +232,9 @@
                         <!-- Payment Button -->
                         <form action="{{ route('paypal.create.payment') }}" method="POST" id="paymentForm">
                             @csrf
-                            <input type="hidden" name="plan_type" value="{{ $plan['type'] }}">
+                            <input type="hidden" name="period_type" value="{{ $selectedPeriod['type'] }}">
+                            <input type="hidden" name="amount" value="{{ $selectedPeriod['price'] }}">
+                            <input type="hidden" name="currency" value="{{ $selectedPeriod['currency'] }}">
                             
                             <button type="submit" id="payButton"
                                     class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
@@ -257,7 +242,7 @@
                                     <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                                     </svg>
-                                    Pagar con PayPal - ${{ $plan['price'] }}
+                                    Pagar con PayPal - ${{ number_format($selectedPeriod['price'], 0, ',', '.') }} {{ $selectedPeriod['currency'] }}
                                 </span>
                                 <span id="loadingText" class="hidden flex items-center justify-center">
                                     <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

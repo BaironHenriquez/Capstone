@@ -241,7 +241,7 @@
 
             <div class="max-w-3xl mx-auto">
                 <div class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-3xl shadow-2xl p-8 md:p-12">
-                    <form id="order-lookup-form" class="space-y-6">
+                    <form id="order-lookup-form" action="{{ route('ordenes.buscar') }}" method="GET" class="space-y-6">
                         <div>
                             <label for="order-code" class="block text-sm font-bold text-gray-700 mb-3">
                                 Código de Orden de Servicio
@@ -250,17 +250,17 @@
                                    id="order-code" 
                                    name="order_code" 
                                    class="w-full px-6 py-4 text-lg border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition"
-                                   placeholder="Ejemplo: BA-2025-001"
-                                   maxlength="11"
+                                   placeholder="Ejemplo: TS-2025-3956 o BA-2025-001"
+                                   maxlength="20"
                                    required>
                             <p class="text-sm text-gray-500 mt-2 flex items-center">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
-                                Formato esperado: BA-YYYY-NNN
+                                Formato: TS-YYYY-NNNN o BA-YYYY-NNN
                             </p>
                         </div>
-<<<<<<< HEAD
+                        
                         <button type="submit" 
                                 class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-5 rounded-xl font-bold text-lg transition transform hover:scale-105 shadow-lg flex items-center justify-center">
                             <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -268,53 +268,26 @@
                             </svg>
                             Buscar Orden
                         </button>
-                    </form>
-                    
-                    <!-- Resultado de búsqueda -->
-                    <div id="order-result" class="mt-8 hidden"></div>
-=======
                         
-                        <form id="order-lookup-form" action="{{ route('ordenes.buscar') }}" method="GET" class="space-y-6">
-                            <div>
-                                <label for="order-code" class="block text-sm font-semibold text-baieco-primary mb-3">
-                                    Código de Orden de Servicio
-                                </label>
-                                <input type="text" id="order-code" name="order_code" 
-                                       class="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-baieco-secondary focus:ring-opacity-20 focus:border-baieco-secondary transition-all duration-300 text-lg focus-ring"
-                                       placeholder="Ej: BA-2025-001"
-                                       maxlength="20"
-                                       required>
-                                <p class="text-sm text-gray-500 mt-2">Formato: BA-YYYY-NNN o TS-YYYY-NNNN</p>
+                        @if(session('error'))
+                            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg" role="alert">
+                                <p class="font-bold">❌ Error</p>
+                                <p>{{ session('error') }}</p>
+                                <p class="text-sm mt-2">💡 Intenta con uno de estos formatos:</p>
+                                <ul class="text-sm list-disc list-inside">
+                                    <li>TS-2025-3956</li>
+                                    <li>BA-2025-001</li>
+                                </ul>
                             </div>
-                            <button type="submit" 
-                                    class="w-full bg-gradient-to-r from-baieco-secondary to-baieco-primary hover:from-blue-600 hover:to-blue-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">
-                                <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                </svg>
-                                Buscar Orden
-                            </button>
-                            
-                            @if(session('error'))
-                                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mt-4" role="alert">
-                                    <p class="font-bold">❌ Error</p>
-                                    <p>{{ session('error') }}</p>
-                                    <p class="text-sm mt-2">💡 Intenta con uno de estos formatos:</p>
-                                    <ul class="text-sm list-disc list-inside">
-                                        <li>TS-2025-3956</li>
-                                        <li>BA-2025-001</li>
-                                    </ul>
-                                </div>
-                            @endif
-                            
-                            @if(session('success'))
-                                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mt-4" role="alert">
-                                    <p class="font-bold">✅ Éxito</p>
-                                    <p>{{ session('success') }}</p>
-                                </div>
-                            @endif
-                        </form>
-                    </div>
->>>>>>> cdba2a43de060147d6b7a088e24e66938740b949
+                        @endif
+                        
+                        @if(session('success'))
+                            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg" role="alert">
+                                <p class="font-bold">✅ Éxito</p>
+                                <p>{{ session('success') }}</p>
+                            </div>
+                        @endif
+                    </form>
                 </div>
 
                 <!-- Estados Info -->

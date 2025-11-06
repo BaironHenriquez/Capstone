@@ -16,28 +16,30 @@ class SubscriptionController extends Controller
         $user = Auth::user();
         $currentSubscription = $user->activeSubscription;
         
-        $plans = config('paypal.plans');
+        $subscription = config('paypal.subscription');
+        $periods = config('paypal.periods');
         
-        return view('subscription.plans', compact('plans', 'currentSubscription', 'user'));
+        return view('subscription.plans', compact('subscription', 'periods', 'currentSubscription', 'user'));
     }
 
     /**
-     * Mostrar página de checkout para un plan específico
+     * Mostrar página de checkout para un período específico
      */
-    public function checkout($planType)
+    public function checkout($period)
     {
         $user = Auth::user();
         
-        // Verificar que el plan existe
-        $plans = config('paypal.plans');
-        if (!array_key_exists($planType, $plans)) {
-            return redirect()->route('subscription.plans')->with('error', 'Plan no válido.');
+        // Verificar que el período existe
+        $periods = config('paypal.periods');
+        if (!array_key_exists($period, $periods)) {
+            return redirect()->route('subscription.plans')->with('error', 'Período de pago no válido.');
         }
         
-        $plan = $plans[$planType];
-        $plan['type'] = $planType;
+        $subscription = config('paypal.subscription');
+        $selectedPeriod = $periods[$period];
+        $selectedPeriod['type'] = $period;
         
-        return view('subscription.checkout', compact('plan', 'user'));
+        return view('subscription.checkout', compact('subscription', 'selectedPeriod', 'user'));
     }
 
     /**
