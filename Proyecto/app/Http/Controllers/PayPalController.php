@@ -16,13 +16,19 @@ class PayPalController extends Controller
     public function createPayment(Request $request)
     {
         $request->validate([
-            'plan_type' => 'required|string|in:basic,premium',
+            'period_type' => 'required|string|in:monthly,quarterly,yearly',
+            'amount' => 'required|numeric|min:0',
+            'currency' => 'required|string|in:CLP,USD',
         ]);
 
         $user = Auth::user();
-        $planType = $request->plan_type;
-        $plans = config('paypal.plans');
-        $plan = $plans[$planType];
+        $periodType = $request->period_type;
+        $amount = $request->amount;
+        $currency = $request->currency;
+        
+        $periods = config('paypal.periods');
+        $period = $periods[$periodType];
+        $subscription = config('paypal.subscription');
 
         try {
             // Simular creación de pago PayPal (en producción usarías el SDK real)
@@ -33,13 +39,14 @@ class PayPalController extends Controller
             Payment::create([
                 'user_id' => $user->id,
                 'paypal_payment_id' => $paymentId,
-                'amount' => $plan['price'],
-                'currency' => $plan['currency'],
+                'amount' => $amount,
+                'currency' => $currency,
                 'status' => 'pending',
                 'type' => 'subscription',
-                'description' => "Suscripción {$plan['name']}",
+                'description' => "{$subscription['name']} - {$period['name']}",
                 'paypal_response' => [
-                    'plan_type' => $planType,
+                    'period_type' => $periodType,
+                    'period_name' => $period['name'],
                     'created_at' => now()->toISOString()
                 ]
             ]);
@@ -88,21 +95,31 @@ class PayPalController extends Controller
             ]);
 
             // Crear suscripción
-            $planType = $payment->paypal_response['plan_type'];
-            $plans = config('paypal.plans');
-            $plan = $plans[$planType];
+            $periodType = $payment->paypal_response['period_type'];
+            $periods = config('paypal.periods');
+            $period = $periods[$periodType];
+            $subscription = config('paypal.subscription');
 
-            $subscription = Subscription::create([
+            // Calcular fecha de fin según el período
+            $endsAt = now();
+            if ($period['interval'] === 'month') {
+                $endsAt = now()->addMonths($period['interval_count']);
+            } elseif ($period['interval'] === 'year') {
+                $endsAt = now()->addYears($period['interval_count']);
+            }
+
+            $subscriptionRecord = Subscription::create([
                 'user_id' => $user->id,
-                'plan_type' => $planType,
+                'plan_type' => $periodType, // monthly, quarterly, yearly
                 'status' => 'active',
                 'paypal_subscription_id' => 'SUB-' . uniqid(),
-                'amount' => $plan['price'],
-                'currency' => $plan['currency'],
+                'amount' => $payment->amount,
+                'currency' => $payment->currency,
                 'starts_at' => now(),
-                'ends_at' => now()->addMonth(),
+                'ends_at' => $endsAt,
                 'paypal_data' => [
-                    'plan_name' => $plan['name'],
+                    'subscription_name' => $subscription['name'],
+                    'period_name' => $period['name'],
                     'payment_id' => $payment->paypal_payment_id,
                 ]
             ]);
@@ -113,7 +130,7 @@ class PayPalController extends Controller
             ]);
 
             // Asociar pago con suscripción
-            $payment->update(['subscription_id' => $subscription->id]);
+            $payment->update(['subscription_id' => $subscriptionRecord->id]);
 
             // Verificar si necesita configurar servicio técnico
             if (!$user->servicio_tecnico_id || !$this->hasCompleteProfile($user)) {
