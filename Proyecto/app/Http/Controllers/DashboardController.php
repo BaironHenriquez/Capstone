@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Cliente;
+use App\Models\OrdenServicio;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -243,6 +244,74 @@ class DashboardController extends Controller
             'user' => $user,
             'servicioTecnico' => $user->servicioTecnico
         ]);
+    }
+
+    /**
+     * Resumen del Técnico con datos reales
+     */
+    public function tecnicoResumen($id = null)
+    {
+        // Si no se proporciona ID, intentar obtener el primer técnico activo
+        if (!$id) {
+            $tecnico = \App\Models\Tecnico::where('estado', 'activo')
+                ->whereNull('deleted_at')
+                ->first();
+            
+            if (!$tecnico) {
+                return redirect()->route('dashboard')->with('error', 'No se encontró información del técnico');
+            }
+        } else {
+            // Si se proporciona ID, buscar ese técnico específico
+            $tecnico = \App\Models\Tecnico::findOrFail($id);
+        }
+
+        // Obtener órdenes asignadas al técnico
+        $ordenesAsignadas = OrdenServicio::where('tecnico_id', $tecnico->id)
+            ->with(['cliente', 'equipo'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Estadísticas
+        $stats = [
+            'total_asignadas' => $ordenesAsignadas->count(),
+            'en_progreso' => $ordenesAsignadas->whereIn('estado', ['en_proceso', 'en_progreso'])->count(),
+            'completadas' => $ordenesAsignadas->whereIn('estado', ['completado', 'completada'])->count(),
+            'pendientes' => $ordenesAsignadas->whereIn('estado', ['pendiente', 'asignada'])->count(),
+            'urgentes' => $ordenesAsignadas->where('prioridad', 'alta')->whereNotIn('estado', ['completado', 'completada', 'cancelado', 'cancelada'])->count(),
+            'completadas_semana' => $ordenesAsignadas->whereIn('estado', ['completado', 'completada'])
+                ->where('updated_at', '>=', now()->startOfWeek())->count(),
+            'nuevas_hoy' => $ordenesAsignadas->where('created_at', '>=', now()->startOfDay())->count(),
+        ];
+
+        // Calcular carga laboral (porcentaje basado en órdenes activas)
+        $maxOrdenes = 20; // Máximo de órdenes que un técnico debería manejar
+        $ordenesActivas = $stats['en_progreso'] + $stats['pendientes'];
+        $stats['carga_laboral'] = min(100, round(($ordenesActivas / $maxOrdenes) * 100));
+
+        // Últimas órdenes activas (no completadas ni canceladas)
+        $ordenesActivas = $ordenesAsignadas->whereNotIn('estado', ['completado', 'completada', 'cancelado', 'cancelada'])
+            ->take(10);
+
+        // Calcular progreso semanal
+        $totalSemana = $ordenesAsignadas->where('created_at', '>=', now()->startOfWeek())->count();
+        $completadasSemana = $stats['completadas_semana'];
+        $progresoSemana = $totalSemana > 0 ? round(($completadasSemana / $totalSemana) * 100) : 0;
+
+        // Crear objeto user simulado con datos del técnico
+        $user = (object) [
+            'id' => $tecnico->id,
+            'name' => $tecnico->nombre . ' ' . $tecnico->apellido,
+            'email' => $tecnico->email
+        ];
+
+        return view('admin.tecnicos.resumen', compact(
+            'user',
+            'tecnico',
+            'stats',
+            'ordenesActivas',
+            'progresoSemana',
+            'totalSemana'
+        ));
     }
 
     /**

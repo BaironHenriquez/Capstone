@@ -204,7 +204,7 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {{-- Gestión de Técnicos --}}
-            <a href="{{ url('/admin/ordenes') }}" class="block stat-card bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white hover:shadow-xl">
+            <a href="{{ route('admin.gestion-tecnicos') }}" class="block stat-card bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white hover:shadow-xl">
             <div class="flex justify-between items-start mb-4">
                 <div class="bg-white bg-opacity-20 rounded-lg p-3">
                 <i class="fas fa-user-cog text-2xl"></i>
