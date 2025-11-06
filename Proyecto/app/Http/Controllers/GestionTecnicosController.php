@@ -374,7 +374,7 @@ class GestionTecnicosController extends Controller
             
             // Obtener órdenes activas del técnico
             $ordenesActivas = OrdenServicio::where('tecnico_id', $tecnico->id)
-                ->whereIn('estado', ['asignada', 'en_proceso', 'diagnostico'])
+                ->whereIn('estado', ['pendiente', 'en_progreso', 'asignada', 'en_proceso', 'diagnostico'])
                 ->with(['cliente', 'equipo'])
                 ->get();
             
@@ -391,18 +391,33 @@ class GestionTecnicosController extends Controller
             
             // Contar órdenes completadas
             $ordenesCompletadas = OrdenServicio::where('tecnico_id', $tecnico->id)
-                ->where('estado', 'completado')
+                ->where('estado', 'completada')
                 ->count();
+            
+            // Calcular carga laboral (asumiendo máximo 10 órdenes activas)
+            $ordenesActivasCount = $ordenesActivas->count();
+            $cargaTrabajo = min(($ordenesActivasCount / 10) * 100, 100);
+            
+            // Determinar estado del técnico
+            if ($cargaTrabajo >= 90) {
+                $estadoTecnico = 'sobrecargado';
+            } elseif ($cargaTrabajo >= 70) {
+                $estadoTecnico = 'activo';
+            } else {
+                $estadoTecnico = 'disponible';
+            }
             
             return view('admin.tecnicos.asignar', compact(
                 'tecnico', 
                 'ordenesActivas', 
                 'ordenesDisponibles',
-                'ordenesCompletadas'
+                'ordenesCompletadas',
+                'cargaTrabajo',
+                'estadoTecnico'
             ));
             
         } catch (\Exception $e) {
-            return redirect()->route('admin.gestion-tecnicos')->with('error', 'Error al cargar la página de asignación: ' . $e->getMessage());
+            return redirect()->route('gestion-tecnicos')->with('error', 'Error al cargar la página de asignación: ' . $e->getMessage());
         }
     }
 

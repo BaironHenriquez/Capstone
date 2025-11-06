@@ -135,17 +135,17 @@ class OrdenServicioController extends Controller
             // Crear orden (el trait asigna automáticamente servicio_tecnico_id)
             $orden = OrdenServicio::create([
                 'numero_orden'         => $numeroOrden,
-                'estado'               => $request->estado ?? 'Pendiente',
-                'prioridad'            => $request->prioridad ?? 'Media',
+                'estado'               => $request->estado ?? 'pendiente',
+                'prioridad'            => $request->prioridad ?? 'media',
                 'fecha_ingreso'        => $request->fecha_ingreso ?? now(),
                 'descripcion_problema' => $request->descripcion_problema,
-                'tipo_servicio'        => $request->tipo_servicio ?? 'Reparación',
-                'tipo_de_trabajo'      => $request->tipo_de_trabajo,
+                'tipo_servicio'        => $request->tipo_servicio ?? 'mantenimiento',
+                'tipo_de_trabajo'      => $request->tipo_de_trabajo ?? 'En Taller',
                 'precio_presupuestado' => $precio,
                 'precio_total'         => $precio,
                 'abono'                => $abono,
                 'saldo'                => $saldo,
-                'medio_de_pago'        => $request->medio_de_pago,
+                'medio_de_pago'        => $request->medio_de_pago ?? 'Tarjeta',
                 'ubicacion_servicio'   => $request->ubicacion_servicio,
                 'contacto_en_sitio'    => $request->contacto_en_sitio,
                 'telefono_contacto'    => $request->telefono_contacto,
@@ -156,26 +156,21 @@ class OrdenServicioController extends Controller
                 'user_id'              => $user->id,
                 'cliente_id'           => $request->cliente_id,
                 'equipo_id'            => $request->equipo_id,
+                'tecnico_id'           => $request->tecnico_id ?? null, // Asignar técnico si viene en el request
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => '✅ Orden creada correctamente',
-                'orden'   => $orden,
-            ]);
+            return redirect()->route('ordenes.index')
+                ->with('success', '✅ Orden #' . $orden->numero_orden . ' creada correctamente');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => '❌ Error de validación',
-                'errors'  => $e->errors(),
-            ], 422);
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->withInput()
+                ->with('error', '❌ Error de validación: Por favor verifica los datos ingresados');
         } catch (\Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => '❌ Error al crear la orden',
-                'error'   => $e->getMessage(),
-            ], 500);
+            return redirect()->back()
+                ->withInput()
+                ->with('error', '❌ Error al crear la orden: ' . $e->getMessage());
         }
     }
 
@@ -322,6 +317,33 @@ class OrdenServicioController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al actualizar la prioridad: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * 🗑️ Eliminar una orden de servicio
+     */
+    public function destroy($id)
+    {
+        try {
+            $orden = OrdenServicio::findOrFail($id);
+            
+            // Guardar información para el mensaje
+            $numeroOrden = $orden->numero_orden;
+            
+            // Eliminar la orden (esto también eliminará registros relacionados si hay cascada)
+            $orden->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Orden {$numeroOrden} eliminada correctamente"
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar la orden: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -216,7 +216,7 @@
                                           rows="4" 
                                           class="input-focus validate-input w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-200 focus:border-pink-500 resize-none" 
                                           data-validate="required|minLength:10|maxLength:1000"
-                                          placeholder="✍️ Describe detalladamente el problema o servicio requerido..."></textarea>
+                                          placeholder="Describe detalladamente el problema o servicio requerido..."></textarea>
                                 <div class="text-xs text-gray-500 mt-2 flex items-center">
                                     <i class="fas fa-info-circle mr-1"></i>
                                     Mínimo 10 caracteres, máximo 1000

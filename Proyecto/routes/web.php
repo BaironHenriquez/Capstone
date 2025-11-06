@@ -100,6 +100,11 @@ Route::get('/dashboard-admin', [DashboardController::class, 'adminDashboard'])
     ->middleware('auth')
     ->name('dashboard-admin');
 
+// API endpoint para métricas en tiempo real
+Route::get('/dashboard/metrics', [DashboardController::class, 'getMetrics'])
+    ->middleware('auth')
+    ->name('dashboard.metrics');
+
 // Dashboard técnico (requiere autenticación y suscripción)
 Route::middleware(['auth', 'subscription'])->get('/dashboard_tecnico', function () {
     return view('tecnico.dashboard_tecnico');
@@ -266,6 +271,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/{id}/toggle-ban', [GestionTecnicosController::class, 'toggleBan'])->name('toggle-ban');
         Route::delete('/{id}', [GestionTecnicosController::class, 'destroy'])->name('destroy');
         
+        // Dashboard/Resumen del técnico (acepta ID opcional)
+        Route::get('/resumen/{id?}', [DashboardController::class, 'tecnicoResumen'])->name('resumen');
+        
         // Rutas de asignación de órdenes
         Route::get('/{id}/asignar', [GestionTecnicosController::class, 'asignar'])->name('asignar');
         Route::post('/{id}/asignar', [GestionTecnicosController::class, 'asignarStore'])->name('asignar.store');
@@ -273,7 +281,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     // Gestión de Clientes
-    Route::get('/gestion-clientes', [GestionClientesController::class, 'index'])->name('clientes.index');
+    Route::get('/gestion-clientes', [GestionClientesController::class, 'index'])->name('gestion-clientes');
+    Route::get('/clientes', [GestionClientesController::class, 'index'])->name('clientes.index'); // Alias
     
     Route::prefix('clientes')->name('clientes.')->group(function () {
         Route::get('/create', [GestionClientesController::class, 'create'])->name('create');
@@ -283,6 +292,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/{id}', [GestionClientesController::class, 'update'])->name('update');
         Route::patch('/{id}/toggle-status', [GestionClientesController::class, 'toggleStatus'])->name('toggle-status');
         Route::delete('/{id}', [GestionClientesController::class, 'destroy'])->name('destroy');
+        Route::get('/export/csv', [GestionClientesController::class, 'export'])->name('export');
     });
 
     // Gestión de Equipos y Marcas

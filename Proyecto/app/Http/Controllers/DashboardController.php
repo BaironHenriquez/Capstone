@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Cliente;
+use App\Models\OrdenServicio;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -208,6 +209,20 @@ class DashboardController extends Controller
             'crecimiento' => round($crecimiento, 1)
         ];
 
+        // Productividad semanal - Órdenes creadas por día de la semana actual
+        $productividadSemanal = [];
+        $inicioSemana = now()->startOfWeek(); // Lunes
+        
+        for ($i = 0; $i < 7; $i++) {
+            $fecha = $inicioSemana->copy()->addDays($i);
+            $ordenesCreadas = DB::table('ordenes_servicio')
+                ->where('servicio_tecnico_id', $servicioTecnicoId)
+                ->whereDate('created_at', $fecha->toDateString())
+                ->count();
+            
+            $productividadSemanal[] = $ordenesCreadas;
+        }
+
         return view('admin.dashboard-admin', compact(
             'user', 
             'estadisticasClientes',
@@ -215,7 +230,8 @@ class DashboardController extends Controller
             'resumenOrdenes', 
             'tecnicos',
             'alertas',
-            'metricas'
+            'metricas',
+            'productividadSemanal'
         ));
     }
 
@@ -231,6 +247,74 @@ class DashboardController extends Controller
     }
 
     /**
+     * Resumen del Técnico con datos reales
+     */
+    public function tecnicoResumen($id = null)
+    {
+        // Si no se proporciona ID, intentar obtener el primer técnico activo
+        if (!$id) {
+            $tecnico = \App\Models\Tecnico::where('estado', 'activo')
+                ->whereNull('deleted_at')
+                ->first();
+            
+            if (!$tecnico) {
+                return redirect()->route('dashboard')->with('error', 'No se encontró información del técnico');
+            }
+        } else {
+            // Si se proporciona ID, buscar ese técnico específico
+            $tecnico = \App\Models\Tecnico::findOrFail($id);
+        }
+
+        // Obtener órdenes asignadas al técnico
+        $ordenesAsignadas = OrdenServicio::where('tecnico_id', $tecnico->id)
+            ->with(['cliente', 'equipo'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Estadísticas
+        $stats = [
+            'total_asignadas' => $ordenesAsignadas->count(),
+            'en_progreso' => $ordenesAsignadas->whereIn('estado', ['en_proceso', 'en_progreso'])->count(),
+            'completadas' => $ordenesAsignadas->whereIn('estado', ['completado', 'completada'])->count(),
+            'pendientes' => $ordenesAsignadas->whereIn('estado', ['pendiente', 'asignada'])->count(),
+            'urgentes' => $ordenesAsignadas->where('prioridad', 'alta')->whereNotIn('estado', ['completado', 'completada', 'cancelado', 'cancelada'])->count(),
+            'completadas_semana' => $ordenesAsignadas->whereIn('estado', ['completado', 'completada'])
+                ->where('updated_at', '>=', now()->startOfWeek())->count(),
+            'nuevas_hoy' => $ordenesAsignadas->where('created_at', '>=', now()->startOfDay())->count(),
+        ];
+
+        // Calcular carga laboral (porcentaje basado en órdenes activas)
+        $maxOrdenes = 20; // Máximo de órdenes que un técnico debería manejar
+        $ordenesActivas = $stats['en_progreso'] + $stats['pendientes'];
+        $stats['carga_laboral'] = min(100, round(($ordenesActivas / $maxOrdenes) * 100));
+
+        // Últimas órdenes activas (no completadas ni canceladas)
+        $ordenesActivas = $ordenesAsignadas->whereNotIn('estado', ['completado', 'completada', 'cancelado', 'cancelada'])
+            ->take(10);
+
+        // Calcular progreso semanal
+        $totalSemana = $ordenesAsignadas->where('created_at', '>=', now()->startOfWeek())->count();
+        $completadasSemana = $stats['completadas_semana'];
+        $progresoSemana = $totalSemana > 0 ? round(($completadasSemana / $totalSemana) * 100) : 0;
+
+        // Crear objeto user simulado con datos del técnico
+        $user = (object) [
+            'id' => $tecnico->id,
+            'name' => $tecnico->nombre . ' ' . $tecnico->apellido,
+            'email' => $tecnico->email
+        ];
+
+        return view('admin.tecnicos.resumen', compact(
+            'user',
+            'tecnico',
+            'stats',
+            'ordenesActivas',
+            'progresoSemana',
+            'totalSemana'
+        ));
+    }
+
+    /**
      * Dashboard para Trabajador
      */
     private function workerDashboard($user)
@@ -238,6 +322,83 @@ class DashboardController extends Controller
         return view('trabajador.dashboard-trabajador', [
             'user' => $user,
             'servicioTecnico' => $user->servicioTecnico
+        ]);
+    }
+
+    /**
+     * Obtener métricas en tiempo real para el dashboard
+     */
+    public function getMetrics(Request $request)
+    {
+        $user = auth()->user();
+        $servicioTecnicoId = $user && $user->servicioTecnico ? $user->servicioTecnico->id : null;
+        
+        // Obtener datos actualizados
+        $resumenOrdenes = [
+            'total' => DB::table('ordenes_servicio')
+                ->where('servicio_tecnico_id', $servicioTecnicoId)
+                ->count(),
+            'pendientes' => DB::table('ordenes_servicio')
+                ->where('servicio_tecnico_id', $servicioTecnicoId)
+                ->where('estado', 'pendiente')
+                ->count(),
+            'en_progreso' => DB::table('ordenes_servicio')
+                ->where('servicio_tecnico_id', $servicioTecnicoId)
+                ->where('estado', 'en_progreso')
+                ->count(),
+            'completadas' => DB::table('ordenes_servicio')
+                ->where('servicio_tecnico_id', $servicioTecnicoId)
+                ->where('estado', 'completada')
+                ->whereMonth('updated_at', now()->month)
+                ->whereYear('updated_at', now()->year)
+                ->count(),
+        ];
+
+        // Obtener carga laboral actualizada de técnicos
+        $tecnicosData = DB::table('tecnicos')
+            ->where('servicio_tecnico_id', $servicioTecnicoId)
+            ->select(
+                'tecnicos.id',
+                DB::raw('CONCAT(tecnicos.nombre, " ", tecnicos.apellido) as nombre'),
+                'tecnicos.especialidades',
+                DB::raw('(SELECT COUNT(*) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND estado IN ("pendiente", "en_progreso")) as ordenes_asignadas'),
+                DB::raw('(SELECT COUNT(*) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND estado = "completada") as ordenes_completadas')
+            )
+            ->get()
+            ->map(function($tecnico) {
+                // Calcular carga de trabajo (asumiendo máximo 10 órdenes)
+                $cargaTrabajo = min(($tecnico->ordenes_asignadas / 10) * 100, 100);
+                
+                // Determinar estado
+                if ($cargaTrabajo >= 90) {
+                    $estado = 'sobrecargado';
+                } elseif ($cargaTrabajo >= 70) {
+                    $estado = 'activo';
+                } else {
+                    $estado = 'disponible';
+                }
+                
+                // Decodificar especialidades JSON y tomar la primera
+                $especialidades = json_decode($tecnico->especialidades, true);
+                $especialidad = is_array($especialidades) && count($especialidades) > 0 
+                    ? ucfirst($especialidades[0]) 
+                    : 'General';
+                
+                return [
+                    'id' => $tecnico->id,
+                    'nombre' => $tecnico->nombre,
+                    'ordenes_asignadas' => $tecnico->ordenes_asignadas,
+                    'ordenes_completadas' => $tecnico->ordenes_completadas,
+                    'carga_trabajo' => round($cargaTrabajo),
+                    'especialidad' => $especialidad,
+                    'estado' => $estado
+                ];
+            })
+            ->toArray();
+        
+        return response()->json([
+            'resumenOrdenes' => $resumenOrdenes,
+            'tecnicos' => $tecnicosData
         ]);
     }
 }

@@ -39,16 +39,25 @@
 
             <!-- Estadísticas -->
             <div class="space-y-4 mb-6">
-                <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4">
+                <div class="bg-gradient-to-r from-{{ $cargaTrabajo >= 90 ? 'red' : ($cargaTrabajo >= 70 ? 'yellow' : 'blue') }}-50 to-{{ $cargaTrabajo >= 90 ? 'red' : ($cargaTrabajo >= 70 ? 'yellow' : 'blue') }}-100 rounded-lg p-4">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-xs text-gray-600 mb-1">Carga de Trabajo</p>
-                            <p class="text-2xl font-bold text-blue-700">{{ $tecnico->carga_trabajo_actual }}%</p>
+                            <p class="text-2xl font-bold text-{{ $cargaTrabajo >= 90 ? 'red' : ($cargaTrabajo >= 70 ? 'yellow' : 'blue') }}-700">{{ round($cargaTrabajo) }}%</p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                @if($estadoTecnico === 'sobrecargado')
+                                    <i class="fas fa-exclamation-triangle text-red-500"></i> Sobrecargado
+                                @elseif($estadoTecnico === 'activo')
+                                    <i class="fas fa-clock text-yellow-500"></i> Activo
+                                @else
+                                    <i class="fas fa-check-circle text-green-500"></i> Disponible
+                                @endif
+                            </p>
                         </div>
-                        <i class="fas fa-chart-line text-3xl text-blue-400"></i>
+                        <i class="fas fa-chart-line text-3xl text-{{ $cargaTrabajo >= 90 ? 'red' : ($cargaTrabajo >= 70 ? 'yellow' : 'blue') }}-400"></i>
                     </div>
-                    <div class="mt-2 bg-white rounded-full h-2 overflow-hidden">
-                        <div class="bg-blue-600 h-full transition-all duration-300" style="width: {{ $tecnico->carga_trabajo_actual }}%"></div>
+                    <div class="mt-3 bg-white rounded-full h-3 overflow-hidden shadow-inner">
+                        <div class="bg-{{ $cargaTrabajo >= 90 ? 'red' : ($cargaTrabajo >= 70 ? 'yellow' : 'blue') }}-600 h-full transition-all duration-500" style="width: {{ round($cargaTrabajo) }}%"></div>
                     </div>
                 </div>
 
