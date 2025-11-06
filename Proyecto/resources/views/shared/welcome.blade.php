@@ -494,49 +494,6 @@
             });
         });
 
-        // Formulario de búsqueda de órdenes
-        document.getElementById('order-lookup-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const orderCode = document.getElementById('order-code').value.trim();
-            const resultDiv = document.getElementById('order-result');
-            
-            if (!orderCode) {
-                resultDiv.innerHTML = `
-                    <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg animate-fade-in">
-                        <div class="flex items-center">
-                            <svg class="w-6 h-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <p class="text-red-800 font-semibold">Por favor ingresa un código de orden válido.</p>
-                        </div>
-                    </div>
-                `;
-            } else {
-                resultDiv.innerHTML = `
-                    <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg animate-fade-in">
-                        <div class="flex items-start">
-                            <svg class="w-6 h-6 text-blue-500 mr-3 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <div>
-                                <p class="text-sm text-blue-700 mb-2">
-                                    <strong>Código de orden:</strong> <span class="font-mono">${orderCode}</span>
-                                </p>
-                                <p class="text-blue-800">
-                                    Para consultar el estado detallado de tu orden, por favor 
-                                    <a href="{{ route('login.form') }}" class="font-bold underline hover:text-blue-900">inicia sesión</a> 
-                                    en tu cuenta o contáctanos directamente.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            resultDiv.classList.remove('hidden');
-            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        });
-
         // Añadir clase de animación al resultado
         const style = document.createElement('style');
         style.textContent = `
