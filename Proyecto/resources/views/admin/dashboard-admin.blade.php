@@ -121,31 +121,17 @@
                     </div>
                 </div>
 
-                {{-- En Revisión --}}
-                <div class="bg-red-50 rounded-lg p-4 border-l-4 border-red-500 hover:shadow-md transition-shadow">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <div class="bg-red-500 rounded-full p-3 mr-4">
-                                <i class="fas fa-clipboard-check text-white text-xl"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-700">En Revisión</p>
-                                <p class="text-3xl font-bold text-gray-900">{{ $resumenOrdenes['en_revision'] ?? 0 }}</p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-2xl font-bold text-red-600">
-                                {{ $resumenOrdenes['total'] > 0 ? number_format((($resumenOrdenes['en_revision'] ?? 0) / $resumenOrdenes['total']) * 100, 1) : 0 }}%
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
                 {{-- Crecimiento mensual --}}
                 <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <p class="text-sm text-gray-600 mb-1">Crecimiento mensual</p>
-                    <p class="text-2xl font-bold text-green-600">+17.1%</p>
-                    <p class="text-xs text-gray-500">vs mes anterior<br>23 órdenes más</p>
+                    <p class="text-2xl font-bold {{ $metricas['crecimiento'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                        {{ $metricas['crecimiento'] >= 0 ? '+' : '' }}{{ number_format($metricas['crecimiento'], 1) }}%
+                    </p>
+                    <p class="text-xs text-gray-500">
+                        vs mes anterior<br>
+                        {{ abs($metricas['ordenes_mes_actual'] - $metricas['ordenes_mes_anterior']) }} órdenes 
+                        {{ $metricas['crecimiento'] >= 0 ? 'más' : 'menos' }}
+                    </p>
                 </div>
             </div>
         </div>
@@ -184,7 +170,7 @@
                     <div class="bg-white bg-opacity-20 rounded-lg p-3">
                         <i class="fas fa-clipboard-list text-2xl"></i>
                     </div>
-                    <span class="bg-white bg-opacity-20 text-xs px-2 py-1 rounded-full">23</span>
+                    <span class="bg-white bg-opacity-20 text-xs px-2 py-1 rounded-full">{{ $resumenOrdenes['total'] }}</span>
                 </div>
                 <h3 class="text-lg font-bold mb-2">Órdenes de Servicio</h3>
                 <p class="text-sm text-indigo-100 mb-4">Gestionar y supervisar órdenes activas</p>
@@ -210,18 +196,18 @@
                 </div>
             </a>
 
-            {{-- Reportes --}}
+            {{-- Configuración del Servicio Técnico --}}
             <a href="#" class="block stat-card bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white hover:shadow-xl">
                 <div class="flex justify-between items-start mb-4">
                     <div class="bg-white bg-opacity-20 rounded-lg p-3">
-                        <i class="fas fa-chart-bar text-2xl"></i>
+                        <i class="fas fa-cog text-2xl"></i>
                     </div>
-                    <span class="bg-white bg-opacity-20 text-xs px-2 py-1 rounded-full">STATS</span>
+                    <span class="bg-white bg-opacity-20 text-xs px-2 py-1 rounded-full">CONFIG</span>
                 </div>
-                <h3 class="text-lg font-bold mb-2">Reportes</h3>
-                <p class="text-sm text-purple-100 mb-4">Estadísticas y análisis detallados</p>
+                <h3 class="text-lg font-bold mb-2">Configuración</h3>
+                <p class="text-sm text-purple-100 mb-4">Configuración de mi servicio técnico</p>
                 <div class="flex items-center text-sm">
-                    <span>Ver reportes</span>
+                    <span>Configurar</span>
                     <i class="fas fa-arrow-right ml-2"></i>
                 </div>
             </a>
@@ -248,113 +234,62 @@
                     <i class="fas fa-user-hard-hat text-blue-500 text-xl mr-3"></i>
                     <h2 class="text-xl font-bold text-gray-900">Carga Laboral de Técnicos</h2>
                 </div>
-                <span class="text-sm text-gray-500">4 técnicos activos</span>
+                <span class="text-sm text-gray-500">{{ count($tecnicos) }} técnicos activos</span>
             </div>
 
             <div class="space-y-4">
-                {{-- Técnico 1 --}}
+                @forelse($tecnicos as $tecnico)
+                {{-- Técnico --}}
                 <div class="flex items-center">
-                    <div class="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold mr-3">
-                        Ca
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-3
+                        {{ $tecnico['carga_trabajo'] >= 90 ? 'bg-red-500' : ($tecnico['carga_trabajo'] >= 70 ? 'bg-yellow-500' : 'bg-green-500') }}">
+                        {{ strtoupper(substr($tecnico['nombre'], 0, 2)) }}
                     </div>
                     <div class="flex-1">
                         <div class="flex justify-between items-center mb-1">
                             <div>
-                                <p class="font-semibold text-gray-900">Carlos Rodríguez</p>
-                                <p class="text-xs text-gray-500">Computadoras</p>
+                                <p class="font-semibold text-gray-900">{{ $tecnico['nombre'] }}</p>
+                                <p class="text-xs text-gray-500">{{ $tecnico['especialidad'] }}</p>
                             </div>
-                            <span class="text-sm font-bold text-gray-700">85%</span>
+                            <span class="text-sm font-bold text-gray-700">{{ $tecnico['carga_trabajo'] }}%</span>
                         </div>
                         <div class="flex justify-between text-xs text-gray-500 mb-1">
-                            <span>8 asignadas</span>
+                            <span>{{ $tecnico['ordenes_asignadas'] }} asignadas • {{ $tecnico['ordenes_completadas'] }} completadas</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-yellow-500 h-2 rounded-full progress-bar" style="width: 85%"></div>
+                            <div class="h-2 rounded-full progress-bar
+                                {{ $tecnico['carga_trabajo'] >= 90 ? 'bg-red-500' : ($tecnico['carga_trabajo'] >= 70 ? 'bg-yellow-500' : 'bg-green-500') }}"
+                                style="width: {{ $tecnico['carga_trabajo'] }}%"></div>
                         </div>
-                    </div>
-                </div>
-
-                {{-- Técnico 2 --}}
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold mr-3">
-                        Ma
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex justify-between items-center mb-1">
-                            <div>
-                                <p class="font-semibold text-gray-900">María González</p>
-                                <p class="text-xs text-gray-500">Móviles</p>
-                            </div>
-                            <span class="text-sm font-bold text-gray-700">65%</span>
-                        </div>
-                        <div class="flex justify-between text-xs text-gray-500 mb-1">
-                            <span>6 asignadas</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-green-500 h-2 rounded-full progress-bar" style="width: 65%"></div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Técnico 3 --}}
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white font-bold mr-3">
-                        Di
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex justify-between items-center mb-1">
-                            <div>
-                                <p class="font-semibold text-gray-900">Diego Sánchez</p>
-                                <p class="text-xs text-gray-500">Soporte</p>
-                            </div>
-                            <span class="text-sm font-bold text-gray-700">95%</span>
-                        </div>
-                        <div class="flex justify-between text-xs text-gray-500 mb-1">
-                            <span>10 asignadas</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-red-500 h-2 rounded-full progress-bar" style="width: 95%"></div>
-                        </div>
+                        @if($tecnico['estado'] === 'sobrecargado')
                         <p class="text-xs text-red-600 mt-1 flex items-center">
                             <i class="fas fa-exclamation-triangle mr-1"></i>
                             Sobrecargado - Requiere redistribución
                         </p>
-                    </div>
-                </div>
-
-                {{-- Técnico 4 --}}
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold mr-3">
-                        An
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex justify-between items-center mb-1">
-                            <div>
-                                <p class="font-semibold text-gray-900">Ana Torres</p>
-                                <p class="text-xs text-gray-500">Reparaciones</p>
-                            </div>
-                            <span class="text-sm font-bold text-gray-700">45%</span>
-                        </div>
-                        <div class="flex justify-between text-xs text-gray-500 mb-1">
-                            <span>4 asignadas</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-green-500 h-2 rounded-full progress-bar" style="width: 45%"></div>
-                        </div>
+                        @elseif($tecnico['estado'] === 'disponible')
                         <p class="text-xs text-green-600 mt-1 flex items-center">
                             <i class="fas fa-check-circle mr-1"></i>
                             Disponible para nuevas asignaciones
                         </p>
+                        @endif
                     </div>
                 </div>
+                @empty
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-user-slash text-4xl mb-2"></i>
+                    <p>No hay técnicos registrados</p>
+                </div>
+                @endforelse
 
                 {{-- Gráfico comparativo --}}
+                @if(count($tecnicos) > 0)
                 <div class="mt-6 pt-6 border-t border-gray-200">
                     <p class="text-sm font-semibold text-gray-700 mb-3">Comparativa de Carga</p>
                     <div style="height: 150px;">
                         <canvas id="cargaChart"></canvas>
                     </div>
                 </div>
+                @endif
             </div>
         </div>
     </div>
@@ -366,60 +301,52 @@
                 <i class="fas fa-bell text-yellow-500 text-xl mr-3"></i>
                 <h2 class="text-xl font-bold text-gray-900">Alertas</h2>
             </div>
-            <span class="bg-red-100 text-red-600 text-xs font-bold px-3 py-1 rounded-full">3</span>
+            <span class="bg-red-100 text-red-600 text-xs font-bold px-3 py-1 rounded-full">{{ count($alertas) }}</span>
         </div>
 
+        @if(count($alertas) > 0)
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            {{-- Retraso Crítico --}}
-            <div class="alert-card alert-critical rounded-lg p-4">
-                <div class="flex items-start">
-                    <div class="bg-red-100 rounded-full p-2 mr-3">
-                        <i class="fas fa-exclamation-triangle text-red-600"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="font-bold text-gray-900 mb-1">Retraso Crítico</h3>
-                        <p class="text-sm text-gray-700 mb-2">Orden TS-2025-089</p>
-                        <p class="text-xs text-gray-600 mb-2">5 días de retraso</p>
-                        <p class="text-xs text-gray-500">Técnico: Carlos Rodríguez</p>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Sobrecarga --}}
-            <div class="alert-card alert-warning rounded-lg p-4">
-                <div class="flex items-start">
-                    <div class="bg-yellow-100 rounded-full p-2 mr-3">
-                        <i class="fas fa-user-clock text-yellow-600"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="font-bold text-gray-900 mb-1">Sobrecarga</h3>
-                        <p class="text-sm text-gray-700 mb-2">Diego Sánchez</p>
-                        <p class="text-xs text-gray-600 mb-2">83% de carga</p>
-                        <p class="text-xs text-gray-500">10 órdenes pendientes</p>
+            @foreach($alertas as $alerta)
+                @if($alerta['tipo'] === 'retraso_critico')
+                {{-- Retraso Crítico --}}
+                <div class="alert-card alert-critical rounded-lg p-4">
+                    <div class="flex items-start">
+                        <div class="bg-red-100 rounded-full p-2 mr-3">
+                            <i class="fas fa-exclamation-triangle text-red-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-900 mb-1">Retraso Crítico</h3>
+                            <p class="text-sm text-gray-700 mb-2">Orden {{ $alerta['orden'] }}</p>
+                            <p class="text-xs text-gray-600 mb-2">{{ $alerta['dias_retraso'] }} días de retraso</p>
+                            <p class="text-xs text-gray-500">Técnico: {{ $alerta['tecnico'] }}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            {{-- Revisión Pendiente --}}
-            <div class="alert-card alert-info rounded-lg p-4">
-                <div class="flex items-start">
-                    <div class="bg-blue-100 rounded-full p-2 mr-3">
-                        <i class="fas fa-clipboard-check text-blue-600"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="font-bold text-gray-900 mb-1">Revisión Pendiente</h3>
-                        <p class="text-sm text-gray-700 mb-2">Orden TS-2025-091</p>
-                        <p class="text-xs text-gray-600 mb-2">2 días sin revisar</p>
-                        <p class="text-xs text-gray-500">Cliente: TechCorp</p>
+                @elseif($alerta['tipo'] === 'sobrecarga_tecnico')
+                {{-- Sobrecarga --}}
+                <div class="alert-card alert-warning rounded-lg p-4">
+                    <div class="flex items-start">
+                        <div class="bg-yellow-100 rounded-full p-2 mr-3">
+                            <i class="fas fa-user-clock text-yellow-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-900 mb-1">Sobrecarga</h3>
+                            <p class="text-sm text-gray-700 mb-2">{{ $alerta['tecnico'] }}</p>
+                            <p class="text-xs text-gray-600 mb-2">{{ $alerta['carga'] }}% de carga</p>
+                            <p class="text-xs text-gray-500">{{ $alerta['ordenes_pendientes'] }} órdenes pendientes</p>
+                        </div>
                     </div>
                 </div>
-            </div>
+                @endif
+            @endforeach
         </div>
-
-        <a href="#" class="block w-full bg-blue-500 text-white text-center py-3 rounded-lg hover:bg-blue-600 transition-colors">
-            <i class="fas fa-eye mr-2"></i>
-            Ver todas las alertas
-        </a>
+        @else
+        <div class="text-center py-8 text-gray-500">
+            <i class="fas fa-check-circle text-4xl mb-2 text-green-500"></i>
+            <p class="font-semibold">¡Todo en orden!</p>
+            <p class="text-sm">No hay alertas en este momento</p>
+        </div>
+        @endif
     </div>
 </div>
 @endsection
@@ -433,15 +360,14 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(ctxDonut, {
         type: 'doughnut',
         data: {
-            labels: ['Completadas', 'En Progreso', 'Pendientes', 'En Revisión'],
+            labels: ['Completadas', 'En Progreso', 'Pendientes'],
             datasets: [{
                 data: [
                     {{ $resumenOrdenes['completadas'] ?? 0 }},
                     {{ $resumenOrdenes['en_progreso'] ?? 0 }},
-                    {{ $resumenOrdenes['pendientes'] ?? 0 }},
-                    {{ $resumenOrdenes['en_revision'] ?? 0 }}
+                    {{ $resumenOrdenes['pendientes'] ?? 0 }}
                 ],
-                backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
+                backgroundColor: ['#10b981', '#3b82f6', '#f59e0b'],
                 borderWidth: 0
             }]
         },
@@ -495,15 +421,28 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Gráfico de Carga Laboral
+    @if(count($tecnicos) > 0)
     const ctxBar = document.getElementById('cargaChart').getContext('2d');
     new Chart(ctxBar, {
         type: 'bar',
         data: {
-            labels: ['Carlos R.', 'María G.', 'Diego S.', 'Ana T.'],
+            labels: [
+                @foreach($tecnicos as $tecnico)
+                    '{{ explode(" ", $tecnico["nombre"])[0] ?? "" }}',
+                @endforeach
+            ],
             datasets: [{
                 label: 'Carga de Trabajo %',
-                data: [85, 65, 95, 45],
-                backgroundColor: ['#f59e0b', '#10b981', '#ef4444', '#10b981'],
+                data: [
+                    @foreach($tecnicos as $tecnico)
+                        {{ $tecnico['carga_trabajo'] }},
+                    @endforeach
+                ],
+                backgroundColor: [
+                    @foreach($tecnicos as $tecnico)
+                        '{{ $tecnico["carga_trabajo"] >= 90 ? "#ef4444" : ($tecnico["carga_trabajo"] >= 70 ? "#f59e0b" : "#10b981") }}',
+                    @endforeach
+                ],
                 borderRadius: 5
             }]
         },
@@ -525,6 +464,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+    @endif
 });
 </script>
 @endpush

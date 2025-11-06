@@ -128,8 +128,8 @@
                 <a href="{{ route('dashboard') }}" class="text-sm text-teal-100 hover:text-white transition {{ request()->routeIs('dashboard*') ? 'text-white font-semibold' : '' }}">Dashboard</a>
                 <a href="{{ route('admin.clientes.index') }}" class="text-sm text-teal-100 hover:text-white transition {{ request()->routeIs('admin.clientes*') ? 'text-white font-semibold' : '' }}">Clientes</a>
                 <a href="{{ route('admin.gestion-tecnicos') }}" class="text-sm text-teal-100 hover:text-white transition {{ request()->routeIs('admin.gestion-tecnicos*') ? 'text-white font-semibold' : '' }}">Técnicos</a>
-                <a href="{{ route('admin.equipos-marcas.index') }}" class="text-sm text-teal-100 hover:text-white transition {{ request()->routeIs('admin.equipos-marcas*') ? 'text-white font-semibold' : '' }}">Equipos</a>
                 <a href="{{ route('ordenes.index') }}" class="text-sm text-teal-100 hover:text-white transition {{ request()->routeIs('ordenes*') ? 'text-white font-semibold' : '' }}">Órdenes</a>
+                <a href="#" class="text-sm text-teal-100 hover:text-white transition">Configuración</a>
                 <form method="POST" action="{{ route('logout') }}" class="inline">
                     @csrf
                     <button type="submit" class="p-2 rounded-md hover:bg-white hover:bg-opacity-20 transition">
