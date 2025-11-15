@@ -67,6 +67,15 @@ class GestionTecnicosController extends Controller
         // Obtener técnicos con paginación
         $tecnicos = $query->paginate(12);
         
+        // Calcular carga de trabajo para cada técnico
+        foreach ($tecnicos as $tecnico) {
+            $ordenesActivas = OrdenServicio::where('tecnico_id', $tecnico->id)
+                ->whereIn('estado', ['asignada', 'en_progreso', 'diagnostico'])
+                ->count();
+            
+            $tecnico->carga_trabajo_actual = min(100, ($ordenesActivas / 10) * 100); // Cada orden representa 10% de carga
+        }
+        
         // Obtener servicios técnicos
         $serviciosTecnicos = ServicioTecnico::all();
         
@@ -458,7 +467,7 @@ class GestionTecnicosController extends Controller
                 ->count();
             
             $tecnico->update([
-                'carga_trabajo_actual' => min(100, $ordenesActivas * 20) // Cada orden representa 20% de carga
+                'carga_trabajo_actual' => min(100, ($ordenesActivas / 10) * 100) // Cada orden representa 10% de carga
             ]);
             
             return back()->with('success', 'Orden asignada exitosamente al técnico.');
@@ -500,7 +509,7 @@ class GestionTecnicosController extends Controller
                 ->count();
             
             $tecnico->update([
-                'carga_trabajo_actual' => min(100, $ordenesActivas * 20)
+                'carga_trabajo_actual' => min(100, ($ordenesActivas / 10) * 100)
             ]);
             
             return back()->with('success', 'Orden desasignada exitosamente.');
