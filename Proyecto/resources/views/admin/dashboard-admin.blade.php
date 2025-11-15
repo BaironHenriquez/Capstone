@@ -269,6 +269,60 @@
         </div>
     </div>
 
+    {{-- Ingresos y Comisiones --}}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {{-- Ingreso Semanal --}}
+        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                    <i class="fas fa-calendar-week text-2xl"></i>
+                </div>
+                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">Esta Semana</span>
+            </div>
+            <p class="text-3xl font-bold mb-1">${{ number_format($ingresoSemanal ?? 0, 0, ',', '.') }}</p>
+            <p class="text-sm text-emerald-100">Ingreso Semanal</p>
+            <p class="text-xs text-emerald-200 mt-2">
+                <i class="fas fa-calendar mr-1"></i>
+                {{ now()->startOfWeek()->format('d/m') }} - {{ now()->endOfWeek()->format('d/m/Y') }}
+            </p>
+        </div>
+
+        {{-- Ingreso Mensual --}}
+        <div class="bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                    <i class="fas fa-calendar-alt text-2xl"></i>
+                </div>
+                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">Este Mes</span>
+            </div>
+            <p class="text-3xl font-bold mb-1">${{ number_format($ingresoMensual ?? 0, 0, ',', '.') }}</p>
+            <p class="text-sm text-violet-100">Ingreso Mensual</p>
+            <p class="text-xs text-violet-200 mt-2">
+                <i class="fas fa-calendar mr-1"></i>
+                {{ now()->format('F Y') }}
+            </p>
+        </div>
+
+        {{-- Comisiones Totales --}}
+        @php
+            $comisionesTotales = array_sum(array_column($tecnicos, 'comision_total'));
+        @endphp
+        <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                    <i class="fas fa-dollar-sign text-2xl"></i>
+                </div>
+                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">Este Mes</span>
+            </div>
+            <p class="text-3xl font-bold mb-1">${{ number_format($comisionesTotales, 0, ',', '.') }}</p>
+            <p class="text-sm text-amber-100">Comisiones Totales</p>
+            <p class="text-xs text-amber-200 mt-2">
+                <i class="fas fa-users mr-1"></i>
+                {{ count($tecnicos) }} técnico(s)
+            </p>
+        </div>
+    </div>
+
     {{-- Productividad Semanal y Carga Laboral --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {{-- Productividad Semanal --}}
@@ -321,6 +375,14 @@
                         </div>
                         <div class="flex justify-between text-xs text-gray-500 mb-1">
                             <span>{{ $tecnico['ordenes_asignadas'] }} asignadas • {{ $tecnico['ordenes_completadas'] }} completadas</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">
+                                    {{ $tecnico['comision_por_orden'] ?? 0 }}%
+                                </span>
+                                <span class="font-semibold text-green-600">
+                                    ${{ number_format($tecnico['comision_total'] ?? 0, 0, ',', '.') }}
+                                </span>
+                            </div>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
                             <div class="h-2 rounded-full progress-bar
@@ -523,15 +585,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 @endforeach
             ],
             datasets: [{
-                label: 'Carga de Trabajo %',
+                label: 'Órdenes Asignadas',
                 data: [
                     @foreach($tecnicos as $tecnico)
-                        {{ $tecnico['carga_trabajo'] }},
+                        {{ $tecnico['ordenes_asignadas'] }},
                     @endforeach
                 ],
                 backgroundColor: [
                     @foreach($tecnicos as $tecnico)
-                        '{{ $tecnico["carga_trabajo"] >= 90 ? "#ef4444" : ($tecnico["carga_trabajo"] >= 70 ? "#f59e0b" : "#10b981") }}',
+                        '{{ $tecnico["ordenes_asignadas"] >= 9 ? "#ef4444" : ($tecnico["ordenes_asignadas"] >= 7 ? "#f59e0b" : "#10b981") }}',
                     @endforeach
                 ],
                 borderRadius: 5
@@ -546,11 +608,38 @@ document.addEventListener('DOMContentLoaded', function() {
             scales: {
                 y: {
                     beginAtZero: true,
-                    max: 100,
-                    grid: { color: 'rgba(0,0,0,0.05)' }
+                    max: 10,
+                    ticks: {
+                        stepSize: 2
+                    },
+                    title: {
+                        display: true,
+                        text: 'Órdenes Asignadas',
+                        font: {
+                            size: 12
+                        }
+                    },
+                    grid: { 
+                        color: 'rgba(0,0,0,0.05)',
+                        drawBorder: false
+                    }
                 },
                 x: {
-                    grid: { display: false }
+                    grid: { display: false },
+                    ticks: {
+                        font: {
+                            size: 11
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.parsed.y + ' órdenes asignadas';
+                        }
+                    }
                 }
             }
         }
@@ -573,6 +662,26 @@ function refreshDashboard() {
             document.getElementById('metric-pendientes').textContent = data.resumenOrdenes.pendientes;
             document.getElementById('metric-progreso').textContent = data.resumenOrdenes.en_progreso;
             document.getElementById('metric-completadas').textContent = data.resumenOrdenes.completadas;
+            
+            // Actualizar ingresos si existen
+            if (data.ingresoSemanal !== undefined) {
+                const ingresoSemanalEl = document.querySelector('.text-emerald-100').previousElementSibling;
+                if (ingresoSemanalEl) {
+                    ingresoSemanalEl.textContent = '$' + new Intl.NumberFormat('es-CL').format(data.ingresoSemanal);
+                }
+            }
+            if (data.ingresoMensual !== undefined) {
+                const ingresoMensualEl = document.querySelector('.text-violet-100').previousElementSibling;
+                if (ingresoMensualEl) {
+                    ingresoMensualEl.textContent = '$' + new Intl.NumberFormat('es-CL').format(data.ingresoMensual);
+                }
+            }
+            if (data.comisionesTotales !== undefined) {
+                const comisionesEl = document.querySelector('.text-amber-100').previousElementSibling;
+                if (comisionesEl) {
+                    comisionesEl.textContent = '$' + new Intl.NumberFormat('es-CL').format(data.comisionesTotales);
+                }
+            }
             
             // Actualizar gráfico de carga laboral de técnicos si existe
             if (window.cargaTecnicosChart && data.tecnicos) {

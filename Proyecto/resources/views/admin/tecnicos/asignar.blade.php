@@ -129,7 +129,7 @@
                             <div class="flex items-start justify-between">
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2 mb-2">
-                                        <span class="font-semibold text-gray-900">Orden #{{ $orden->id }}</span>
+                                        <span class="font-semibold text-gray-900">{{ $orden->numero_orden }}</span>
                                         @php
                                             $estadoColor = match($orden->estado) {
                                                 'pendiente' => 'yellow',
@@ -204,7 +204,7 @@
                             <div class="flex items-start justify-between">
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2 mb-2">
-                                        <span class="font-semibold text-gray-900">Orden #{{ $orden->id }}</span>
+                                        <span class="font-semibold text-gray-900">{{ $orden->numero_orden }}</span>
                                         <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
                                             {{ ucfirst($orden->prioridad ?? 'normal') }}
                                         </span>

@@ -446,10 +446,10 @@ class GestionTecnicosController extends Controller
                 return back()->with('error', 'Esta orden no pertenece a tu servicio técnico.');
             }
             
-            // Asignar el técnico a la orden y cambiar estado a 'asignada'
+            // Asignar el técnico a la orden y cambiar estado a 'en_progreso'
             $orden->update([
                 'tecnico_id' => $tecnico->id,
-                'estado' => 'asignada'
+                'estado' => 'en_progreso'
             ]);
             
             // Actualizar carga de trabajo del técnico

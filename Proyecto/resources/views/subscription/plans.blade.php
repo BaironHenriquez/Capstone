@@ -125,8 +125,8 @@
         <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             
             @foreach($periods as $periodType => $period)
-                <div class="relative bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden transform transition-all duration-200 hover:scale-[1.02] hover:shadow-2xl
-                            {{ $periodType === 'yearly' ? 'ring-2 ring-blue-600' : '' }}">
+                <div class="relative bg-white rounded-2xl shadow-xl border-2 overflow-hidden transform transition-all duration-200 hover:scale-[1.02] hover:shadow-2xl
+                            {{ $periodType === 'yearly' ? 'border-blue-600' : ($periodType === 'quarterly' ? 'border-green-600' : 'border-gray-200') }}">
                     
                     @if($periodType === 'yearly')
                         <div class="absolute top-0 left-0 right-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-center py-2 text-sm font-medium">
@@ -138,7 +138,7 @@
                         </div>
                     @endif
                     
-                    <div class="p-8 {{ isset($period['discount']) && $period['discount'] > 0 ? 'pt-12' : '' }}">
+                    <div class="p-8 {{ isset($period['discount']) && $period['discount'] > 0 ? 'pt-12' : 'pt-8' }}">
                         <!-- Plan Header -->
                         <div class="text-center mb-8">
                             <h3 class="text-2xl font-bold text-gray-900 mb-2">
@@ -185,16 +185,20 @@
                         @if($currentSubscription && $currentSubscription->isActive())
                             <a href="{{ route('subscription.checkout', $periodType) }}" 
                                class="block w-full py-3 px-6 bg-gradient-to-r 
-                                      {{ $periodType === 'yearly' ? 'from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' : 'from-gray-800 to-gray-900 hover:from-gray-900 hover:to-black' }} 
+                                      {{ $periodType === 'yearly' ? 'from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' : 
+                                         ($periodType === 'quarterly' ? 'from-gray-800 to-gray-900 hover:from-gray-900 hover:to-black' : 
+                                         'from-gray-800 to-gray-900 hover:from-gray-900 hover:to-black') }} 
                                       text-white font-semibold rounded-xl text-center transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl">
                                 Cambiar a {{ $period['name'] }}
                             </a>
                         @else
                             <a href="{{ route('subscription.checkout', $periodType) }}" 
                                class="block w-full py-3 px-6 bg-gradient-to-r 
-                                      {{ $periodType === 'yearly' ? 'from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' : 'from-gray-800 to-gray-900 hover:from-gray-900 hover:to-black' }} 
+                                      {{ $periodType === 'yearly' ? 'from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' : 
+                                         ($periodType === 'quarterly' ? 'from-gray-800 to-gray-900 hover:from-gray-900 hover:to-black' : 
+                                         'from-gray-800 to-gray-900 hover:from-gray-900 hover:to-black') }} 
                                       text-white font-semibold rounded-xl text-center transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl">
-                                Comenzar Ahora
+                                Cambiar a {{ $period['name'] }}
                             </a>
                         @endif
                     </div>

@@ -118,40 +118,57 @@
         </div>
 
         <!-- Lista de técnicos -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
             @forelse($tecnicos as $tecnico)
-                <div class="tecnico-card bg-white rounded-lg shadow-sm p-6">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex-1">
-                            <h3 class="text-lg font-semibold text-gray-900">
+                <div class="tecnico-card bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-100">
+                    <!-- Header con gradiente -->
+                    <div class="bg-gradient-to-r from-blue-500 to-cyan-500 p-6 text-white">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-bold">
                                 {{ $tecnico->nombre }} {{ $tecnico->apellido }}
                             </h3>
-                            <p class="text-gray-600 text-sm">{{ $tecnico->email }}</p>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $tecnico->estado === 'activo' ? 'bg-green-400 text-green-900' : 'bg-gray-400 text-gray-900' }}">
+                                {{ ucfirst($tecnico->estado) }}
+                            </span>
                         </div>
-                        <span class="status-badge status-{{ $tecnico->estado }}">
-                            {{ ucfirst($tecnico->estado) }}
-                        </span>
+                        <p class="text-blue-100 text-sm">{{ $tecnico->email }}</p>
                     </div>
+                    
+                    <!-- Contenido -->
+                    <div class="p-6">
 
-                    <div class="space-y-2 mb-4">
-                        <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-phone w-4 mr-2 text-sky-500"></i>
-                            <span class="truncate">{{ $tecnico->telefono }}</span>
+                    <!-- Info Grid -->
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                            <div class="flex items-center text-sm text-blue-700">
+                                <i class="fas fa-phone mr-2"></i>
+                                <span class="truncate font-medium">{{ $tecnico->telefono }}</span>
+                            </div>
                         </div>
-                        <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-id-card w-4 mr-2 text-blue-500"></i>
-                            {{ $tecnico->rut }}
+                        <div class="bg-purple-50 rounded-lg p-3 border border-purple-100">
+                            <div class="flex items-center text-sm text-purple-700">
+                                <i class="fas fa-id-card mr-2"></i>
+                                <span class="font-medium">{{ $tecnico->rut }}</span>
+                            </div>
                         </div>
-                        <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-briefcase w-4 mr-2 text-purple-500"></i>
-                            <span class="capitalize">{{ $tecnico->nivel_experiencia }}</span>
+                        <div class="bg-indigo-50 rounded-lg p-3 border border-indigo-100">
+                            <div class="flex items-center text-sm text-indigo-700">
+                                <i class="fas fa-briefcase mr-2"></i>
+                                <span class="capitalize font-medium">{{ $tecnico->nivel_experiencia }}</span>
+                            </div>
                         </div>
-                        <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-map-marker-alt w-4 mr-2 text-red-500"></i>
-                            <span class="truncate">{{ $tecnico->zona_trabajo ?? 'Sin zona' }}</span>
+                        <div class="bg-rose-50 rounded-lg p-3 border border-rose-100">
+                            <div class="flex items-center text-sm text-rose-700">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                <span class="truncate font-medium">{{ $tecnico->zona_trabajo ?? 'Sin zona' }}</span>
+                            </div>
                         </div>
-                        <div class="flex items-center text-sm">
-                            <i class="fas fa-tasks w-4 mr-2 text-orange-500"></i>
+                    </div>
+                    
+                    <!-- Estado de disponibilidad -->
+                    <div class="mb-4 p-3 rounded-lg {{ $tecnico->disponible ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200' }}">
+                        <div class="flex items-center justify-center">
+                            <i class="fas fa-{{ $tecnico->disponible ? 'check-circle' : 'times-circle' }} mr-2 {{ $tecnico->disponible ? 'text-green-600' : 'text-gray-400' }}"></i>
                             <span class="font-semibold {{ $tecnico->disponible ? 'text-green-600' : 'text-gray-400' }}">
                                 {{ $tecnico->disponible ? 'Disponible' : 'No disponible' }}
                             </span>
@@ -161,10 +178,10 @@
                     <!-- Especialidades -->
                     @if(!empty($tecnico->especialidades))
                         <div class="mb-4">
-                            <p class="text-xs text-gray-500 mb-2">Especialidades:</p>
-                            <div class="flex flex-wrap gap-1">
+                            <p class="text-xs font-semibold text-gray-700 mb-2">Especialidades:</p>
+                            <div class="flex flex-wrap gap-2">
                                 @foreach($tecnico->especialidades as $especialidad)
-                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                                    <span class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs px-3 py-1 rounded-full font-medium">
                                         {{ $especialidad }}
                                     </span>
                                 @endforeach
@@ -173,65 +190,74 @@
                     @endif
 
                     <!-- Estadísticas -->
-                    <div class="grid grid-cols-3 gap-2 mb-4 p-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg">
-                        <div class="text-center">
-                            <p class="text-lg font-bold text-blue-600">{{ $tecnico->ordenes_count ?? 0 }}</p>
-                            <p class="text-xs text-gray-500">Órdenes</p>
+                    <div class="grid grid-cols-3 gap-3 mb-4">
+                        <div class="text-center bg-gradient-to-br from-blue-50 to-blue-100 p-3 rounded-lg border border-blue-200">
+                            <p class="text-2xl font-bold text-blue-600">{{ $tecnico->ordenes_count ?? 0 }}</p>
+                            <p class="text-xs text-blue-700 font-medium">Órdenes</p>
                         </div>
-                        <div class="text-center">
-                            <p class="text-lg font-bold text-orange-600">{{ $tecnico->carga_trabajo_actual ?? 0 }}%</p>
-                            <p class="text-xs text-gray-500">Carga</p>
+                        <div class="text-center bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-lg border border-orange-200">
+                            <p class="text-2xl font-bold text-orange-600">{{ $tecnico->carga_trabajo_actual ?? 0 }}%</p>
+                            <p class="text-xs text-orange-700 font-medium">Carga</p>
                         </div>
-                        <div class="text-center">
+                        <div class="text-center bg-gradient-to-br from-green-50 to-green-100 p-3 rounded-lg border border-green-200">
                             <p class="text-lg font-bold text-green-600">
                                 ${{ number_format($tecnico->salario_base ?? 0, 0, ',', '.') }}
                             </p>
-                            <p class="text-xs text-gray-500">Salario</p>
+                            <p class="text-xs text-green-700 font-medium">Salario</p>
                         </div>
                     </div>
                     
                     <!-- Información adicional -->
-                    <div class="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                        <div class="flex items-center justify-between text-xs">
-                            <span class="text-gray-600">
-                                <i class="fas fa-calendar-alt mr-1 text-blue-500"></i>
+                    <div class="mb-4 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200">
+                        <div class="text-xs text-center">
+                            <span class="text-indigo-700 font-semibold">
+                                <i class="fas fa-calendar-alt mr-1"></i>
                                 Ingreso: {{ $tecnico->fecha_ingreso ? \Carbon\Carbon::parse($tecnico->fecha_ingreso)->format('d/m/Y') : 'N/A' }}
                             </span>
                         </div>
                         @if($tecnico->horario_trabajo)
-                            <div class="mt-2 text-xs text-gray-600">
-                                <i class="fas fa-clock mr-1 text-blue-500"></i>
+                            <div class="mt-2 text-xs text-center text-indigo-600">
+                                <i class="fas fa-clock mr-1"></i>
                                 {{ $tecnico->horario_trabajo }}
                             </div>
                         @endif
                     </div>
 
                     <!-- Acciones -->
-                    <div class="grid grid-cols-2 gap-2">
+                    <div class="grid grid-cols-2 gap-3">
                         <a href="{{ route('admin.tecnicos.edit', $tecnico->id) }}" 
-                           class="bg-yellow-100 text-yellow-700 hover:bg-yellow-200 px-3 py-2 rounded-lg text-sm font-medium text-center transition-colors duration-200">
+                           class="bg-gradient-to-r from-yellow-400 to-amber-500 text-white hover:from-yellow-500 hover:to-amber-600 px-4 py-2.5 rounded-lg text-sm font-semibold text-center transition-all duration-200 shadow-md hover:shadow-lg">
                             <i class="fas fa-edit mr-1"></i>Editar
                         </a>
                         
                         <a href="{{ route('admin.tecnicos.asignar', $tecnico->id) }}" 
-                           class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-2 rounded-lg text-sm font-medium text-center transition-colors duration-200">
+                           class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600 px-4 py-2.5 rounded-lg text-sm font-semibold text-center transition-all duration-200 shadow-md hover:shadow-lg">
                             <i class="fas fa-tasks mr-1"></i>Asignar
                         </a>
                         
                         <button onclick="verDetalle({{ $tecnico->id }})" 
-                                class="bg-purple-100 text-purple-700 hover:bg-purple-200 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                                class="bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white hover:from-purple-600 hover:to-fuchsia-600 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg">
                             <i class="fas fa-eye mr-1"></i>Ver más
                         </button>
                         
                         <form method="POST" action="{{ route('admin.tecnicos.toggle-ban', $tecnico->id) }}">
                             @csrf
                             @method('PATCH')
-                            <button type="submit" 
-                                    class="w-full bg-{{ $tecnico->estado === 'activo' ? 'red' : 'green' }}-100 text-{{ $tecnico->estado === 'activo' ? 'red' : 'green' }}-700 hover:bg-{{ $tecnico->estado === 'activo' ? 'red' : 'green' }}-200 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
-                                <i class="fas fa-{{ $tecnico->estado === 'activo' ? 'ban' : 'check' }} mr-1"></i>
-                                {{ $tecnico->estado === 'activo' ? 'Desactivar' : 'Activar' }}
-                            </button>
+                            @if($tecnico->estado === 'activo')
+                                <button type="submit" 
+                                        class="w-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg">
+                                    <i class="fas fa-ban mr-1"></i>
+                                    Desactivar
+                                </button>
+                            @else
+                                <button type="submit" 
+                                        class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg">
+                                    <i class="fas fa-check mr-1"></i>
+                                    Activar
+                                </button>
+                            @endif
                         </form>
+                    </div>
                     </div>
                 </div>
             @empty

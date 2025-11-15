@@ -461,6 +461,7 @@
                                 Fecha Programada
                             </label>
                             <input type="date" 
+                                   id="fecha_programada"
                                    name="fecha_programada" 
                                    class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:outline-none transition-all">
                         </div>
@@ -472,6 +473,7 @@
                                 Fecha Aprox. de Entrega
                             </label>
                             <input type="date" 
+                                   id="fecha_aprox_entrega"
                                    name="fecha_aprox_entrega" 
                                    class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:outline-none transition-all">
                         </div>
@@ -483,11 +485,13 @@
                                 Horas Estimadas
                             </label>
                             <input type="number" 
+                                   id="horas_estimadas"
                                    name="horas_estimadas" 
                                    step="0.5" 
                                    min="0"
-                                   class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:outline-none transition-all"
-                                   placeholder="Ej: 2.5">
+                                   readonly
+                                   class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 focus:border-indigo-500 focus:outline-none transition-all"
+                                   placeholder="Se calcula automáticamente">
                         </div>
 
                         <!-- Precio Presupuestado -->
@@ -772,6 +776,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 fileList.appendChild(listContainer);
             }
         });
+    }
+    
+    // Calcular horas estimadas automáticamente
+    const fechaProgramada = document.getElementById('fecha_programada');
+    const fechaEntrega = document.getElementById('fecha_aprox_entrega');
+    const horasEstimadas = document.getElementById('horas_estimadas');
+    
+    function calcularHorasEstimadas() {
+        if (fechaProgramada.value && fechaEntrega.value) {
+            const inicio = new Date(fechaProgramada.value + 'T00:00:00');
+            const fin = new Date(fechaEntrega.value + 'T00:00:00');
+            
+            if (fin >= inicio) {
+                // Calcular diferencia en milisegundos
+                const diferencia = fin - inicio;
+                
+                // Convertir a días
+                const dias = diferencia / (1000 * 60 * 60 * 24);
+                
+                // Calcular horas (asumiendo 8 horas laborales por día)
+                const horas = dias * 8;
+                
+                horasEstimadas.value = horas.toFixed(1);
+            } else {
+                horasEstimadas.value = '';
+            }
+        } else {
+            horasEstimadas.value = '';
+        }
+    }
+    
+    if (fechaProgramada && fechaEntrega) {
+        fechaProgramada.addEventListener('change', calcularHorasEstimadas);
+        fechaEntrega.addEventListener('change', calcularHorasEstimadas);
     }
     
     // Inicializar

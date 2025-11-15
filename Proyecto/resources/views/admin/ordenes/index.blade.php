@@ -174,35 +174,35 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        <a href="{{ request()->fullUrlWithQuery(['orden_por' => 'numero_orden', 'direccion' => request('direccion') === 'asc' ? 'desc' : 'asc']) }}" class="flex items-center space-x-1 hover:text-gray-700">
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <a href="{{ request()->fullUrlWithQuery(['orden_por' => 'numero_orden', 'direccion' => request('direccion') === 'asc' ? 'desc' : 'asc']) }}" class="flex items-center justify-center space-x-1 hover:text-gray-700">
                             <span>Número</span>
                             <i class="fas fa-sort text-xs"></i>
                         </a>
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Técnico</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Servicio</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prioridad</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        <a href="{{ request()->fullUrlWithQuery(['orden_por' => 'created_at', 'direccion' => request('direccion') === 'asc' ? 'desc' : 'asc']) }}" class="flex items-center space-x-1 hover:text-gray-700">
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Técnico</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Servicio</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Prioridad</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <a href="{{ request()->fullUrlWithQuery(['orden_por' => 'created_at', 'direccion' => request('direccion') === 'asc' ? 'desc' : 'asc']) }}" class="flex items-center justify-center space-x-1 hover:text-gray-700">
                             <span>Creada</span>
                             <i class="fas fa-sort text-xs"></i>
                         </a>
                     </th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @forelse($ordenes ?? [] as $orden)
                 <tr class="hover:bg-gray-50 transition-colors duration-200">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 text-center">
                         <a href="{{ route('ordenes.show', $orden) }}" class="hover:text-blue-800">
                             {{ $orden->numero_orden ?? 'TS-000' }}
                         </a>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
                         <div class="text-sm font-medium text-gray-900">
                             {{ $orden->cliente->nombre_completo ?? 'Sin cliente' }}
                         </div>
@@ -210,30 +210,21 @@
                         <div class="text-sm text-gray-500">{{ $orden->cliente->empresa }}</div>
                         @endif
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-6 py-4 text-center">
                         @if($orden->tecnico)
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-2">
-                                <span class="text-xs font-semibold text-blue-600">
-                                    {{ substr($orden->tecnico->nombre_completo, 0, 2) }}
-                                </span>
-                            </div>
-                            <div>
-                                <div class="text-sm font-medium text-gray-900">{{ $orden->tecnico->nombre_completo }}</div>
-                                <div class="text-xs text-gray-500">{{ $orden->tecnico->especialidades_texto ?? '' }}</div>
-                            </div>
-                        </div>
+                        <div class="text-sm font-medium text-gray-900">{{ $orden->tecnico->nombre_completo }}</div>
+                        <div class="text-xs text-gray-500">{{ Str::limit($orden->tecnico->especialidades_texto ?? '', 30) }}</div>
                         @else
                         <span class="text-sm text-gray-500 italic">Sin asignar</span>
                         @endif
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
                         <div class="text-sm font-medium text-gray-900 capitalize">{{ $orden->tipo_servicio ?? 'N/A' }}</div>
-                        <div class="text-xs text-gray-500 truncate max-w-32" title="{{ $orden->descripcion_problema ?? '' }}">
+                        <div class="text-xs text-gray-500 truncate max-w-32 mx-auto" title="{{ $orden->descripcion_problema ?? '' }}">
                             {{ Str::limit($orden->descripcion_problema ?? '', 40) }}
                         </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
                         <div class="relative inline-block" x-data="{ open: false }">
                             <button @click="open = !open" type="button" class="px-3 py-1.5 inline-flex items-center text-xs leading-5 font-semibold rounded-full {{ $orden->estado_badge ?? 'bg-gray-100 text-gray-800' }} hover:opacity-80 transition-opacity cursor-pointer min-w-[120px] justify-between">
                                 <span>{{ ucfirst(str_replace('_', ' ', $orden->estado ?? 'pendiente')) }}</span>
@@ -253,7 +244,7 @@
                             </div>
                         </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
                         <div class="relative inline-block" x-data="{ open: false }">
                             <button @click="open = !open" type="button" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $orden->prioridad_badge ?? 'bg-gray-100 text-gray-800' }} hover:opacity-80 transition-opacity cursor-pointer">
                                 <span class="mr-1">{{ ucfirst($orden->prioridad ?? 'media') }}</span>
@@ -276,14 +267,14 @@
                             </div>
                         </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                         {{ $orden->created_at ? $orden->created_at->format('d/m/Y') : 'N/A' }}
                         <div class="text-xs text-gray-400">
                             {{ $orden->created_at ? $orden->created_at->format('H:i') : '' }}
                         </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div class="flex items-center justify-end space-x-2">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div class="flex items-center justify-center space-x-2">
                             <a href="{{ route('ordenes.show', $orden) }}" class="text-blue-600 hover:text-blue-900 transition-colors duration-200" title="Ver orden">
                                 <i class="fas fa-eye"></i>
                             </a>

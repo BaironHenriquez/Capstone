@@ -102,8 +102,10 @@ class DashboardController extends Controller
                 'tecnicos.id',
                 DB::raw('CONCAT(tecnicos.nombre, " ", tecnicos.apellido) as nombre'),
                 'tecnicos.especialidades',
-                DB::raw('(SELECT COUNT(*) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND estado IN ("pendiente", "en_progreso")) as ordenes_asignadas'),
-                DB::raw('(SELECT COUNT(*) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND estado = "completada") as ordenes_completadas')
+                'tecnicos.comision_por_orden',
+                DB::raw('(SELECT COUNT(*) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND estado IN ("asignada", "en_progreso", "diagnostico")) as ordenes_asignadas'),
+                DB::raw('(SELECT COUNT(*) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND estado = "completada") as ordenes_completadas'),
+                DB::raw('(SELECT SUM(precio_presupuestado) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW())) as ingresos_mes')
             )
             ->get()
             ->map(function($tecnico) {
@@ -125,6 +127,11 @@ class DashboardController extends Controller
                     ? ucfirst($especialidades[0]) 
                     : 'General';
                 
+                // Calcular comisión del mes (porcentaje sobre ingresos)
+                $ingresosMes = floatval($tecnico->ingresos_mes ?? 0);
+                $porcentajeComision = floatval($tecnico->comision_por_orden ?? 0);
+                $comisionTotal = ($ingresosMes * $porcentajeComision) / 100;
+                
                 return [
                     'id' => $tecnico->id,
                     'nombre' => $tecnico->nombre,
@@ -132,7 +139,10 @@ class DashboardController extends Controller
                     'ordenes_completadas' => $tecnico->ordenes_completadas,
                     'carga_trabajo' => round($cargaTrabajo),
                     'especialidad' => $especialidad,
-                    'estado' => $estado
+                    'estado' => $estado,
+                    'ingresos_mes' => $ingresosMes,
+                    'comision_por_orden' => $porcentajeComision,
+                    'comision_total' => $comisionTotal
                 ];
             })
             ->toArray();
@@ -223,6 +233,20 @@ class DashboardController extends Controller
             $productividadSemanal[] = $ordenesCreadas;
         }
 
+        // Cálculo de ingresos
+        $ingresoMensual = DB::table('ordenes_servicio')
+            ->where('servicio_tecnico_id', $servicioTecnicoId)
+            ->whereNotNull('precio_presupuestado')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('precio_presupuestado');
+
+        $ingresoSemanal = DB::table('ordenes_servicio')
+            ->where('servicio_tecnico_id', $servicioTecnicoId)
+            ->whereNotNull('precio_presupuestado')
+            ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+            ->sum('precio_presupuestado');
+
         return view('admin.dashboard-admin', compact(
             'user', 
             'estadisticasClientes',
@@ -231,7 +255,9 @@ class DashboardController extends Controller
             'tecnicos',
             'alertas',
             'metricas',
-            'productividadSemanal'
+            'productividadSemanal',
+            'ingresoMensual',
+            'ingresoSemanal'
         ));
     }
 
@@ -361,8 +387,10 @@ class DashboardController extends Controller
                 'tecnicos.id',
                 DB::raw('CONCAT(tecnicos.nombre, " ", tecnicos.apellido) as nombre'),
                 'tecnicos.especialidades',
-                DB::raw('(SELECT COUNT(*) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND estado IN ("pendiente", "en_progreso")) as ordenes_asignadas'),
-                DB::raw('(SELECT COUNT(*) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND estado = "completada") as ordenes_completadas')
+                'tecnicos.comision_por_orden',
+                DB::raw('(SELECT COUNT(*) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND estado IN ("asignada", "en_progreso", "diagnostico")) as ordenes_asignadas'),
+                DB::raw('(SELECT COUNT(*) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND estado = "completada") as ordenes_completadas'),
+                DB::raw('(SELECT SUM(precio_presupuestado) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW())) as ingresos_mes')
             )
             ->get()
             ->map(function($tecnico) {
@@ -384,6 +412,11 @@ class DashboardController extends Controller
                     ? ucfirst($especialidades[0]) 
                     : 'General';
                 
+                // Calcular comisión (porcentaje sobre ingresos)
+                $ingresosMes = floatval($tecnico->ingresos_mes ?? 0);
+                $porcentajeComision = floatval($tecnico->comision_por_orden ?? 0);
+                $comisionTotal = ($ingresosMes * $porcentajeComision) / 100;
+                
                 return [
                     'id' => $tecnico->id,
                     'nombre' => $tecnico->nombre,
@@ -391,14 +424,35 @@ class DashboardController extends Controller
                     'ordenes_completadas' => $tecnico->ordenes_completadas,
                     'carga_trabajo' => round($cargaTrabajo),
                     'especialidad' => $especialidad,
-                    'estado' => $estado
+                    'estado' => $estado,
+                    'comision_total' => $comisionTotal
                 ];
             })
             ->toArray();
+
+        // Calcular ingresos actualizados
+        $ingresoMensual = DB::table('ordenes_servicio')
+            ->where('servicio_tecnico_id', $servicioTecnicoId)
+            ->whereNotNull('precio_presupuestado')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('precio_presupuestado');
+
+        $ingresoSemanal = DB::table('ordenes_servicio')
+            ->where('servicio_tecnico_id', $servicioTecnicoId)
+            ->whereNotNull('precio_presupuestado')
+            ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+            ->sum('precio_presupuestado');
+        
+        // Calcular comisiones totales
+        $comisionesTotales = array_sum(array_column($tecnicosData, 'comision_total'));
         
         return response()->json([
             'resumenOrdenes' => $resumenOrdenes,
-            'tecnicos' => $tecnicosData
+            'tecnicos' => $tecnicosData,
+            'ingresoMensual' => $ingresoMensual,
+            'ingresoSemanal' => $ingresoSemanal,
+            'comisionesTotales' => $comisionesTotales
         ]);
     }
 }

@@ -172,11 +172,11 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
                             <p class="text-xs font-semibold text-gray-500 mb-1">Tipo</p>
-                            <p class="font-bold text-base text-gray-900">{{ $orden->equipo->tipo ?? 'No especificado' }}</p>
+                            <p class="font-bold text-base text-gray-900">{{ $orden->equipo->tipo_equipo ?? 'No especificado' }}</p>
                         </div>
                         <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
                             <p class="text-xs font-semibold text-gray-500 mb-1">Marca</p>
-                            <p class="font-bold text-base text-gray-900">{{ $orden->equipo->marca->nombre ?? 'No especificada' }}</p>
+                            <p class="font-bold text-base text-gray-900">{{ $orden->equipo->marca->nombre_marca ?? 'No especificada' }}</p>
                         </div>
                         <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
                             <p class="text-xs font-semibold text-gray-500 mb-1">Modelo</p>
@@ -223,6 +223,50 @@
                     </div>
                 </div>
                 @endif
+
+                <!-- Técnico Asignado -->
+                @if($orden->tecnico)
+                <div class="info-card bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <span class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            </svg>
+                        </span>
+                        Técnico Asignado
+                    </h3>
+                    <div class="flex items-center bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center mr-3 shadow-lg">
+                            <span class="text-white font-bold text-lg">{{ substr($orden->tecnico->name, 0, 1) }}</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-base text-gray-900">{{ $orden->tecnico->name }}</p>
+                            @if($orden->tecnico->email)
+                            <p class="text-xs text-gray-600 mt-1 break-all">{{ $orden->tecnico->email }}</p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Botón Consultar Nueva Orden -->
+                <div class="info-card bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-white mb-2 flex items-center">
+                        <span class="w-10 h-10 bg-white bg-opacity-20 backdrop-blur rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </span>
+                        ¿Otra Consulta?
+                    </h3>
+                    <p class="text-white text-opacity-90 mb-4 text-sm">Busca el estado de otra orden de servicio</p>
+                    <a href="{{ route('home') }}#consultar" class="block w-full bg-white hover:bg-gray-100 text-purple-600 font-bold py-3 px-6 rounded-lg text-center transition-all duration-200 shadow-lg">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        Nueva Búsqueda
+                    </a>
+                </div>
 
                 <!-- Historial de Estado -->
                 @if(isset($orden->historial) && $orden->historial && $orden->historial->count() > 0)
@@ -351,50 +395,6 @@
                         </div>
                         @endif
                     </div>
-                </div>
-
-                <!-- Técnico Asignado -->
-                @if($orden->tecnico)
-                <div class="info-card bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                        <span class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                            </svg>
-                        </span>
-                        Técnico Asignado
-                    </h3>
-                    <div class="flex items-center bg-gray-50 rounded-lg p-4 border border-gray-200">
-                        <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center mr-3 shadow-lg">
-                            <span class="text-white font-bold text-lg">{{ substr($orden->tecnico->name, 0, 1) }}</span>
-                        </div>
-                        <div>
-                            <p class="font-bold text-base text-gray-900">{{ $orden->tecnico->name }}</p>
-                            @if($orden->tecnico->email)
-                            <p class="text-xs text-gray-600 mt-1 break-all">{{ $orden->tecnico->email }}</p>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-                @endif
-
-                <!-- Botón Consultar Nueva Orden -->
-                <div class="info-card bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl shadow-lg p-6">
-                    <h3 class="text-lg font-bold text-white mb-2 flex items-center">
-                        <span class="w-10 h-10 bg-white bg-opacity-20 backdrop-blur rounded-lg flex items-center justify-center mr-3">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
-                        </span>
-                        ¿Otra Consulta?
-                    </h3>
-                    <p class="text-white text-opacity-90 mb-4 text-sm">Busca el estado de otra orden de servicio</p>
-                    <a href="{{ route('home') }}#consultar" class="block w-full bg-white hover:bg-gray-100 text-purple-600 font-bold py-3 px-6 rounded-lg text-center transition-all duration-200 shadow-lg">
-                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                        Nueva Búsqueda
-                    </a>
                 </div>
 
             </div>
