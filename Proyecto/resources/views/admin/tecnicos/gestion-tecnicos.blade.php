@@ -88,7 +88,9 @@
                             <option value="">Todos los estados</option>
                             <option value="activo" {{ request('estado') == 'activo' ? 'selected' : '' }}>Activo</option>
                             <option value="inactivo" {{ request('estado') == 'inactivo' ? 'selected' : '' }}>Inactivo</option>
-                            <option value="baneado" {{ request('estado') == 'baneado' ? 'selected' : '' }}>Baneado</option>
+                            <option value="vacaciones" {{ request('estado') == 'vacaciones' ? 'selected' : '' }}>Vacaciones</option>
+                            <option value="licencia" {{ request('estado') == 'licencia' ? 'selected' : '' }}>Licencia</option>
+                            <option value="suspendido" {{ request('estado') == 'suspendido' ? 'selected' : '' }}>Suspendido</option>
                         </select>
                     </div>
                     <div>
@@ -230,33 +232,45 @@
                             <i class="fas fa-edit mr-1"></i>Editar
                         </a>
                         
-                        <a href="{{ route('admin.tecnicos.asignar', $tecnico->id) }}" 
-                           class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600 px-4 py-2.5 rounded-lg text-sm font-semibold text-center transition-all duration-200 shadow-md hover:shadow-lg">
-                            <i class="fas fa-tasks mr-1"></i>Asignar
-                        </a>
+                        @if($tecnico->estado === 'activo')
+                            <a href="{{ route('admin.tecnicos.asignar', $tecnico->id) }}" 
+                               class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600 px-4 py-2.5 rounded-lg text-sm font-semibold text-center transition-all duration-200 shadow-md hover:shadow-lg">
+                                <i class="fas fa-tasks mr-1"></i>Asignar
+                            </a>
+                        @else
+                            <button disabled
+                                    title="El técnico debe estar en estado 'Activo' para asignar órdenes"
+                                    class="bg-gray-300 text-gray-500 cursor-not-allowed px-4 py-2.5 rounded-lg text-sm font-semibold text-center shadow-md opacity-60">
+                                <i class="fas fa-lock mr-1"></i>Asignar
+                            </button>
+                        @endif
                         
                         <button onclick="verDetalle({{ $tecnico->id }})" 
                                 class="bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white hover:from-purple-600 hover:to-fuchsia-600 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg">
                             <i class="fas fa-eye mr-1"></i>Ver más
                         </button>
                         
-                        <form method="POST" action="{{ route('admin.tecnicos.toggle-ban', $tecnico->id) }}">
-                            @csrf
-                            @method('PATCH')
-                            @if($tecnico->estado === 'activo')
-                                <button type="submit" 
-                                        class="w-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg">
-                                    <i class="fas fa-ban mr-1"></i>
-                                    Desactivar
-                                </button>
-                            @else
-                                <button type="submit" 
-                                        class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg">
-                                    <i class="fas fa-check mr-1"></i>
-                                    Activar
-                                </button>
-                            @endif
-                        </form>
+                        <div class="relative">
+                            <form method="POST" action="{{ route('admin.tecnicos.cambiar-estado', $tecnico->id) }}" id="form-estado-{{ $tecnico->id }}">
+                                @csrf
+                                @method('PATCH')
+                                <select name="estado" 
+                                        onchange="document.getElementById('form-estado-{{ $tecnico->id }}').submit()"
+                                        class="w-full px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg border-2 cursor-pointer appearance-none
+                                        @if($tecnico->estado === 'activo') bg-green-500 hover:bg-green-600 text-white border-green-600
+                                        @elseif($tecnico->estado === 'inactivo') bg-gray-500 hover:bg-gray-600 text-white border-gray-600
+                                        @elseif($tecnico->estado === 'vacaciones') bg-blue-500 hover:bg-blue-600 text-white border-blue-600
+                                        @elseif($tecnico->estado === 'licencia') bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-600
+                                        @elseif($tecnico->estado === 'suspendido') bg-red-500 hover:bg-red-600 text-white border-red-600
+                                        @endif">
+                                    <option value="activo" {{ $tecnico->estado === 'activo' ? 'selected' : '' }} style="background-color: #22c55e; color: white;">✓ Activo</option>
+                                    <option value="inactivo" {{ $tecnico->estado === 'inactivo' ? 'selected' : '' }} style="background-color: #6b7280; color: white;">○ Inactivo</option>
+                                    <option value="vacaciones" {{ $tecnico->estado === 'vacaciones' ? 'selected' : '' }} style="background-color: #3b82f6; color: white;">✈ Vacaciones</option>
+                                    <option value="licencia" {{ $tecnico->estado === 'licencia' ? 'selected' : '' }} style="background-color: #eab308; color: white;">⚕ Licencia</option>
+                                    <option value="suspendido" {{ $tecnico->estado === 'suspendido' ? 'selected' : '' }} style="background-color: #ef4444; color: white;">⊗ Suspendido</option>
+                                </select>
+                            </form>
+                        </div>
                     </div>
                     </div>
                 </div>

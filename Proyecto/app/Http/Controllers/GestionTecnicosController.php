@@ -518,4 +518,33 @@ class GestionTecnicosController extends Controller
             return back()->with('error', 'Error al desasignar la orden: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Cambiar el estado de un técnico
+     */
+    public function cambiarEstado(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'estado' => 'required|in:activo,inactivo,vacaciones,licencia,suspendido'
+            ]);
+
+            $tecnico = Tecnico::findOrFail($id);
+            
+            // Verificar que el técnico pertenece al servicio del usuario
+            if (!auth()->check() || $tecnico->servicio_tecnico_id !== auth()->user()->servicioTecnico->id) {
+                return back()->with('error', 'No tienes permiso para modificar este técnico.');
+            }
+
+            $estadoAnterior = $tecnico->estado;
+            $tecnico->update([
+                'estado' => $request->estado
+            ]);
+
+            return back()->with('success', "Estado cambiado de '{$estadoAnterior}' a '{$request->estado}' exitosamente.");
+            
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al cambiar el estado: ' . $e->getMessage());
+        }
+    }
 }

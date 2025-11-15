@@ -269,6 +269,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/{id}/edit', [GestionTecnicosController::class, 'edit'])->name('edit');
         Route::put('/{id}', [GestionTecnicosController::class, 'update'])->name('update');
         Route::patch('/{id}/toggle-ban', [GestionTecnicosController::class, 'toggleBan'])->name('toggle-ban');
+        Route::patch('/{id}/cambiar-estado', [GestionTecnicosController::class, 'cambiarEstado'])->name('cambiar-estado');
         Route::delete('/{id}', [GestionTecnicosController::class, 'destroy'])->name('destroy');
         
         // Dashboard/Resumen del técnico (acepta ID opcional)
