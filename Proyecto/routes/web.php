@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Tecnico\TecnicoAuthController;
 use App\Http\Controllers\OrdenServicioController;
 use App\Http\Controllers\TecnicoOrdenController;
 use App\Http\Controllers\ClienteController;
@@ -24,6 +25,11 @@ Route::get('/', function () {
     return view('shared.welcome');
 })->name('home');
 
+// Página de selección de tipo de usuario
+Route::get('/seleccionar-usuario', function () {
+    return view('auth.select-user-type');
+})->name('select.user.type');
+
 // ============================================
 // MÓDULO DE SUSCRIPCIÓN Y AUTENTICACIÓN
 // ============================================
@@ -35,6 +41,25 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [RegisterController::class, 'register'])->name('register');
     Route::post('/login', [RegisterController::class, 'login'])->name('login');
 });
+
+// ============================================
+// AUTENTICACIÓN DE TÉCNICOS
+// ============================================
+
+Route::middleware('guest:tecnico')->group(function () {
+    Route::get('/tecnico/login', [TecnicoAuthController::class, 'showLoginForm'])->name('tecnico.login');
+    Route::post('/tecnico/login', [TecnicoAuthController::class, 'login'])->name('tecnico.login.submit');
+});
+
+Route::middleware('auth:tecnico')->group(function () {
+    Route::post('/tecnico/logout', [TecnicoAuthController::class, 'logout'])->name('tecnico.logout');
+    Route::get('/tecnico/dashboard', [TecnicoOrdenController::class, 'dashboard'])->name('tecnico.dashboard');
+});
+
+// ============================================
+// MÓDULO DE SUSCRIPCIONES Y PAGOS
+// ============================================
+
 
 // Rutas de suscripción (requieren autenticación)
 Route::middleware('auth')->prefix('subscription')->name('subscription.')->group(function () {
