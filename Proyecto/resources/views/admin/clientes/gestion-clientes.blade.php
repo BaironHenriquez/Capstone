@@ -203,6 +203,11 @@
                     </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">
+                            <button onclick="verOrdenes({{ $cliente->id }})" 
+                                    class="text-purple-600 hover:text-purple-800 hover:bg-purple-50 p-2 rounded transition-colors" 
+                                    title="Ver Órdenes">
+                                <i class="fas fa-list-alt"></i>
+                            </button>
                             <button onclick="editCliente({{ $cliente->id }})" 
                                     class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded transition-colors" 
                                     title="Editar">
@@ -336,7 +341,7 @@
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 function openCreateModal() {
     document.getElementById('modalTitle').textContent = 'Nuevo Cliente';
@@ -462,7 +467,162 @@ document.getElementById('clienteModal').addEventListener('click', function(e) {
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeModal();
+        closeOrdenesModal();
+    }
+});
+
+// Función para ver órdenes del cliente
+async function verOrdenes(clienteId) {
+    console.log('verOrdenes llamada con ID:', clienteId);
+    try {
+        const url = `/admin/clientes/${clienteId}/ordenes`;
+        console.log('Fetching URL:', url);
+        
+        const response = await fetch(url, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log('Response status:', response.status);
+        const data = await response.json();
+        console.log('Data recibida:', data);
+        
+        if (data.success) {
+            mostrarModalOrdenes(data.cliente, data.ordenes);
+        } else {
+            alert('❌ ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error completo:', error);
+        alert('❌ Error al cargar las órdenes');
+    }
+}
+
+function mostrarModalOrdenes(cliente, ordenes) {
+    console.log('mostrarModalOrdenes llamada', { cliente, ordenes });
+    const modal = document.getElementById('ordenesModal');
+    console.log('Modal encontrado:', modal);
+    document.getElementById('modalClienteNombre').textContent = cliente.nombre + ' ' + cliente.apellido;
+    
+    const tbody = document.getElementById('ordenesTableBody');
+    tbody.innerHTML = '';
+    
+    if (ordenes.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="px-6 py-12 text-center">
+                    <i class="fas fa-inbox text-gray-300 text-5xl mb-4"></i>
+                    <p class="text-gray-500 font-medium">No hay órdenes de servicio</p>
+                    <p class="text-gray-400 text-sm mt-2">Este cliente aún no tiene órdenes registradas</p>
+                </td>
+            </tr>
+        `;
+    } else {
+        ordenes.forEach(orden => {
+            const estadoClasses = {
+                'pendiente': 'bg-yellow-100 text-yellow-800',
+                'en_progreso': 'bg-blue-100 text-blue-800',
+                'diagnostico': 'bg-purple-100 text-purple-800',
+                'completada': 'bg-green-100 text-green-800',
+                'cancelada': 'bg-red-100 text-red-800'
+            };
+            
+            const row = `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4">
+                        <span class="font-semibold text-blue-600">${orden.numero_orden}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-gray-900">${orden.equipo?.tipo_equipo || 'N/A'}</div>
+                        <div class="text-xs text-gray-500">${orden.equipo?.marca?.nombre_marca || ''}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold ${estadoClasses[orden.estado] || 'bg-gray-100 text-gray-800'}">
+                            ${orden.estado.replace('_', ' ')}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-900">
+                        ${orden.tecnico ? orden.tecnico.nombre + ' ' + orden.tecnico.apellido : 'Sin asignar'}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-900">
+                        ${orden.created_at}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <a href="/ordenes/${orden.id}/publica" target="_blank" 
+                           class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded transition-colors inline-block"
+                           title="Ver Orden">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+    
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+}
+
+function closeOrdenesModal() {
+    const modal = document.getElementById('ordenesModal');
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+}
+
+// Cerrar modal de órdenes al hacer clic fuera (cuando el DOM esté listo)
+document.addEventListener('DOMContentLoaded', function() {
+    const ordenesModal = document.getElementById('ordenesModal');
+    if (ordenesModal) {
+        ordenesModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeOrdenesModal();
+            }
+        });
     }
 });
 </script>
-@endsection
+
+<!-- Modal de Órdenes -->
+<div id="ordenesModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
+    <div class="bg-white rounded-xl shadow-2xl max-w-5xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center rounded-t-xl">
+            <div>
+                <h3 class="text-xl font-bold text-gray-900">Órdenes de Servicio</h3>
+                <p class="text-sm text-gray-600 mt-1">Cliente: <span id="modalClienteNombre" class="font-semibold"></span></p>
+            </div>
+            <button onclick="closeOrdenesModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <div class="p-6">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">N° Orden</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Equipo</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Estado</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Técnico</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Fecha</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase">Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="ordenesTableBody" class="divide-y divide-gray-200">
+                    <!-- Se llenará con JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 rounded-b-xl">
+            <button onclick="closeOrdenesModal()" 
+                    class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors duration-300">
+                Cerrar
+            </button>
+        </div>
+    </div>
+</div>
+
+@endpush

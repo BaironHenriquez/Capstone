@@ -141,27 +141,27 @@
 
                     <!-- Info Grid -->
                     <div class="grid grid-cols-2 gap-3 mb-4">
-                        <div class="bg-blue-50 rounded-lg p-3 border border-blue-100">
-                            <div class="flex items-center text-sm text-blue-700">
-                                <i class="fas fa-phone mr-2"></i>
+                        <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                            <div class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-phone mr-2 text-gray-500"></i>
                                 <span class="truncate font-medium">{{ $tecnico->telefono }}</span>
                             </div>
                         </div>
-                        <div class="bg-purple-50 rounded-lg p-3 border border-purple-100">
-                            <div class="flex items-center text-sm text-purple-700">
-                                <i class="fas fa-id-card mr-2"></i>
+                        <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                            <div class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-id-card mr-2 text-gray-500"></i>
                                 <span class="font-medium">{{ $tecnico->rut }}</span>
                             </div>
                         </div>
-                        <div class="bg-indigo-50 rounded-lg p-3 border border-indigo-100">
-                            <div class="flex items-center text-sm text-indigo-700">
-                                <i class="fas fa-briefcase mr-2"></i>
+                        <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                            <div class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-briefcase mr-2 text-gray-500"></i>
                                 <span class="capitalize font-medium">{{ $tecnico->nivel_experiencia }}</span>
                             </div>
                         </div>
-                        <div class="bg-rose-50 rounded-lg p-3 border border-rose-100">
-                            <div class="flex items-center text-sm text-rose-700">
-                                <i class="fas fa-map-marker-alt mr-2"></i>
+                        <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                            <div class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-map-marker-alt mr-2 text-gray-500"></i>
                                 <span class="truncate font-medium">{{ $tecnico->zona_trabajo ?? 'Sin zona' }}</span>
                             </div>
                         </div>
@@ -183,7 +183,7 @@
                             <p class="text-xs font-semibold text-gray-700 mb-2">Especialidades:</p>
                             <div class="flex flex-wrap gap-2">
                                 @foreach($tecnico->especialidades as $especialidad)
-                                    <span class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs px-3 py-1 rounded-full font-medium">
+                                    <span class="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-medium border border-blue-200">
                                         {{ $especialidad }}
                                     </span>
                                 @endforeach
@@ -193,33 +193,49 @@
 
                     <!-- Estadísticas -->
                     <div class="grid grid-cols-3 gap-3 mb-4">
-                        <div class="text-center bg-gradient-to-br from-blue-50 to-blue-100 p-3 rounded-lg border border-blue-200">
-                            <p class="text-2xl font-bold text-blue-600">{{ $tecnico->ordenes_count ?? 0 }}</p>
-                            <p class="text-xs text-blue-700 font-medium">Órdenes</p>
+                        <div class="text-center bg-gray-50 p-3 rounded-lg border border-gray-200">
+                            <p class="text-2xl font-bold text-gray-700">{{ $tecnico->ordenes_count ?? 0 }}</p>
+                            <p class="text-xs text-gray-600 font-medium">Órdenes</p>
                         </div>
-                        <div class="text-center bg-gradient-to-br from-orange-50 to-orange-100 p-3 rounded-lg border border-orange-200">
-                            <p class="text-2xl font-bold text-orange-600">{{ $tecnico->carga_trabajo_actual ?? 0 }}%</p>
-                            <p class="text-xs text-orange-700 font-medium">Carga</p>
+                        @php
+                            $carga = $tecnico->carga_trabajo_actual ?? 0;
+                            if ($carga >= 70) {
+                                $colorCarga = 'bg-red-50 border-red-200';
+                                $colorTexto = 'text-red-700';
+                                $colorSubtexto = 'text-red-600';
+                            } elseif ($carga >= 50) {
+                                $colorCarga = 'bg-yellow-50 border-yellow-200';
+                                $colorTexto = 'text-yellow-700';
+                                $colorSubtexto = 'text-yellow-600';
+                            } else {
+                                $colorCarga = 'bg-green-50 border-green-200';
+                                $colorTexto = 'text-green-700';
+                                $colorSubtexto = 'text-green-600';
+                            }
+                        @endphp
+                        <div class="text-center p-3 rounded-lg border {{ $colorCarga }}">
+                            <p class="text-2xl font-bold {{ $colorTexto }}">{{ $carga }}%</p>
+                            <p class="text-xs font-medium {{ $colorSubtexto }}">Carga</p>
                         </div>
-                        <div class="text-center bg-gradient-to-br from-green-50 to-green-100 p-3 rounded-lg border border-green-200">
-                            <p class="text-lg font-bold text-green-600">
+                        <div class="text-center bg-gray-50 p-3 rounded-lg border border-gray-200">
+                            <p class="text-lg font-bold text-gray-700">
                                 ${{ number_format($tecnico->salario_base ?? 0, 0, ',', '.') }}
                             </p>
-                            <p class="text-xs text-green-700 font-medium">Salario</p>
+                            <p class="text-xs text-gray-600 font-medium">Salario</p>
                         </div>
                     </div>
                     
                     <!-- Información adicional -->
-                    <div class="mb-4 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200">
+                    <div class="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
                         <div class="text-xs text-center">
-                            <span class="text-indigo-700 font-semibold">
-                                <i class="fas fa-calendar-alt mr-1"></i>
+                            <span class="text-gray-700 font-semibold">
+                                <i class="fas fa-calendar-alt mr-1 text-gray-500"></i>
                                 Ingreso: {{ $tecnico->fecha_ingreso ? \Carbon\Carbon::parse($tecnico->fecha_ingreso)->format('d/m/Y') : 'N/A' }}
                             </span>
                         </div>
                         @if($tecnico->horario_trabajo)
-                            <div class="mt-2 text-xs text-center text-indigo-600">
-                                <i class="fas fa-clock mr-1"></i>
+                            <div class="mt-2 text-xs text-center text-gray-600">
+                                <i class="fas fa-clock mr-1 text-gray-500"></i>
                                 {{ $tecnico->horario_trabajo }}
                             </div>
                         @endif
@@ -228,13 +244,13 @@
                     <!-- Acciones -->
                     <div class="grid grid-cols-2 gap-3">
                         <a href="{{ route('admin.tecnicos.edit', $tecnico->id) }}" 
-                           class="bg-gradient-to-r from-yellow-400 to-amber-500 text-white hover:from-yellow-500 hover:to-amber-600 px-4 py-2.5 rounded-lg text-sm font-semibold text-center transition-all duration-200 shadow-md hover:shadow-lg">
+                           class="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2.5 rounded-lg text-sm font-semibold text-center transition-all duration-200 shadow-md hover:shadow-lg">
                             <i class="fas fa-edit mr-1"></i>Editar
                         </a>
                         
                         @if($tecnico->estado === 'activo')
                             <a href="{{ route('admin.tecnicos.asignar', $tecnico->id) }}" 
-                               class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600 px-4 py-2.5 rounded-lg text-sm font-semibold text-center transition-all duration-200 shadow-md hover:shadow-lg">
+                               class="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2.5 rounded-lg text-sm font-semibold text-center transition-all duration-200 shadow-md hover:shadow-lg">
                                 <i class="fas fa-tasks mr-1"></i>Asignar
                             </a>
                         @else
@@ -245,10 +261,15 @@
                             </button>
                         @endif
                         
-                        <button onclick="verDetalle({{ $tecnico->id }})" 
-                                class="bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white hover:from-purple-600 hover:to-fuchsia-600 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg">
-                            <i class="fas fa-eye mr-1"></i>Ver más
-                        </button>
+                        <form method="POST" action="{{ route('admin.tecnicos.destroy', $tecnico->id) }}" 
+                              onsubmit="return confirm('¿Estás seguro de que deseas eliminar este técnico? Esta acción no se puede deshacer.');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" 
+                                    class="w-full bg-red-600 text-white hover:bg-red-700 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg">
+                                <i class="fas fa-trash mr-1"></i>Eliminar
+                            </button>
+                        </form>
                         
                         <div class="relative">
                             <form method="POST" action="{{ route('admin.tecnicos.cambiar-estado', $tecnico->id) }}" id="form-estado-{{ $tecnico->id }}">
@@ -257,17 +278,17 @@
                                 <select name="estado" 
                                         onchange="document.getElementById('form-estado-{{ $tecnico->id }}').submit()"
                                         class="w-full px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg border-2 cursor-pointer appearance-none
-                                        @if($tecnico->estado === 'activo') bg-green-500 hover:bg-green-600 text-white border-green-600
-                                        @elseif($tecnico->estado === 'inactivo') bg-gray-500 hover:bg-gray-600 text-white border-gray-600
-                                        @elseif($tecnico->estado === 'vacaciones') bg-blue-500 hover:bg-blue-600 text-white border-blue-600
-                                        @elseif($tecnico->estado === 'licencia') bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-600
-                                        @elseif($tecnico->estado === 'suspendido') bg-red-500 hover:bg-red-600 text-white border-red-600
+                                        @if($tecnico->estado === 'activo') bg-white hover:bg-gray-50 text-green-700 border-green-500
+                                        @elseif($tecnico->estado === 'inactivo') bg-white hover:bg-gray-50 text-gray-700 border-gray-400
+                                        @elseif($tecnico->estado === 'vacaciones') bg-white hover:bg-gray-50 text-blue-700 border-blue-500
+                                        @elseif($tecnico->estado === 'licencia') bg-white hover:bg-gray-50 text-yellow-700 border-yellow-500
+                                        @elseif($tecnico->estado === 'suspendido') bg-white hover:bg-gray-50 text-red-700 border-red-500
                                         @endif">
-                                    <option value="activo" {{ $tecnico->estado === 'activo' ? 'selected' : '' }} style="background-color: #22c55e; color: white;">✓ Activo</option>
-                                    <option value="inactivo" {{ $tecnico->estado === 'inactivo' ? 'selected' : '' }} style="background-color: #6b7280; color: white;">○ Inactivo</option>
-                                    <option value="vacaciones" {{ $tecnico->estado === 'vacaciones' ? 'selected' : '' }} style="background-color: #3b82f6; color: white;">✈ Vacaciones</option>
-                                    <option value="licencia" {{ $tecnico->estado === 'licencia' ? 'selected' : '' }} style="background-color: #eab308; color: white;">⚕ Licencia</option>
-                                    <option value="suspendido" {{ $tecnico->estado === 'suspendido' ? 'selected' : '' }} style="background-color: #ef4444; color: white;">⊗ Suspendido</option>
+                                    <option value="activo" {{ $tecnico->estado === 'activo' ? 'selected' : '' }}>✓ Activo</option>
+                                    <option value="inactivo" {{ $tecnico->estado === 'inactivo' ? 'selected' : '' }}>○ Inactivo</option>
+                                    <option value="vacaciones" {{ $tecnico->estado === 'vacaciones' ? 'selected' : '' }}>✈ Vacaciones</option>
+                                    <option value="licencia" {{ $tecnico->estado === 'licencia' ? 'selected' : '' }}>⚕ Licencia</option>
+                                    <option value="suspendido" {{ $tecnico->estado === 'suspendido' ? 'selected' : '' }}>⊗ Suspendido</option>
                                 </select>
                             </form>
                         </div>

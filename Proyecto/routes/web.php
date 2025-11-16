@@ -290,6 +290,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/', [GestionClientesController::class, 'store'])->name('store');
         Route::get('/{id}', [GestionClientesController::class, 'show'])->name('show');
         Route::get('/{id}/edit', [GestionClientesController::class, 'edit'])->name('edit');
+        Route::get('/{id}/ordenes', [GestionClientesController::class, 'getOrdenes'])->name('ordenes');
         Route::put('/{id}', [GestionClientesController::class, 'update'])->name('update');
         Route::patch('/{id}/toggle-status', [GestionClientesController::class, 'toggleStatus'])->name('toggle-status');
         Route::delete('/{id}', [GestionClientesController::class, 'destroy'])->name('destroy');

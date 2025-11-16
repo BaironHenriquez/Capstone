@@ -314,4 +314,51 @@ class GestionClientesController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
+
+    /**
+     * Obtener las órdenes de servicio de un cliente
+     */
+    public function getOrdenes($id)
+    {
+        try {
+            $cliente = Cliente::findOrFail($id);
+            
+            $ordenes = OrdenServicio::where('cliente_id', $id)
+                ->with(['equipo.marca', 'tecnico'])
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(function($orden) {
+                    return [
+                        'id' => $orden->id,
+                        'numero_orden' => $orden->numero_orden,
+                        'estado' => $orden->estado,
+                        'created_at' => $orden->created_at->format('d/m/Y'),
+                        'equipo' => $orden->equipo ? [
+                            'tipo_equipo' => $orden->equipo->tipo_equipo,
+                            'marca' => $orden->equipo->marca ? [
+                                'nombre_marca' => $orden->equipo->marca->nombre_marca
+                            ] : null
+                        ] : null,
+                        'tecnico' => $orden->tecnico ? [
+                            'nombre' => $orden->tecnico->nombre,
+                            'apellido' => $orden->tecnico->apellido
+                        ] : null
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'cliente' => [
+                    'nombre' => $cliente->nombre,
+                    'apellido' => $cliente->apellido
+                ],
+                'ordenes' => $ordenes
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cargar las órdenes: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
