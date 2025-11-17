@@ -235,6 +235,22 @@
                 </div>
             </a>
 
+            {{-- Historial de Órdenes --}}
+            <a href="{{ route('admin.ordenes.historicas') }}" class="block stat-card bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg p-6 text-white hover:shadow-xl">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                        <i class="fas fa-history text-2xl"></i>
+                    </div>
+                    <span class="bg-white bg-opacity-20 text-xs px-2 py-1 rounded-full">HISTÓRICO</span>
+                </div>
+                <h3 class="text-lg font-bold mb-2">Historial de Órdenes</h3>
+                <p class="text-sm text-teal-100 mb-4">Registro detallado con precios y respaldos</p>
+                <div class="flex items-center text-sm">
+                    <span>Ver historial</span>
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </div>
+            </a>
+
             {{-- Gestión de Clientes --}}
             <a href="{{ route('clientes.index') }}" class="block stat-card bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-6 text-white hover:shadow-xl">
                 <div class="flex justify-between items-start mb-4">
@@ -251,6 +267,9 @@
                 </div>
             </a>
 
+        </div>
+
+        <div class="mt-4">
             {{-- Configuración del Servicio Técnico --}}
             <a href="{{ route('configuracion.index') }}" class="block stat-card bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white hover:shadow-xl">
                 <div class="flex justify-between items-start mb-4">

@@ -187,6 +187,9 @@ Route::middleware(['auth', 'subscription'])->group(function () {
         Route::get('ordenes/{orden}/historial', [OrdenServicioController::class, 'historial'])->name('ordenes.historial');
     });
 
+    // Ruta de historial de órdenes (fuera del grupo para mantener compatibilidad)
+    Route::get('admin/ordenes-historicas', [OrdenServicioController::class, 'historicas'])->name('admin.ordenes.historicas');
+
     // Rutas para actualización inline de órdenes
     Route::put('/ordenes/{id}/estado', [OrdenServicioController::class, 'updateEstado'])->name('ordenes.update-estado');
     Route::put('/ordenes/{id}/prioridad', [OrdenServicioController::class, 'updatePrioridad'])->name('ordenes.update-prioridad');

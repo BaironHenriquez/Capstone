@@ -347,4 +347,68 @@ class OrdenServicioController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * 📊 Vista de órdenes históricas con detalles y precios
+     */
+    public function historicas(Request $request)
+    {
+        $query = OrdenServicio::with(['cliente', 'tecnico', 'equipo.marca', 'historial']);
+
+        // Filtros
+        if ($request->filled('buscar')) {
+            $buscar = $request->buscar;
+            $query->where(function($q) use ($buscar) {
+                $q->where('numero_orden', 'like', "%{$buscar}%")
+                  ->orWhere('descripcion_problema', 'like', "%{$buscar}%")
+                  ->orWhereHas('cliente', function($q) use ($buscar) {
+                      $q->where('nombre', 'like', "%{$buscar}%")
+                        ->orWhere('apellido', 'like', "%{$buscar}%");
+                  });
+            });
+        }
+
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        if ($request->filled('fecha_desde')) {
+            $query->whereDate('fecha_ingreso', '>=', $request->fecha_desde);
+        }
+
+        if ($request->filled('fecha_hasta')) {
+            $query->whereDate('fecha_ingreso', '<=', $request->fecha_hasta);
+        }
+
+        if ($request->filled('tecnico_id')) {
+            $query->where('tecnico_id', $request->tecnico_id);
+        }
+
+        // Ordenamiento
+        $ordenPor = $request->get('orden_por', 'fecha_ingreso');
+        $direccion = $request->get('direccion', 'desc');
+        $ordenes = $query->orderBy($ordenPor, $direccion)->paginate(20);
+
+        // Estadísticas generales
+        $estadisticas = [
+            'total_ordenes' => OrdenServicio::count(),
+            'completadas' => OrdenServicio::where('estado', 'completada')->count(),
+            'total_facturado' => OrdenServicio::whereNotNull('precio_presupuestado')->sum('precio_presupuestado'),
+            'promedio_precio' => OrdenServicio::whereNotNull('precio_presupuestado')->avg('precio_presupuestado'),
+            'mes_actual' => OrdenServicio::whereMonth('fecha_ingreso', now()->month)
+                                        ->whereYear('fecha_ingreso', now()->year)
+                                        ->count(),
+            'facturado_mes' => OrdenServicio::whereMonth('fecha_ingreso', now()->month)
+                                           ->whereYear('fecha_ingreso', now()->year)
+                                           ->whereNotNull('precio_presupuestado')
+                                           ->sum('precio_presupuestado'),
+        ];
+
+        // Obtener lista de técnicos para filtro
+        $tecnicos = \App\Models\Tecnico::whereNull('deleted_at')
+                                      ->select('id', 'nombre', 'apellido')
+                                      ->get();
+
+        return view('admin.ordenes.historicas', compact('ordenes', 'estadisticas', 'tecnicos'));
+    }
 }
