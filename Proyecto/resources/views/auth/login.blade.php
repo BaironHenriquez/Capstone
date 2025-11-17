@@ -273,37 +273,6 @@
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
-                                    <div id="req-uppercase" class="flex items-center space-x-2 text-gray-500">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                        <span>Una letra mayúscula</span>
-                                    </div>
-                                    <div id="req-lowercase" class="flex items-center space-x-2 text-gray-500">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                        <span>Una letra minúscula</span>
-                                    </div>
-                                    <div id="req-number" class="flex items-center space-x-2 text-gray-500">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                        <span>Un número</span>
-                                    </div>
-                                    <div id="req-special" class="flex items-center space-x-2 text-gray-500">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                        <span>Un carácter especial (.;:"#$%&/()=¨]*+@, etc.)</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            @error('password')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
 
                         <!-- Remember Me & Forgot Password -->
                         <div class="flex items-center justify-between">
