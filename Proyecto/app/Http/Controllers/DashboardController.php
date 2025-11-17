@@ -98,6 +98,7 @@ class DashboardController extends Controller
         // Obtener técnicos reales del servicio técnico
         $tecnicos = DB::table('tecnicos')
             ->where('tecnicos.servicio_tecnico_id', $servicioTecnicoId)
+            ->whereNull('tecnicos.deleted_at')
             ->select(
                 'tecnicos.id',
                 DB::raw('CONCAT(tecnicos.nombre, " ", tecnicos.apellido) as nombre'),
@@ -383,6 +384,7 @@ class DashboardController extends Controller
         // Obtener carga laboral actualizada de técnicos
         $tecnicosData = DB::table('tecnicos')
             ->where('servicio_tecnico_id', $servicioTecnicoId)
+            ->whereNull('deleted_at')
             ->select(
                 'tecnicos.id',
                 DB::raw('CONCAT(tecnicos.nombre, " ", tecnicos.apellido) as nombre'),
