@@ -71,39 +71,6 @@ class TecnicoOrdenController extends Controller
         return view('tecnico.ordenes.show', compact('orden'));
     }
 
-    public function edit($id)
-    {
-        $orden = OrdenServicio::with('cliente')->findOrFail($id);
-        return view('tecnico.ordenes.edit', compact('orden'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $orden = OrdenServicio::findOrFail($id);
-        
-        $request->validate([
-            'estado' => 'required|in:pendiente,en_progreso,completada,retrasada',
-            'prioridad' => 'required|in:baja,media,alta',
-            'fecha_programada' => 'nullable|date',
-            'fecha_estimada_completion' => 'nullable|date',
-            'descripcion_problema' => 'nullable|string',
-            'dictamen_tecnico' => 'nullable|string',
-            'observaciones_tecnico' => 'nullable|string',
-        ]);
-
-        try {
-            $orden->update($request->all());
-
-            return redirect()
-                ->route('tecnico.ordenes.index')
-                ->with('success', 'Orden actualizada correctamente');
-        } catch (\Exception $e) {
-            return back()
-                ->withInput()
-                ->with('error', 'Error al actualizar la orden: ' . $e->getMessage());
-        }
-    }
-
     public function actualizarEstado(Request $request, OrdenServicio $orden)
     {
         $tecnico = Auth::guard('tecnico')->user();

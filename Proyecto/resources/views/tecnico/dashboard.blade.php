@@ -46,7 +46,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <h2 class="text-2xl font-bold mb-2">
-                            <i class="fas fa-user-tie mr-2"></i>¡Bienvenido, {{ $tecnico->nombre }}!
+                            <i class="fas fa-user-tie mr-2"></i>¡Bienvenido, {{ $tecnico->nombre_completo }}!
                         </h2>
                         <p class="text-purple-100">
                             Tienes <strong class="text-white">{{ $estadisticas['pendientes'] + $estadisticas['en_progreso'] }}</strong> órdenes activas que requieren tu atención
