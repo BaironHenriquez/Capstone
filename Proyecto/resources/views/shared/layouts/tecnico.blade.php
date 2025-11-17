@@ -79,17 +79,17 @@
                     
                     <!-- Navegación desktop -->
                     <div class="hidden md:ml-10 md:flex md:space-x-8">
-                        <a href="{{ route('dashboard') }}" class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {{ request()->routeIs('dashboard*') ? 'bg-white bg-opacity-20' : '' }}">
+                        <a href="{{ route('tecnico.dashboard') }}" class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {{ request()->routeIs('tecnico.dashboard*') ? 'bg-white bg-opacity-20' : '' }}">
                             <i class="fas fa-tachometer-alt mr-1"></i> Dashboard
                         </a>
-                        <a href="{{ route('ordenes.mis-ordenes') }}" class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {{ request()->routeIs('ordenes.mis*') ? 'bg-white bg-opacity-20' : '' }}">
+                        <a href="{{ route('tecnico.ordenes.index') }}" class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {{ request()->routeIs('tecnico.ordenes*') ? 'bg-white bg-opacity-20' : '' }}">
                             <i class="fas fa-clipboard-list mr-1"></i> Mis Órdenes
                         </a>
-                        <a href="{{ route('ordenes.index') }}" class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {{ request()->routeIs('ordenes.index') ? 'bg-white bg-opacity-20' : '' }}">
-                            <i class="fas fa-list mr-1"></i> Todas las Órdenes
-                        </a>
-                        <a href="{{ route('clientes.index') }}" class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {{ request()->routeIs('clientes*') ? 'bg-white bg-opacity-20' : '' }}">
+                        <a href="{{ route('tecnico.clientes') }}" class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {{ request()->routeIs('tecnico.clientes') ? 'bg-white bg-opacity-20' : '' }}">
                             <i class="fas fa-users mr-1"></i> Clientes
+                        </a>
+                        <a href="{{ route('tecnico.equipos') }}" class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {{ request()->routeIs('tecnico.equipos') ? 'bg-white bg-opacity-20' : '' }}">
+                            <i class="fas fa-laptop mr-1"></i> Equipos
                         </a>
                     </div>
                 </div>
@@ -107,7 +107,7 @@
                     <!-- Usuario -->
                     <div class="flex items-center space-x-3">
                         <div class="hidden sm:block text-white text-sm">
-                            <div class="font-semibold">{{ auth()->user()->name ?? 'Técnico' }}</div>
+                            <div class="font-semibold">{{ auth()->guard('tecnico')->user()->nombre ?? 'Técnico' }}</div>
                             <div class="text-xs text-gray-200">Panel Técnico</div>
                         </div>
                         <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
@@ -126,17 +126,17 @@
         <!-- Menú móvil -->
         <div id="mobile-menu" class="md:hidden bg-purple-900 border-t border-purple-700 hidden">
             <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="{{ route('dashboard') }}" class="text-white hover:text-gray-200 block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('dashboard*') ? 'bg-white bg-opacity-20' : '' }}">
+                <a href="{{ route('tecnico.dashboard') }}" class="text-white hover:text-gray-200 block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('tecnico.dashboard*') ? 'bg-white bg-opacity-20' : '' }}">
                     <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
                 </a>
-                <a href="{{ route('ordenes.mis-ordenes') }}" class="text-white hover:text-gray-200 block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('ordenes.mis*') ? 'bg-white bg-opacity-20' : '' }}">
+                <a href="{{ route('tecnico.ordenes.index') }}" class="text-white hover:text-gray-200 block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('tecnico.ordenes*') ? 'bg-white bg-opacity-20' : '' }}">
                     <i class="fas fa-clipboard-list mr-2"></i> Mis Órdenes
                 </a>
-                <a href="{{ route('ordenes.index') }}" class="text-white hover:text-gray-200 block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('ordenes.index') ? 'bg-white bg-opacity-20' : '' }}">
-                    <i class="fas fa-list mr-2"></i> Todas las Órdenes
-                </a>
-                <a href="{{ route('clientes.index') }}" class="text-white hover:text-gray-200 block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('clientes*') ? 'bg-white bg-opacity-20' : '' }}">
+                <a href="{{ route('tecnico.clientes') }}" class="text-white hover:text-gray-200 block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('tecnico.clientes') ? 'bg-white bg-opacity-20' : '' }}">
                     <i class="fas fa-users mr-2"></i> Clientes
+                </a>
+                <a href="{{ route('tecnico.equipos') }}" class="text-white hover:text-gray-200 block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('tecnico.equipos') ? 'bg-white bg-opacity-20' : '' }}">
+                    <i class="fas fa-laptop mr-2"></i> Equipos
                 </a>
             </div>
         </div>
