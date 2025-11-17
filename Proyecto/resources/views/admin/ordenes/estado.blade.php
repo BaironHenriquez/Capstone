@@ -107,6 +107,7 @@
             fetch(`/api/orden-estado/${orderNumber}`)
                 .then(response => response.json())
                 .then(data => {
+                    console.log('Datos de la orden:', data); // Debug
                     document.getElementById('loading').style.display = 'none';
                     
                     if (data.error) {
@@ -140,6 +141,12 @@
                                 <span class="font-medium text-tech-dark-blue">Fecha de Ingreso:</span>
                                 <span class="text-gray-600">${data.fecha_ingreso}</span>
                             </div>
+                            ${data.tecnico ? `
+                            <div>
+                                <span class="font-medium text-tech-dark-blue">Técnico Asignado:</span>
+                                <span class="text-gray-600">${data.tecnico}</span>
+                            </div>
+                            ` : ''}
                             ${data.fecha_estimada ? `
                             <div>
                                 <span class="font-medium text-tech-dark-blue">Fecha Estimada:</span>
@@ -157,6 +164,27 @@
                             <span class="font-medium text-tech-dark-blue">Descripción:</span>
                             <p class="text-gray-600 mt-1">${data.descripcion}</p>
                         </div>
+                        ${(data.estado === 'completada' || data.estado === 'Completada' || data.estado === 'completado' || data.estado === 'Completado') && data.tecnico && !data.calificada ? `
+                        <div class="mt-6 pt-4 border-t border-gray-200">
+                            <button onclick="abrirModalCalificacion(${data.orden_id}, '${data.tecnico}', '${data.numero_orden}')" 
+                                    class="w-full bg-tech-electric-blue hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                                Calificar Servicio
+                            </button>
+                        </div>
+                        ` : data.calificada ? `
+                        <div class="mt-6 pt-4 border-t border-gray-200">
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                                <svg class="w-6 h-6 text-green-600 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <p class="text-green-700 font-semibold">¡Ya has calificado este servicio!</p>
+                                <p class="text-green-600 text-sm mt-1">Gracias por tu feedback</p>
+                            </div>
+                        </div>
+                        ` : ''}
                     `;
 
                     // Update timeline
@@ -193,6 +221,166 @@
             `).join('');
         }
         @endif
+
+        // Modal de calificación
+        let ordenIdActual = null;
+
+        function abrirModalCalificacion(ordenId, tecnico, numeroOrden) {
+            ordenIdActual = ordenId;
+            document.getElementById('tecnico-nombre').textContent = tecnico;
+            document.getElementById('numero-orden-modal').textContent = numeroOrden;
+            document.getElementById('modal-calificacion').classList.remove('hidden');
+        }
+
+        function cerrarModalCalificacion() {
+            document.getElementById('modal-calificacion').classList.add('hidden');
+            ordenIdActual = null;
+            // Resetear estrellas
+            document.querySelectorAll('.star').forEach(star => {
+                star.classList.remove('text-yellow-400');
+                star.classList.add('text-gray-300');
+            });
+            document.getElementById('calificacion-seleccionada').value = '';
+            document.getElementById('comentario-calificacion').value = '';
+        }
+
+        function seleccionarEstrellas(rating) {
+            document.getElementById('calificacion-seleccionada').value = rating;
+            document.querySelectorAll('.star').forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.remove('text-gray-300');
+                    star.classList.add('text-yellow-400');
+                } else {
+                    star.classList.remove('text-yellow-400');
+                    star.classList.add('text-gray-300');
+                }
+            });
+        }
+
+        function enviarCalificacion() {
+            const calificacion = document.getElementById('calificacion-seleccionada').value;
+            const comentario = document.getElementById('comentario-calificacion').value;
+
+            if (!calificacion) {
+                alert('Por favor selecciona una calificación con estrellas');
+                return;
+            }
+
+            const btnEnviar = document.getElementById('btn-enviar-calificacion');
+            btnEnviar.disabled = true;
+            btnEnviar.innerHTML = '<span class="animate-spin mr-2">⏳</span> Enviando...';
+
+            fetch('{{ route("calificacion.store") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    orden_servicio_id: ordenIdActual,
+                    calificacion: parseInt(calificacion),
+                    comentario: comentario
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    cerrarModalCalificacion();
+                    // Mostrar mensaje de éxito
+                    const mensaje = document.createElement('div');
+                    mensaje.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 animate-fade-in';
+                    mensaje.innerHTML = `
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>${data.message}</span>
+                        </div>
+                    `;
+                    document.body.appendChild(mensaje);
+                    setTimeout(() => {
+                        mensaje.remove();
+                        location.reload(); // Recargar para actualizar estado
+                    }, 2000);
+                } else {
+                    alert(data.message || 'Error al enviar calificación');
+                    btnEnviar.disabled = false;
+                    btnEnviar.textContent = 'Enviar Calificación';
+                }
+            })
+            .catch(error => {
+                alert('Error al enviar calificación');
+                btnEnviar.disabled = false;
+                btnEnviar.textContent = 'Enviar Calificación';
+            });
+        }
     </script>
+
+    <!-- Modal de Calificación -->
+    <div id="modal-calificacion" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 animate-scale-in">
+            <div class="bg-gradient-to-r from-tech-electric-blue to-blue-600 text-white p-6 rounded-t-xl">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold">Califica el Servicio</h3>
+                    <button onclick="cerrarModalCalificacion()" class="text-white hover:text-gray-200 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-6">
+                <div class="text-center mb-6">
+                    <p class="text-gray-600 mb-2">Orden: <strong id="numero-orden-modal" class="text-tech-dark-blue"></strong></p>
+                    <p class="text-gray-600">Técnico: <strong id="tecnico-nombre" class="text-tech-dark-blue"></strong></p>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-3 text-center">¿Cómo calificas el servicio?</label>
+                    <div class="flex justify-center gap-2">
+                        <svg onclick="seleccionarEstrellas(1)" class="star w-12 h-12 cursor-pointer text-gray-300 hover:text-yellow-400 transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                        <svg onclick="seleccionarEstrellas(2)" class="star w-12 h-12 cursor-pointer text-gray-300 hover:text-yellow-400 transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                        <svg onclick="seleccionarEstrellas(3)" class="star w-12 h-12 cursor-pointer text-gray-300 hover:text-yellow-400 transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                        <svg onclick="seleccionarEstrellas(4)" class="star w-12 h-12 cursor-pointer text-gray-300 hover:text-yellow-400 transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                        <svg onclick="seleccionarEstrellas(5)" class="star w-12 h-12 cursor-pointer text-gray-300 hover:text-yellow-400 transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                    </div>
+                    <input type="hidden" id="calificacion-seleccionada">
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Comentarios (opcional)</label>
+                    <textarea id="comentario-calificacion" 
+                              rows="4" 
+                              placeholder="Cuéntanos sobre tu experiencia..."
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tech-electric-blue focus:border-transparent resize-none"
+                              maxlength="500"></textarea>
+                    <p class="text-xs text-gray-500 mt-1">Máximo 500 caracteres</p>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="cerrarModalCalificacion()" 
+                            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold transition-colors">
+                        Cancelar
+                    </button>
+                    <button id="btn-enviar-calificacion"
+                            onclick="enviarCalificacion()" 
+                            class="flex-1 bg-tech-electric-blue hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                        Enviar Calificación
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

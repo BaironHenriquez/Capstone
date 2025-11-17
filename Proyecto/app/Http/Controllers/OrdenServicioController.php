@@ -249,19 +249,25 @@ class OrdenServicioController extends Controller
      */
     public function apiEstado($numeroOrden)
     {
-        $orden = OrdenServicio::where('numero_orden', $numeroOrden)->first();
+        $orden = OrdenServicio::with(['tecnico', 'calificacion'])->where('numero_orden', $numeroOrden)->first();
 
         if (!$orden) {
             return response()->json(['error' => 'Orden no encontrada'], 404);
         }
 
+        // Verificar si ya fue calificada
+        $calificada = \App\Models\CalificacionTecnico::where('orden_servicio_id', $orden->id)->exists();
+
         return response()->json([
+            'orden_id'         => $orden->id,
             'numero_orden'     => $orden->numero_orden,
-            'estado'           => ucfirst($orden->estado),
+            'estado'           => $orden->estado,
             'descripcion'      => $orden->descripcion_problema,
-            'fecha_ingreso'    => optional($orden->fecha_ingreso)->format('Y-m-d'),
-            'fecha_estimada'   => optional($orden->fecha_aprox_entrega)->format('Y-m-d'),
-            'fecha_completada' => optional($orden->fecha_completada)->format('Y-m-d'),
+            'fecha_ingreso'    => optional($orden->fecha_ingreso)->format('d/m/Y'),
+            'fecha_estimada'   => optional($orden->fecha_aprox_entrega)->format('d/m/Y'),
+            'fecha_completado' => optional($orden->updated_at)->format('d/m/Y'),
+            'tecnico'          => $orden->tecnico ? $orden->tecnico->nombre . ' ' . $orden->tecnico->apellido : null,
+            'calificada'       => $calificada,
         ]);
     }
 

@@ -155,17 +155,16 @@ Route::prefix('servicios')->name('servicios.')->group(function () {
         return view('admin.servicios.soporte');
     })->name('soporte');
 
-    // 🔹 Nueva ruta para calificar técnico
-    Route::get('/calificar_tecnico', function () {
-        return view('servicios.calificar_tecnico');
-    })->name('calificar_tecnico');
-
     // Procesar solicitud de servicio
     Route::post('/crear', function () {
         // Aquí iría la lógica para procesar la solicitud
         return redirect()->route('home')->with('success', 'Solicitud de servicio enviada correctamente. Te contactaremos pronto.');
     })->name('store');
 });
+
+// 🔹 Rutas de calificación de técnicos (públicas - no requieren autenticación)
+Route::post('/calificacion-tecnico', [App\Http\Controllers\CalificacionTecnicoController::class, 'store'])->name('calificacion.store');
+Route::get('/tecnico/{id}/promedio', [App\Http\Controllers\CalificacionTecnicoController::class, 'promedio'])->name('tecnico.promedio');
 
 // Rutas de órdenes de servicio (CRUD completo)
 Route::middleware(['auth', 'subscription'])->group(function () {

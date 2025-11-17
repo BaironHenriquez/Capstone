@@ -249,6 +249,47 @@
                 </div>
                 @endif
 
+                <!-- Botón de Calificación -->
+                @if($orden->estado === 'completada' && $orden->tecnico && !$orden->calificacion)
+                <div class="info-card bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl shadow-lg p-6 animate-pulse">
+                    <h3 class="text-lg font-bold text-white mb-2 flex items-center">
+                        <span class="w-10 h-10 bg-white bg-opacity-20 backdrop-blur rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                        </span>
+                        ¡Califica Nuestro Servicio!
+                    </h3>
+                    <p class="text-white text-opacity-90 mb-4 text-sm">Tu opinión nos ayuda a mejorar</p>
+                    <button onclick="abrirModalCalificacion()" 
+                            class="block w-full bg-white hover:bg-gray-100 text-orange-600 font-bold py-3 px-6 rounded-lg text-center transition-all duration-200 shadow-lg">
+                        <svg class="w-5 h-5 inline mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                        Calificar Servicio
+                    </button>
+                </div>
+                @elseif($orden->calificacion)
+                <div class="info-card bg-green-50 rounded-xl shadow-lg p-6 border-2 border-green-200">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-green-800 mb-2">¡Gracias por tu Calificación!</h3>
+                        <p class="text-green-700 text-sm">Ya has evaluado este servicio</p>
+                        <div class="flex justify-center mt-3">
+                            @for($i = 1; $i <= 5; $i++)
+                                <svg class="w-6 h-6 {{ $i <= $orden->calificacion->calificacion ? 'text-yellow-400' : 'text-gray-300' }}" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            @endfor
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 <!-- Botón Consultar Nueva Orden -->
                 <div class="info-card bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl shadow-lg p-6">
                     <h3 class="text-lg font-bold text-white mb-2 flex items-center">
@@ -419,6 +460,190 @@
             </div>
         </div>
     </footer>
+
+    <!-- Modal de Calificación -->
+    <div id="modalCalificacion" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Fondo oscuro -->
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="cerrarModalCalificacion()"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <!-- Contenido del Modal -->
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-gradient-to-br from-purple-600 to-pink-600 px-4 py-5 sm:px-6">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-white bg-opacity-20 backdrop-blur rounded-lg p-2">
+                                <svg class="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            </div>
+                            <h3 class="ml-3 text-xl font-bold text-white" id="modal-title">
+                                Calificar Servicio
+                            </h3>
+                        </div>
+                        <button onclick="cerrarModalCalificacion()" class="bg-white bg-opacity-20 backdrop-blur rounded-lg p-2 text-white hover:bg-opacity-30 transition-colors">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <form id="formCalificacion" onsubmit="enviarCalificacion(event)">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="space-y-4">
+                            <!-- Info de la Orden -->
+                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                <p class="text-sm text-gray-600 mb-1">Orden de Servicio</p>
+                                <p class="text-lg font-bold text-gray-900">{{ $orden->numero_orden }}</p>
+                                @if($orden->tecnico)
+                                <p class="text-sm text-gray-600 mt-2">Técnico</p>
+                                <p class="text-base font-semibold text-gray-900">{{ $orden->tecnico->name }}</p>
+                                @endif
+                            </div>
+
+                            <!-- Estrellas de Calificación -->
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-3">
+                                    ¿Cómo calificarías el servicio? <span class="text-red-500">*</span>
+                                </label>
+                                <div class="flex justify-center space-x-2" id="estrellas">
+                                    @for($i = 1; $i <= 5; $i++)
+                                    <button type="button" 
+                                            onclick="seleccionarEstrellas({{ $i }})"
+                                            class="estrella focus:outline-none transform transition-all duration-200 hover:scale-110"
+                                            data-valor="{{ $i }}">
+                                        <svg class="w-12 h-12 text-gray-300 hover:text-yellow-400 transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                    </button>
+                                    @endfor
+                                </div>
+                                <input type="hidden" name="calificacion" id="calificacionInput" required>
+                                <p class="text-center text-sm text-gray-500 mt-2" id="textoCalificacion">Selecciona una calificación</p>
+                            </div>
+
+                            <!-- Comentario -->
+                            <div>
+                                <label for="comentario" class="block text-sm font-bold text-gray-700 mb-2">
+                                    Comentarios (opcional)
+                                </label>
+                                <textarea 
+                                    name="comentario" 
+                                    id="comentario"
+                                    rows="4"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                                    placeholder="Cuéntanos sobre tu experiencia..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
+                        <button type="submit" 
+                                class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-base font-bold text-white hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:w-auto transition-all duration-200">
+                            Enviar Calificación
+                        </button>
+                        <button type="button" 
+                                onclick="cerrarModalCalificacion()"
+                                class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-6 py-3 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:mt-0 sm:w-auto transition-colors">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let calificacionSeleccionada = 0;
+
+        function abrirModalCalificacion() {
+            document.getElementById('modalCalificacion').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function cerrarModalCalificacion() {
+            document.getElementById('modalCalificacion').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            
+            // Resetear formulario
+            document.getElementById('formCalificacion').reset();
+            calificacionSeleccionada = 0;
+            document.getElementById('calificacionInput').value = '';
+            
+            // Resetear estrellas
+            const estrellas = document.querySelectorAll('.estrella svg');
+            estrellas.forEach(estrella => {
+                estrella.classList.remove('text-yellow-400');
+                estrella.classList.add('text-gray-300');
+            });
+            
+            document.getElementById('textoCalificacion').textContent = 'Selecciona una calificación';
+        }
+
+        function seleccionarEstrellas(rating) {
+            calificacionSeleccionada = rating;
+            document.getElementById('calificacionInput').value = rating;
+            
+            const estrellas = document.querySelectorAll('.estrella svg');
+            const textos = ['Muy Malo', 'Malo', 'Regular', 'Bueno', 'Excelente'];
+            
+            estrellas.forEach((estrella, index) => {
+                if (index < rating) {
+                    estrella.classList.remove('text-gray-300');
+                    estrella.classList.add('text-yellow-400');
+                } else {
+                    estrella.classList.remove('text-yellow-400');
+                    estrella.classList.add('text-gray-300');
+                }
+            });
+            
+            document.getElementById('textoCalificacion').textContent = textos[rating - 1];
+        }
+
+        async function enviarCalificacion(event) {
+            event.preventDefault();
+            
+            const calificacion = document.getElementById('calificacionInput').value;
+            if (!calificacion) {
+                alert('Por favor selecciona una calificación');
+                return;
+            }
+
+            const comentario = document.getElementById('comentario').value;
+            
+            try {
+                const response = await fetch('{{ route("calificacion.store") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        orden_servicio_id: {{ $orden->id }},
+                        tecnico_id: {{ $orden->tecnico_id ?? 'null' }},
+                        calificacion: parseInt(calificacion),
+                        comentario: comentario
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('¡Gracias por tu calificación!');
+                    cerrarModalCalificacion();
+                    location.reload(); // Recargar para mostrar que ya fue calificado
+                } else {
+                    alert(data.message || 'Error al enviar la calificación');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al enviar la calificación. Por favor intenta de nuevo.');
+            }
+        }
+    </script>
 
 </body>
 </html>
