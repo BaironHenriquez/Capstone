@@ -65,7 +65,7 @@
                             Dashboard
                         </a>
                     @else
-                        <a href="{{ route('login.form') }}" class="text-gray-700 hover:text-purple-600 transition font-medium">Ingresar</a>
+                        <a href="{{ route('select.user.type') }}" class="text-gray-700 hover:text-purple-600 transition font-medium">Ingresar</a>
                         <a href="{{ route('register.form') }}" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 rounded-lg font-semibold transition transform hover:scale-105">
                             Crear Cuenta
                         </a>

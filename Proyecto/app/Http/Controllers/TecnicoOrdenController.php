@@ -4,9 +4,44 @@ namespace App\Http\Controllers;
 
 use App\Models\OrdenServicio;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TecnicoOrdenController extends Controller
 {
+    /**
+     * Dashboard del técnico con sus órdenes asignadas
+     */
+    public function dashboard()
+    {
+        $tecnico = Auth::guard('tecnico')->user();
+        
+        // Obtener órdenes asignadas al técnico
+        $ordenesAsignadas = OrdenServicio::where('tecnico_id', $tecnico->id)
+            ->whereIn('estado', ['asignada', 'en_progreso', 'diagnostico'])
+            ->with(['cliente', 'equipo.marca'])
+            ->orderBy('prioridad', 'desc')
+            ->orderBy('fecha_programada', 'asc')
+            ->get();
+
+        $ordenesCompletadas = OrdenServicio::where('tecnico_id', $tecnico->id)
+            ->where('estado', 'completada')
+            ->whereMonth('fecha_completada', now()->month)
+            ->count();
+
+        $ordenesPendientes = $ordenesAsignadas->whereIn('estado', ['asignada', 'diagnostico'])->count();
+        $ordenesEnProgreso = $ordenesAsignadas->where('estado', 'en_progreso')->count();
+
+        // Estadísticas del técnico
+        $estadisticas = [
+            'asignadas' => $ordenesAsignadas->count(),
+            'pendientes' => $ordenesPendientes,
+            'en_progreso' => $ordenesEnProgreso,
+            'completadas_mes' => $ordenesCompletadas,
+        ];
+
+        return view('tecnico.dashboard', compact('tecnico', 'ordenesAsignadas', 'estadisticas'));
+    }
+
     public function index()
     {
         $ordenes = OrdenServicio::with('cliente')
