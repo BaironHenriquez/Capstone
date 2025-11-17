@@ -39,7 +39,7 @@
 
             <!-- Register Form -->
             <div id="register-form" class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-                <form method="POST" action="{{ route('register') }}" class="space-y-6">
+                <form id="registerForm" method="POST" action="{{ route('register') }}" class="space-y-6">
                     @csrf
                     
                     <!-- Name Field -->
@@ -171,7 +171,8 @@
                             <input type="password" 
                                    id="password" 
                                    name="password" 
-                                   required 
+                                   required
+                                   oninput="checkPasswordStrength()" 
                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 pl-12 pr-12 @error('password') border-red-500 @enderror"
                                    placeholder="Mínimo 8 caracteres">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -188,6 +189,15 @@
                                 </button>
                             </div>
                         </div>
+                        
+                        <!-- Barra de seguridad -->
+                        <div id="passwordStrengthContainer" class="mt-2 hidden">
+                            <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                                <div id="passwordStrengthBar" class="h-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <p id="passwordStrengthText" class="text-xs mt-1 text-gray-500 font-medium"></p>
+                        </div>
+                        
                         @error('password')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -432,6 +442,132 @@
         document.getElementById('telefono').addEventListener('input', function(e) {
             let value = e.target.value.replace(/[^0-9+\s]/g, '');
             e.target.value = value;
+        });
+
+        // Password strength validation
+        const passwordInput = document.getElementById('password');
+        const strengthContainer = document.getElementById('passwordStrengthContainer');
+        const strengthBar = document.getElementById('passwordStrengthBar');
+        const strengthText = document.getElementById('passwordStrengthText');
+
+        function checkPasswordStrength() {
+            const password = passwordInput.value;
+            
+            if (password.length === 0) {
+                strengthContainer.classList.add('hidden');
+                strengthBar.style.width = '0%';
+                strengthBar.style.backgroundColor = '';
+                strengthText.textContent = '';
+                return;
+            }
+
+            // Show strength container
+            strengthContainer.classList.remove('hidden');
+
+            // Check requirements
+            const hasUppercase = /[A-Z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const hasSpecial = /[.;:"#$%&\/()=¨\[\]*+@,!¡?¿\-_{}|\\<>~`^]/.test(password);
+
+            // Count critical requirements (uppercase, number, special character)
+            let criticalScore = 0;
+            if (hasUppercase) criticalScore++;
+            if (hasNumber) criticalScore++;
+            if (hasSpecial) criticalScore++;
+
+            // Update strength bar based on 3 levels
+            if (criticalScore === 0 || criticalScore === 1) {
+                // ROJO - Insegura (0-1 requisitos)
+                strengthBar.style.width = '33%';
+                strengthBar.style.backgroundColor = '#ef4444'; // red
+                strengthText.textContent = '🔴 Contraseña insegura';
+                strengthText.className = 'text-xs mt-1 text-red-600 font-medium';
+                
+                if (!hasUppercase && !hasNumber && !hasSpecial) {
+                    strengthText.textContent = '🔴 Debe contener mayúscula, número y carácter especial';
+                } else if (!hasUppercase) {
+                    strengthText.textContent = '🔴 Debe contener una mayúscula';
+                } else if (!hasNumber) {
+                    strengthText.textContent = '🔴 Debe contener un número';
+                } else if (!hasSpecial) {
+                    strengthText.textContent = '🔴 Debe contener un carácter especial (.;:"#$%&/()=¨]*+@, etc.)';
+                }
+            } else if (criticalScore === 2) {
+                // AMARILLO - Regular (2 requisitos)
+                strengthBar.style.width = '66%';
+                strengthBar.style.backgroundColor = '#eab308'; // yellow
+                strengthText.textContent = '🟡 Contraseña regular';
+                strengthText.className = 'text-xs mt-1 text-yellow-600 font-medium';
+                
+                if (!hasUppercase) {
+                    strengthText.textContent = '🟡 Agrégale una mayúscula para mayor seguridad';
+                } else if (!hasNumber) {
+                    strengthText.textContent = '🟡 Agrégale un número para mayor seguridad';
+                } else if (!hasSpecial) {
+                    strengthText.textContent = '🟡 Agrégale un carácter especial para mayor seguridad';
+                }
+            } else {
+                // VERDE - Segura (3 requisitos)
+                strengthBar.style.width = '100%';
+                strengthBar.style.backgroundColor = '#22c55e'; // green
+                strengthText.textContent = '✅ Contraseña segura';
+                strengthText.className = 'text-xs mt-1 text-green-600 font-medium';
+            }
+        }
+
+        // Form validation before submit
+        const registerForm = document.getElementById('registerForm');
+
+        registerForm.addEventListener('submit', function(e) {
+            const password = passwordInput.value;
+            
+            // Check critical requirements
+            const hasUppercase = /[A-Z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const hasSpecial = /[.;:"#$%&\/()=¨\[\]*+@,!¡?¿\-_{}|\\<>~`^]/.test(password);
+            
+            if (!hasUppercase || !hasNumber || !hasSpecial || password.length < 8) {
+                e.preventDefault();
+                
+                // Show error message
+                let errorMsg = 'La contraseña debe contener: ';
+                let missing = [];
+                if (password.length < 8) missing.push('mínimo 8 caracteres');
+                if (!hasUppercase) missing.push('una mayúscula');
+                if (!hasNumber) missing.push('un número');
+                if (!hasSpecial) missing.push('un carácter especial');
+                
+                errorMsg += missing.join(', ');
+                
+                // Create or update error message
+                let errorDiv = document.getElementById('password-error-message');
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.id = 'password-error-message';
+                    errorDiv.className = 'mt-4 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg';
+                    passwordInput.closest('div').parentElement.appendChild(errorDiv);
+                }
+                
+                errorDiv.innerHTML = `
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="text-sm text-red-800 font-medium">${errorMsg}</p>
+                    </div>
+                `;
+                
+                // Scroll to error
+                errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                return false;
+            }
+            
+            // Remove error message if exists
+            const errorDiv = document.getElementById('password-error-message');
+            if (errorDiv) {
+                errorDiv.remove();
+            }
         });
     </script>
 </body>

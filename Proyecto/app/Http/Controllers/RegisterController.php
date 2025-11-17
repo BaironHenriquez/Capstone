@@ -13,7 +13,7 @@ class RegisterController extends Controller
 {
     public function showRegistrationForm()
     {
-        return view('auth.register-login');
+        return view('login.register-login');
     }
 
     public function register(Request $request)
@@ -25,7 +25,15 @@ class RegisterController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'rut' => 'required|string|max:45|unique:users',
             'telefono' => 'required|string|max:45',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/[A-Z]/',      // Al menos una mayúscula
+                'regex:/[0-9]/',      // Al menos un número
+                'regex:/[.;:"#$%&\/()=¨\[\]*+@,!¡?¿\-_{}|\\<>~`^]/', // Al menos un carácter especial
+            ],
         ], [
             'nombre.required' => 'El nombre es obligatorio.',
             'apellido.required' => 'El apellido es obligatorio.',
@@ -36,6 +44,7 @@ class RegisterController extends Controller
             'telefono.required' => 'El teléfono es obligatorio.',
             'password.required' => 'La contraseña es obligatoria.',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.regex' => 'La contraseña debe contener al menos una mayúscula, un número y un carácter especial (.;:"#$%&/()=¨]*+@, etc.).',
             'password.confirmed' => 'Las contraseñas no coinciden.',
         ]);
 
