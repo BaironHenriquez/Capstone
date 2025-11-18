@@ -44,61 +44,58 @@ class TecnicoOrdenController extends Controller
 
     public function index()
     {
-        $ordenes = OrdenServicio::with('cliente')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $tecnico = Auth::guard('tecnico')->user();
+        
+        // Obtener todas las órdenes del técnico con relaciones
+        $ordenes = OrdenServicio::where('tecnico_id', $tecnico->id)
+            ->with(['cliente', 'equipo.marca'])
+            ->orderBy('prioridad', 'desc')
+            ->orderBy('fecha_programada', 'asc')
+            ->paginate(15);
 
-        return view('tecnico.ordenes', compact('ordenes'));
+        return view('tecnico.ordenes.index', compact('tecnico', 'ordenes'));
     }
 
     public function show(OrdenServicio $orden)
     {
-        return view('tecnico.ordenes.show', compact('orden'));
-    }
-
-    public function edit($id)
-    {
-        $orden = OrdenServicio::with('cliente')->findOrFail($id);
-        return view('tecnico.ordenes.edit', compact('orden'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $orden = OrdenServicio::findOrFail($id);
+        $tecnico = Auth::guard('tecnico')->user();
         
-        $request->validate([
-            'estado' => 'required|in:pendiente,en_progreso,completada,retrasada',
-            'prioridad' => 'required|in:baja,media,alta',
-            'fecha_programada' => 'nullable|date',
-            'fecha_estimada_completion' => 'nullable|date',
-            'descripcion_problema' => 'nullable|string',
-            'dictamen_tecnico' => 'nullable|string',
-            'observaciones_tecnico' => 'nullable|string',
-        ]);
-
-        try {
-            $orden->update($request->all());
-
-            return redirect()
-                ->route('tecnico.ordenes.index')
-                ->with('success', 'Orden actualizada correctamente');
-        } catch (\Exception $e) {
-            return back()
-                ->withInput()
-                ->with('error', 'Error al actualizar la orden: ' . $e->getMessage());
+        // Verificar que la orden pertenece al técnico
+        if ($orden->tecnico_id !== $tecnico->id) {
+            abort(403, 'No tienes permiso para ver esta orden');
         }
+
+        // Cargar las relaciones necesarias
+        $orden->load(['cliente', 'equipo.marca']);
+        
+        return view('tecnico.ordenes.show', compact('orden'));
     }
 
     public function actualizarEstado(Request $request, OrdenServicio $orden)
     {
+        $tecnico = Auth::guard('tecnico')->user();
+        
+        // Verificar que la orden pertenece al técnico
+        if ($orden->tecnico_id !== $tecnico->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No tienes permiso para modificar esta orden'
+            ], 403);
+        }
+
         $request->validate([
-            'estado' => 'required|in:pendiente,en_progreso,completada,retrasada'
+            'estado' => 'required|in:asignada,diagnostico,en_progreso,completada,cancelada'
         ]);
 
         try {
             $orden->update([
                 'estado' => $request->estado
             ]);
+
+            // Si cambia a en_progreso por primera vez, registrar fecha de inicio
+            if ($request->estado === 'en_progreso' && !$orden->fecha_inicio_trabajo) {
+                $orden->update(['fecha_inicio_trabajo' => now()]);
+            }
 
             return response()->json([
                 'success' => true,
@@ -107,30 +104,111 @@ class TecnicoOrdenController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al actualizar el estado'
+                'message' => 'Error al actualizar el estado: ' . $e->getMessage()
             ], 500);
         }
     }
 
-    public function actualizarPrioridad(Request $request, OrdenServicio $orden)
+    public function agregarDiagnostico(Request $request, OrdenServicio $orden)
     {
+        $tecnico = Auth::guard('tecnico')->user();
+        
+        if ($orden->tecnico_id !== $tecnico->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No tienes permiso para modificar esta orden'
+            ], 403);
+        }
+
         $request->validate([
-            'prioridad' => 'required|in:baja,media,alta'
+            'diagnostico' => 'required|string|min:10'
         ]);
 
         try {
             $orden->update([
-                'prioridad' => $request->prioridad
+                'dictamen_tecnico' => $request->diagnostico,
+                'estado' => 'diagnostico'
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Prioridad actualizada correctamente'
+                'message' => 'Diagnóstico agregado correctamente'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al actualizar la prioridad'
+                'message' => 'Error al agregar el diagnóstico'
+            ], 500);
+        }
+    }
+
+    public function agregarObservacion(Request $request, OrdenServicio $orden)
+    {
+        $tecnico = Auth::guard('tecnico')->user();
+        
+        if ($orden->tecnico_id !== $tecnico->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No tienes permiso para modificar esta orden'
+            ], 403);
+        }
+
+        $request->validate([
+            'observacion' => 'required|string'
+        ]);
+
+        try {
+            $orden->update([
+                'observaciones_tecnico' => $request->observacion
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Observación agregada correctamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al agregar la observación'
+            ], 500);
+        }
+    }
+
+    public function completar(Request $request, OrdenServicio $orden)
+    {
+        $tecnico = Auth::guard('tecnico')->user();
+        
+        if ($orden->tecnico_id !== $tecnico->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No tienes permiso para modificar esta orden'
+            ], 403);
+        }
+
+        $request->validate([
+            'dictamen_tecnico' => 'required|string|min:20',
+            'observaciones_tecnico' => 'nullable|string',
+            'costo_total' => 'required|numeric|min:0',
+            'fecha_completada' => 'required|date'
+        ]);
+
+        try {
+            $orden->update([
+                'estado' => 'completada',
+                'dictamen_tecnico' => $request->dictamen_tecnico,
+                'observaciones_tecnico' => $request->observaciones_tecnico,
+                'costo_total' => $request->costo_total,
+                'fecha_completada' => $request->fecha_completada
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Orden completada exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al completar la orden: ' . $e->getMessage()
             ], 500);
         }
     }

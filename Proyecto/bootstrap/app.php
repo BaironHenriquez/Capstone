@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'subscription' => \App\Http\Middleware\CheckSubscription::class,
             'technical.service' => \App\Http\Middleware\CheckTechnicalServiceComplete::class,
             'servicio.tecnico' => \App\Http\Middleware\EnsureUserHasServicioTecnico::class,
+            'guest.tecnico' => \App\Http\Middleware\RedirectIfAuthenticatedTecnico::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

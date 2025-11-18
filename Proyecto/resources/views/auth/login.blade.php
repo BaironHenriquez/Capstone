@@ -258,8 +258,7 @@
                                     name="password" 
                                     class="w-full pl-12 pr-12 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-200 focus:border-purple-600 transition duration-300 @error('password') border-red-500 @enderror"
                                     placeholder="••••••••"
-                                    required
-                                    oninput="checkPasswordStrength()">
+                                    required>
                                 <button 
                                     type="button"
                                     onclick="togglePassword()"
@@ -270,51 +269,6 @@
                                     </svg>
                                 </button>
                             </div>
-                            
-                            <!-- Password Strength Indicator -->
-                            <div id="password-strength-container" class="mt-3 hidden">
-                                <div class="flex items-center space-x-2 mb-2">
-                                    <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                        <div id="password-strength-bar" class="h-full transition-all duration-300 rounded-full" style="width: 0%"></div>
-                                    </div>
-                                    <span id="password-strength-text" class="text-xs font-semibold"></span>
-                                </div>
-                                
-                                <!-- Password Requirements -->
-                                <div class="space-y-1 text-xs">
-                                    <div id="req-length" class="flex items-center space-x-2 text-gray-500">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                        <span>Mínimo 8 caracteres</span>
-                                    </div>
-                                    <div id="req-uppercase" class="flex items-center space-x-2 text-gray-500">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                        <span>Una letra mayúscula</span>
-                                    </div>
-                                    <div id="req-lowercase" class="flex items-center space-x-2 text-gray-500">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                        <span>Una letra minúscula</span>
-                                    </div>
-                                    <div id="req-number" class="flex items-center space-x-2 text-gray-500">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                        <span>Un número</span>
-                                    </div>
-                                    <div id="req-special" class="flex items-center space-x-2 text-gray-500">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                        <span>Un carácter especial (.;:"#$%&/()=¨]*+@, etc.)</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
                             @error('password')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -398,105 +352,7 @@
             }
         }
 
-        function checkPasswordStrength() {
-            const password = document.getElementById('password').value;
-            const container = document.getElementById('password-strength-container');
-            const bar = document.getElementById('password-strength-bar');
-            const text = document.getElementById('password-strength-text');
-            
-            // Requirements elements
-            const reqLength = document.getElementById('req-length');
-            const reqUppercase = document.getElementById('req-uppercase');
-            const reqLowercase = document.getElementById('req-lowercase');
-            const reqNumber = document.getElementById('req-number');
-            const reqSpecial = document.getElementById('req-special');
 
-            // Show container if password is not empty
-            if (password.length > 0) {
-                container.classList.remove('hidden');
-            } else {
-                container.classList.add('hidden');
-                return;
-            }
-
-            // Check requirements
-            const hasLength = password.length >= 8;
-            const hasUppercase = /[A-Z]/.test(password);
-            const hasLowercase = /[a-z]/.test(password);
-            const hasNumber = /[0-9]/.test(password);
-            const hasSpecial = /[.;:"#$%&\/()=¨\]\*+@,\-_<>!?¿¡{}[\]\\|~`^]/.test(password);
-
-            // Update requirement indicators
-            updateRequirement(reqLength, hasLength);
-            updateRequirement(reqUppercase, hasUppercase);
-            updateRequirement(reqLowercase, hasLowercase);
-            updateRequirement(reqNumber, hasNumber);
-            updateRequirement(reqSpecial, hasSpecial);
-
-            // Calculate strength
-            let strength = 0;
-            if (hasLength) strength++;
-            if (hasUppercase) strength++;
-            if (hasLowercase) strength++;
-            if (hasNumber) strength++;
-            if (hasSpecial) strength++;
-
-            // Update bar and text based on strength
-            let color, width, message;
-            
-            switch(strength) {
-                case 0:
-                case 1:
-                    color = '#ef4444'; // red
-                    width = '20%';
-                    message = 'Muy débil';
-                    break;
-                case 2:
-                    color = '#f97316'; // orange
-                    width = '40%';
-                    message = 'Débil';
-                    break;
-                case 3:
-                    color = '#eab308'; // yellow
-                    width = '60%';
-                    message = 'Regular';
-                    break;
-                case 4:
-                    color = '#22c55e'; // green
-                    width = '80%';
-                    message = 'Buena';
-                    break;
-                case 5:
-                    color = '#10b981'; // strong green
-                    width = '100%';
-                    message = 'Excelente';
-                    break;
-            }
-
-            bar.style.width = width;
-            bar.style.backgroundColor = color;
-            text.textContent = message;
-            text.style.color = color;
-        }
-
-        function updateRequirement(element, isValid) {
-            const icon = element.querySelector('svg');
-            const span = element.querySelector('span');
-            
-            if (isValid) {
-                element.classList.remove('text-gray-500');
-                element.classList.add('text-green-600');
-                icon.innerHTML = `
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                `;
-            } else {
-                element.classList.remove('text-green-600');
-                element.classList.add('text-gray-500');
-                icon.innerHTML = `
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                `;
-            }
-        }
 
         // Add smooth entrance animations
         document.addEventListener('DOMContentLoaded', function() {

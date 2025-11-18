@@ -46,7 +46,7 @@ Route::middleware('guest')->group(function () {
 // AUTENTICACIÓN DE TÉCNICOS
 // ============================================
 
-Route::middleware('guest:tecnico')->group(function () {
+Route::middleware('guest.tecnico:tecnico')->group(function () {
     Route::get('/tecnico/login', [TecnicoAuthController::class, 'showLoginForm'])->name('tecnico.login');
     Route::post('/tecnico/login', [TecnicoAuthController::class, 'login'])->name('tecnico.login.submit');
 });
@@ -54,6 +54,16 @@ Route::middleware('guest:tecnico')->group(function () {
 Route::middleware('auth:tecnico')->group(function () {
     Route::post('/tecnico/logout', [TecnicoAuthController::class, 'logout'])->name('tecnico.logout');
     Route::get('/tecnico/dashboard', [TecnicoOrdenController::class, 'dashboard'])->name('tecnico.dashboard');
+    
+    // Rutas de órdenes para técnico
+    Route::prefix('tecnico/ordenes')->name('tecnico.ordenes.')->group(function () {
+        Route::get('/', [TecnicoOrdenController::class, 'index'])->name('index');
+        Route::get('/{orden}', [TecnicoOrdenController::class, 'show'])->name('show');
+        Route::patch('/{orden}/actualizar-estado', [TecnicoOrdenController::class, 'actualizarEstado'])->name('actualizar-estado');
+        Route::post('/{orden}/agregar-diagnostico', [TecnicoOrdenController::class, 'agregarDiagnostico'])->name('agregar-diagnostico');
+        Route::post('/{orden}/agregar-observacion', [TecnicoOrdenController::class, 'agregarObservacion'])->name('agregar-observacion');
+        Route::post('/{orden}/completar', [TecnicoOrdenController::class, 'completar'])->name('completar');
+    });
 });
 
 // ============================================
@@ -358,21 +368,3 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
-// Rutas para el técnico (asegúrate de que estas rutas estén antes de las rutas de vista)
-Route::middleware(['auth'])->prefix('tecnico')->name('tecnico.')->group(function () {
-    // Órdenes
-    Route::get('/ordenes', [TecnicoOrdenController::class, 'index'])->name('ordenes.index');
-    Route::get('/ordenes/{id}', [TecnicoOrdenController::class, 'show'])->name('ordenes.show');
-    Route::get('/ordenes/{id}/editar', [TecnicoOrdenController::class, 'edit'])->name('ordenes.edit');
-    Route::put('/ordenes/{id}', [TecnicoOrdenController::class, 'update'])->name('ordenes.update');
-    Route::put('/ordenes/{orden}/estado', [TecnicoOrdenController::class, 'actualizarEstado'])->name('ordenes.estado');
-    Route::put('/ordenes/{orden}/prioridad', [TecnicoOrdenController::class, 'actualizarPrioridad'])->name('ordenes.prioridad');
-
-    // Vistas estáticas
-    Route::view('/resumen', 'tecnico.resumen')->name('resumen');
-    Route::view('/clientes', 'tecnico.clientes')->name('clientes');
-    Route::view('/equipos', 'tecnico.equipos')->name('equipos');
-    Route::view('/marcas', 'tecnico.marcas')->name('marcas');
-    Route::view('/modificaciones', 'tecnico.modificaciones')->name('modificaciones');
-    Route::view('/ingresar_orden', 'tecnico.ingresar_orden')->name('ingresar_orden');
-});
