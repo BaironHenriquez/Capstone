@@ -45,6 +45,11 @@ class Cliente extends Model
         return $this->hasMany(OrdenServicio::class);
     }
 
+    public function calificaciones()
+    {
+        return $this->hasMany(CalificacionTecnico::class);
+    }
+
     // Accessors
     public function getNombreCompletoAttribute()
     {

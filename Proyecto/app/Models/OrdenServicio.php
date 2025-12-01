@@ -122,6 +122,11 @@ class OrdenServicio extends Model
         return $this->hasMany(HistorialOrden::class, 'orden_servicio_id');
     }
 
+    public function calificacion()
+    {
+        return $this->hasOne(CalificacionTecnico::class);
+    }
+
     /**
      * 🔢 Generar número único de orden por servicio técnico
      */
