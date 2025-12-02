@@ -30,24 +30,28 @@
 
 @section('content')
 <div class="space-y-6">
-    {{-- Header --}}
-    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 mb-1">Panel de Control Técnico</h1>
-                <p class="text-gray-600">Resumen general del estado del servicio técnico</p>
-                <p class="text-sm text-gray-500 mt-2">Última actualización: <span id="last-update">{{ now()->format('d/m/Y H:i') }}</span></p>
+    {{-- Header Simplificado --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+            <div class="flex items-start gap-4">
+                <div class="bg-gray-100 rounded-xl p-3">
+                    <svg class="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 mb-1">Panel de Control Técnico</h1>
+                    <p class="text-gray-600">Resumen general del estado del servicio técnico</p>
+                    <p class="text-xs text-gray-500 mt-2">Última actualización: {{ now()->format('d/m/Y H:i') }}</p>
+                </div>
             </div>
             
             <div class="flex flex-wrap items-center gap-3">
                 {{-- Selectores de Fecha --}}
-                <div class="flex items-center gap-2 bg-gray-50 rounded-lg p-2">
-                    <div class="flex items-center">
-                        <label class="text-sm font-medium text-gray-700 mr-2">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            Mes:
-                        </label>
-                        <select id="filtro-mes" onchange="actualizarRangoSemana()" class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <div class="flex items-center gap-3 bg-gray-50 rounded-lg p-3 border border-gray-200">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-calendar-alt text-gray-500"></i>
+                        <select id="filtro-mes" onchange="actualizarRangoSemana()" class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all cursor-pointer">
                             @for($m = 1; $m <= 12; $m++)
                                 <option value="{{ $m }}" {{ $m == ($mes ?? now()->month) ? 'selected' : '' }}>
                                     {{ \Carbon\Carbon::create(null, $m)->translatedFormat('F') }}
@@ -56,21 +60,17 @@
                         </select>
                     </div>
                     
-                    <div class="flex items-center">
-                        <label class="text-sm font-medium text-gray-700 mr-2">Año:</label>
-                        <select id="filtro-anio" onchange="actualizarRangoSemana()" class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <div class="flex items-center gap-2">
+                        <select id="filtro-anio" onchange="actualizarRangoSemana()" class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all cursor-pointer">
                             @for($y = now()->year; $y >= now()->year - 5; $y--)
                                 <option value="{{ $y }}" {{ $y == ($anio ?? now()->year) ? 'selected' : '' }}>{{ $y }}</option>
                             @endfor
                         </select>
                     </div>
                     
-                    <div class="flex items-center">
-                        <label class="text-sm font-medium text-gray-700 mr-2">
-                            <i class="fas fa-calendar-week mr-1"></i>
-                            Semana:
-                        </label>
-                        <select id="filtro-semana" class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-calendar-week text-gray-500"></i>
+                        <select id="filtro-semana" class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all cursor-pointer">
                             <option value="0" {{ ($semana ?? 0) == 0 ? 'selected' : '' }}>Todo el mes</option>
                             <option value="1" {{ ($semana ?? 0) == 1 ? 'selected' : '' }}>Semana 1</option>
                             <option value="2" {{ ($semana ?? 0) == 2 ? 'selected' : '' }}>Semana 2</option>
@@ -80,20 +80,20 @@
                         </select>
                     </div>
                     
-                    <div id="rango-semana" class="text-xs text-gray-600 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        <span id="texto-rango">{{ $rangoSemana ?? 'Todo el mes seleccionado' }}</span>
-                    </div>
-                    
-                    <button onclick="filtrarDashboard()" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2 rounded-lg flex items-center transition-all duration-200 shadow-md hover:shadow-lg">
-                        <i class="fas fa-filter mr-2"></i>
-                        Filtrar
+                    <button onclick="filtrarDashboard()" class="bg-gray-900 hover:bg-gray-800 text-white px-5 py-2 rounded-lg font-medium flex items-center gap-2 transition-all duration-200">
+                        <i class="fas fa-filter"></i>
+                        <span>Filtrar</span>
                     </button>
                 </div>
                 
-                <button onclick="location.reload()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg flex items-center transition-colors">
-                    <i class="fas fa-sync-alt mr-2"></i>
-                    Actualizar
+                <div id="rango-semana" class="bg-gray-50 px-4 py-2 rounded-lg border border-gray-200 flex items-center gap-2">
+                    <i class="fas fa-info-circle text-gray-500"></i>
+                    <span id="texto-rango" class="text-xs font-medium text-gray-700">{{ $rangoSemana ?? 'Todo el mes seleccionado' }}</span>
+                </div>
+                
+                <button onclick="location.reload()" class="bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-all border border-gray-300">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>Actualizar</span>
                 </button>
             </div>
         </div>
@@ -234,8 +234,8 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-xs font-semibold text-white/80 uppercase tracking-wider mb-1">Desempeño</p>
-                                <p class="text-3xl font-black text-white drop-shadow-lg">{{ now()->format('M') }}</p>
-                                <p class="text-xs text-white/70 mt-1">Este Mes</p>
+                                <p class="text-3xl font-black text-white drop-shadow-lg">{{ \Carbon\Carbon::create($anio ?? now()->year, $mes ?? now()->month)->translatedFormat('M') }}</p>
+                                <p class="text-xs text-white/70 mt-1">{{ $semana > 0 ? 'Semana ' . $semana : 'Mes Completo' }}</p>
                             </div>
                             <div class="bg-white/20 rounded-full p-3">
                                 <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -247,6 +247,28 @@
                 </div>
             </div>
         </div>
+        </div>
+        @else
+        {{-- Mensaje cuando no hay empleado del mes --}}
+        <div class="lg:col-span-2 relative bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600 rounded-2xl shadow-2xl overflow-hidden">
+            <div class="relative z-10 p-6">
+                <div class="mb-2 text-xs text-white/90 bg-black/20 px-3 py-1 rounded-lg inline-block font-semibold">
+                    📅 Período: {{ $rangoSemana ?? 'Todo el mes' }}
+                </div>
+                
+                <div class="flex flex-col items-center justify-center py-12 text-center">
+                    <div class="bg-white/20 backdrop-blur-sm rounded-full p-6 mb-4">
+                        <svg class="w-16 h-16 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2">Sin Empleado del Mes</h3>
+                    <p class="text-white/80 text-sm max-w-md">
+                        No hay órdenes completadas en el período seleccionado. 
+                        Selecciona otro mes o semana para ver los resultados.
+                    </p>
+                </div>
+            </div>
         </div>
         @endif
 
@@ -299,7 +321,7 @@
             <p class="text-sm text-emerald-100">Ingreso Semanal</p>
             <p class="text-xs text-emerald-200 mt-2">
                 <i class="fas fa-calendar mr-1"></i>
-                {{ now()->startOfWeek()->format('d/m') }} - {{ now()->endOfWeek()->format('d/m/Y') }}
+                {{ $rangoSemanalTexto ?? (now()->startOfWeek()->format('d/m') . ' - ' . now()->endOfWeek()->format('d/m/Y')) }}
             </p>
         </div>
 
@@ -342,51 +364,51 @@
     {{-- Métricas en Tiempo Real --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {{-- Total Órdenes --}}
-        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between mb-2">
-                <div class="bg-white bg-opacity-20 rounded-lg p-3">
-                    <i class="fas fa-clipboard-list text-2xl"></i>
+        <div class="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between mb-4">
+                <div class="bg-gray-100 rounded-lg p-3">
+                    <i class="fas fa-clipboard-list text-gray-700 text-xl"></i>
                 </div>
-                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">Total</span>
+                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-medium">Total</span>
             </div>
-            <p class="text-3xl font-bold mb-1" id="metric-total">{{ $resumenOrdenes['total'] ?? 0 }}</p>
-            <p class="text-sm text-blue-100">Órdenes de Servicio</p>
+            <p class="text-3xl font-bold text-gray-900 mb-1" id="metric-total">{{ $resumenOrdenes['total'] ?? 0 }}</p>
+            <p class="text-sm text-gray-600">Órdenes de Servicio</p>
         </div>
 
         {{-- Órdenes Pendientes --}}
-        <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between mb-2">
-                <div class="bg-white bg-opacity-20 rounded-lg p-3">
-                    <i class="fas fa-clock text-2xl"></i>
+        <div class="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between mb-4">
+                <div class="bg-amber-50 rounded-lg p-3">
+                    <i class="fas fa-clock text-amber-600 text-xl"></i>
                 </div>
-                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">Activas</span>
+                <span class="text-xs bg-amber-50 text-amber-600 px-2 py-1 rounded-full font-medium">Activas</span>
             </div>
-            <p class="text-3xl font-bold mb-1" id="metric-pendientes">{{ $resumenOrdenes['pendientes'] ?? 0 }}</p>
-            <p class="text-sm text-yellow-100">Pendientes</p>
+            <p class="text-3xl font-bold text-gray-900 mb-1" id="metric-pendientes">{{ $resumenOrdenes['pendientes'] ?? 0 }}</p>
+            <p class="text-sm text-gray-600">Pendientes</p>
         </div>
 
         {{-- Órdenes en Progreso --}}
-        <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between mb-2">
-                <div class="bg-white bg-opacity-20 rounded-lg p-3">
-                    <i class="fas fa-tools text-2xl"></i>
+        <div class="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between mb-4">
+                <div class="bg-blue-50 rounded-lg p-3">
+                    <i class="fas fa-tools text-blue-600 text-xl"></i>
                 </div>
-                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">En Curso</span>
+                <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full font-medium">En Curso</span>
             </div>
-            <p class="text-3xl font-bold mb-1" id="metric-progreso">{{ $resumenOrdenes['en_progreso'] ?? 0 }}</p>
-            <p class="text-sm text-indigo-100">En Progreso</p>
+            <p class="text-3xl font-bold text-gray-900 mb-1" id="metric-progreso">{{ $resumenOrdenes['en_progreso'] ?? 0 }}</p>
+            <p class="text-sm text-gray-600">En Progreso</p>
         </div>
 
         {{-- Órdenes Completadas --}}
-        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between mb-2">
-                <div class="bg-white bg-opacity-20 rounded-lg p-3">
-                    <i class="fas fa-check-circle text-2xl"></i>
+        <div class="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between mb-4">
+                <div class="bg-green-50 rounded-lg p-3">
+                    <i class="fas fa-check-circle text-green-600 text-xl"></i>
                 </div>
-                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">Este Mes</span>
+                <span class="text-xs bg-green-50 text-green-600 px-2 py-1 rounded-full font-medium">Este Mes</span>
             </div>
-            <p class="text-3xl font-bold mb-1" id="metric-completadas">{{ $metricas['ordenes_mes_actual'] ?? 0 }}</p>
-            <p class="text-sm text-green-100">Completadas</p>
+            <p class="text-3xl font-bold text-gray-900 mb-1" id="metric-completadas">{{ $metricas['ordenes_mes_actual'] ?? 0 }}</p>
+            <p class="text-sm text-gray-600">Completadas</p>
         </div>
     </div>
 
@@ -411,19 +433,19 @@
             {{-- Estadísticas detalladas --}}
             <div class="space-y-4">
                 {{-- Completadas --}}
-                <div class="bg-green-50 rounded-lg p-4 border-l-4 border-green-500 hover:shadow-md transition-shadow">
+                <div class="bg-white rounded-lg p-5 border border-gray-200 hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <div class="bg-green-500 rounded-full p-3 mr-4">
-                                <i class="fas fa-check-circle text-white text-xl"></i>
+                        <div class="flex items-center gap-4">
+                            <div class="bg-green-50 rounded-lg p-3">
+                                <i class="fas fa-check-circle text-green-600 text-2xl"></i>
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-gray-700">Completadas</p>
+                                <p class="text-sm font-medium text-gray-600">Completadas</p>
                                 <p class="text-3xl font-bold text-gray-900">{{ $resumenOrdenes['completadas'] ?? 0 }}</p>
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="text-2xl font-bold text-green-600">
+                            <p class="text-2xl font-bold text-gray-900">
                                 {{ $resumenOrdenes['total'] > 0 ? number_format(($resumenOrdenes['completadas'] / $resumenOrdenes['total']) * 100, 1) : 0 }}%
                             </p>
                         </div>
@@ -431,19 +453,19 @@
                 </div>
 
                 {{-- En Progreso --}}
-                <div class="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500 hover:shadow-md transition-shadow">
+                <div class="bg-white rounded-lg p-5 border border-gray-200 hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <div class="bg-blue-500 rounded-full p-3 mr-4">
-                                <i class="fas fa-tools text-white text-xl"></i>
+                        <div class="flex items-center gap-4">
+                            <div class="bg-blue-50 rounded-lg p-3">
+                                <i class="fas fa-tools text-blue-600 text-2xl"></i>
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-gray-700">En Progreso</p>
+                                <p class="text-sm font-medium text-gray-600">En Progreso</p>
                                 <p class="text-3xl font-bold text-gray-900">{{ $resumenOrdenes['en_progreso'] ?? 0 }}</p>
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="text-2xl font-bold text-blue-600">
+                            <p class="text-2xl font-bold text-gray-900">
                                 {{ $resumenOrdenes['total'] > 0 ? number_format(($resumenOrdenes['en_progreso'] / $resumenOrdenes['total']) * 100, 1) : 0 }}%
                             </p>
                         </div>
@@ -451,14 +473,14 @@
                 </div>
 
                 {{-- Pendientes --}}
-                <div class="bg-yellow-50 rounded-lg p-4 border-l-4 border-yellow-500 hover:shadow-md transition-shadow">
+                <div class="bg-white rounded-lg p-5 border border-gray-200 hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <div class="bg-yellow-500 rounded-full p-3 mr-4">
-                                <i class="fas fa-clock text-white text-xl"></i>
+                        <div class="flex items-center gap-4">
+                            <div class="bg-amber-50 rounded-lg p-3">
+                                <i class="fas fa-clock text-amber-600 text-2xl"></i>
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-gray-700">Pendientes</p>
+                                <p class="text-sm font-medium text-gray-600">Pendientes</p>
                                 <p class="text-3xl font-bold text-gray-900">{{ $resumenOrdenes['pendientes'] ?? 0 }}</p>
                             </div>
                         </div>
@@ -471,14 +493,18 @@
                 </div>
 
                 {{-- Crecimiento mensual --}}
-                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <p class="text-sm text-gray-600 mb-1">Crecimiento mensual</p>
-                    <p class="text-2xl font-bold {{ $metricas['crecimiento'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                <div class="bg-white rounded-lg p-5 border border-gray-200">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="bg-gray-100 rounded-lg p-2">
+                            <i class="fas fa-chart-line text-gray-700 text-lg"></i>
+                        </div>
+                        <p class="text-sm font-medium text-gray-600">Crecimiento mensual</p>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-900 mb-1">
                         {{ $metricas['crecimiento'] >= 0 ? '+' : '' }}{{ number_format($metricas['crecimiento'], 1) }}%
                     </p>
                     <p class="text-xs text-gray-500">
-                        vs mes anterior<br>
-                        {{ abs($metricas['ordenes_mes_actual'] - $metricas['ordenes_mes_anterior']) }} órdenes 
+                        vs mes anterior • {{ abs($metricas['ordenes_mes_actual'] - $metricas['ordenes_mes_anterior']) }} órdenes 
                         {{ $metricas['crecimiento'] >= 0 ? 'más' : 'menos' }}
                     </p>
                 </div>
@@ -753,8 +779,11 @@ function filtrarDashboard() {
     btnFiltrar.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Cargando...';
     btnFiltrar.disabled = true;
     
+    // Agregar timestamp para evitar caché del navegador
+    const timestamp = new Date().getTime();
+    
     // Redirigir con parámetros de fecha
-    window.location.href = `{{ route('dashboard') }}?mes=${mes}&anio=${anio}&semana=${semana}`;
+    window.location.href = `{{ route('dashboard') }}?mes=${mes}&anio=${anio}&semana=${semana}&_t=${timestamp}`;
 }
 
 function actualizarRangoSemana() {

@@ -43,6 +43,11 @@ class DashboardController extends Controller
      */
     public function adminDashboard(Request $request)
     {
+        // Headers para evitar caché del navegador
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
         $user = auth()->user();
         $servicioTecnicoId = $user && $user->servicioTecnico ? $user->servicioTecnico->id : null;
         
@@ -53,6 +58,10 @@ class DashboardController extends Controller
         
         // Crear fecha para filtrado
         $fechaFiltro = \Carbon\Carbon::create($anio, $mes, 1);
+        
+        // Rango del mes completo (siempre para ingreso mensual)
+        $inicioMesCompleto = $fechaFiltro->copy()->startOfMonth();
+        $finMesCompleto = $fechaFiltro->copy()->endOfMonth();
         
         // Calcular rango de fechas según la semana seleccionada
         if ($semana > 0) {
@@ -74,8 +83,8 @@ class DashboardController extends Controller
             $rangoSemana = $inicioSemana->format('d/m') . ' - ' . $finSemana->format('d/m/Y');
         } else {
             // Todo el mes
-            $fechaInicio = $fechaFiltro->copy()->startOfMonth();
-            $fechaFin = $fechaFiltro->copy()->endOfMonth();
+            $fechaInicio = $inicioMesCompleto;
+            $fechaFin = $finMesCompleto;
             $rangoSemana = 'Todo el mes: ' . $fechaFiltro->translatedFormat('F Y');
         }
         
@@ -308,18 +317,31 @@ class DashboardController extends Controller
         $fechaFinGrafico = $fechaFin->format('d/m/Y');
 
         // Cálculo de ingresos
+        // Ingreso mensual SIEMPRE usa el mes completo (no importa si filtró por semana)
         $ingresoMensual = DB::table('ordenes_servicio')
             ->where('servicio_tecnico_id', $servicioTecnicoId)
             ->whereNotNull('precio_presupuestado')
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
+            ->whereBetween('created_at', [$inicioMesCompleto, $finMesCompleto])
             ->sum('precio_presupuestado');
 
-        $ingresoSemanal = DB::table('ordenes_servicio')
-            ->where('servicio_tecnico_id', $servicioTecnicoId)
-            ->whereNotNull('precio_presupuestado')
-            ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
-            ->sum('precio_presupuestado');
+        // Ingreso semanal - Si filtró por semana específica, calcular para esa semana, sino usar semana actual
+        if ($semana > 0) {
+            // Calcular ingreso de la semana específica seleccionada
+            $ingresoSemanal = DB::table('ordenes_servicio')
+                ->where('servicio_tecnico_id', $servicioTecnicoId)
+                ->whereNotNull('precio_presupuestado')
+                ->whereBetween('created_at', [$fechaInicio, $fechaFin])
+                ->sum('precio_presupuestado');
+            $rangoSemanalTexto = $fechaInicioGrafico . ' - ' . $fechaFinGrafico;
+        } else {
+            // Usar la semana actual del calendario
+            $ingresoSemanal = DB::table('ordenes_servicio')
+                ->where('servicio_tecnico_id', $servicioTecnicoId)
+                ->whereNotNull('precio_presupuestado')
+                ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+                ->sum('precio_presupuestado');
+            $rangoSemanalTexto = now()->startOfWeek()->format('d/m') . ' - ' . now()->endOfWeek()->format('d/m/Y');
+        }
 
         // 🏆 Empleado del Mes - Basado en órdenes completadas y calificación promedio
         $empleadoDelMes = DB::table('tecnicos')
@@ -391,11 +413,14 @@ class DashboardController extends Controller
             'fechaFinGrafico',
             'ingresoMensual',
             'ingresoSemanal',
+            'rangoSemanalTexto',
             'empleadoDelMes',
             'mes',
             'anio',
             'semana',
-            'rangoSemana'
+            'rangoSemana',
+            'fechaInicio',
+            'fechaFin'
         ));
     }
 
@@ -569,14 +594,14 @@ class DashboardController extends Controller
             })
             ->toArray();
 
-        // Calcular ingresos actualizados
+        // Cálculo de ingresos según el período filtrado
         $ingresoMensual = DB::table('ordenes_servicio')
             ->where('servicio_tecnico_id', $servicioTecnicoId)
             ->whereNotNull('precio_presupuestado')
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
+            ->whereBetween('created_at', [$fechaInicio, $fechaFin])
             ->sum('precio_presupuestado');
 
+        // Ingreso semanal actual (semana en curso)
         $ingresoSemanal = DB::table('ordenes_servicio')
             ->where('servicio_tecnico_id', $servicioTecnicoId)
             ->whereNotNull('precio_presupuestado')
