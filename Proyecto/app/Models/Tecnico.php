@@ -81,6 +81,11 @@ class Tecnico extends Authenticatable
         return $this->hasMany(Trabajador::class);
     }
 
+    public function calificaciones()
+    {
+        return $this->hasMany(CalificacionTecnico::class);
+    }
+
     // Accessors
     public function getNombreCompletoAttribute()
     {
@@ -230,5 +235,57 @@ class Tecnico extends Authenticatable
         $puntuacion += $niveles[$this->nivel_experiencia] ?? 0;
 
         return max($puntuacion, 0);
+    }
+
+    /**
+     * 📊 Métodos de Calificación
+     */
+    public function promedioCalificacion()
+    {
+        return round($this->calificaciones()->avg('calificacion') ?? 0, 2);
+    }
+
+    public function totalCalificaciones()
+    {
+        return $this->calificaciones()->count();
+    }
+
+    public function distribucionCalificaciones()
+    {
+        return [
+            '5_estrellas' => $this->calificaciones()->where('calificacion', 5)->count(),
+            '4_estrellas' => $this->calificaciones()->where('calificacion', 4)->count(),
+            '3_estrellas' => $this->calificaciones()->where('calificacion', 3)->count(),
+            '2_estrellas' => $this->calificaciones()->where('calificacion', 2)->count(),
+            '1_estrella' => $this->calificaciones()->where('calificacion', 1)->count(),
+        ];
+    }
+
+    public function porcentajeRecomendacion()
+    {
+        $total = $this->calificaciones()->count();
+        if ($total === 0) return 0;
+        
+        $recomendaciones = $this->calificaciones()->where('recomendaria', true)->count();
+        return round(($recomendaciones / $total) * 100, 1);
+    }
+
+    public function promediosAspectos()
+    {
+        return [
+            'puntualidad' => round($this->calificaciones()->avg('puntualidad') ?? 0, 2),
+            'calidad_trabajo' => round($this->calificaciones()->avg('calidad_trabajo') ?? 0, 2),
+            'atencion_cliente' => round($this->calificaciones()->avg('atencion_cliente') ?? 0, 2),
+            'limpieza' => round($this->calificaciones()->avg('limpieza') ?? 0, 2),
+        ];
+    }
+
+    public function ultimasCalificaciones($limite = 5)
+    {
+        return $this->calificaciones()
+            ->with(['cliente', 'ordenServicio'])
+            ->latest('fecha_calificacion')
+            ->limit($limite)
+            ->get();
     }
 }

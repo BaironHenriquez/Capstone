@@ -124,7 +124,11 @@ class OrdenServicio extends Model
 
     public function calificacion()
     {
+<<<<<<< HEAD
         return $this->hasOne(CalificacionTecnico::class, 'orden_servicio_id');
+=======
+        return $this->hasOne(CalificacionTecnico::class);
+>>>>>>> 834f7a94e82d02728c9cb2d213f12acd79f4bdfd
     }
 
     /**
