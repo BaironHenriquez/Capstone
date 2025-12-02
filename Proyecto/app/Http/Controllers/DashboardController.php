@@ -27,7 +27,7 @@ class DashboardController extends Controller
         // Redirigir según el rol del usuario
         switch ($user->role->nombre_rol) {
             case 'Administrador':
-                return $this->adminDashboard($user);
+                return $this->adminDashboard($request);
             case 'Técnico':
                 return $this->technicianDashboard($user);
             case 'Trabajador':
@@ -41,10 +41,43 @@ class DashboardController extends Controller
     /**
      * Dashboard para Administrador
      */
-    public function adminDashboard()
+    public function adminDashboard(Request $request)
     {
         $user = auth()->user();
         $servicioTecnicoId = $user && $user->servicioTecnico ? $user->servicioTecnico->id : null;
+        
+        // Obtener mes, año y semana de los parámetros o usar el actual
+        $mes = $request->input('mes', now()->month);
+        $anio = $request->input('anio', now()->year);
+        $semana = $request->input('semana', 0); // 0 = todo el mes, 1-5 = semanas específicas
+        
+        // Crear fecha para filtrado
+        $fechaFiltro = \Carbon\Carbon::create($anio, $mes, 1);
+        
+        // Calcular rango de fechas según la semana seleccionada
+        if ($semana > 0) {
+            // Calcular el inicio y fin de la semana específica del mes
+            $inicioMes = \Carbon\Carbon::create($anio, $mes, 1)->startOfDay();
+            $finMes = \Carbon\Carbon::create($anio, $mes, 1)->endOfMonth()->endOfDay();
+            
+            // Cada semana son 7 días
+            $inicioSemana = $inicioMes->copy()->addDays(($semana - 1) * 7);
+            $finSemana = $inicioSemana->copy()->addDays(6)->endOfDay();
+            
+            // Asegurar que no exceda el mes
+            if ($finSemana->gt($finMes)) {
+                $finSemana = $finMes;
+            }
+            
+            $fechaInicio = $inicioSemana;
+            $fechaFin = $finSemana;
+            $rangoSemana = $inicioSemana->format('d/m') . ' - ' . $finSemana->format('d/m/Y');
+        } else {
+            // Todo el mes
+            $fechaInicio = $fechaFiltro->copy()->startOfMonth();
+            $fechaFin = $fechaFiltro->copy()->endOfMonth();
+            $rangoSemana = 'Todo el mes: ' . $fechaFiltro->translatedFormat('F Y');
+        }
         
         // Estadísticas de clientes reales
         $estadisticasClientes = [
@@ -75,22 +108,26 @@ class DashboardController extends Controller
             ];
         }
 
-        // Resumen de órdenes reales desde la base de datos
+        // Resumen de órdenes reales desde la base de datos (filtrado por rango)
         $resumenOrdenes = [
             'total' => DB::table('ordenes_servicio')
                 ->where('servicio_tecnico_id', $servicioTecnicoId)
+                ->whereBetween('created_at', [$fechaInicio, $fechaFin])
                 ->count(),
             'pendientes' => DB::table('ordenes_servicio')
                 ->where('servicio_tecnico_id', $servicioTecnicoId)
                 ->where('estado', 'pendiente')
+                ->whereBetween('created_at', [$fechaInicio, $fechaFin])
                 ->count(),
             'en_progreso' => DB::table('ordenes_servicio')
                 ->where('servicio_tecnico_id', $servicioTecnicoId)
                 ->where('estado', 'en_progreso')
+                ->whereBetween('created_at', [$fechaInicio, $fechaFin])
                 ->count(),
             'completadas' => DB::table('ordenes_servicio')
                 ->where('servicio_tecnico_id', $servicioTecnicoId)
                 ->where('estado', 'completada')
+                ->whereBetween('updated_at', [$fechaInicio, $fechaFin])
                 ->count(),
             'en_revision' => 0 // Estado no usado actualmente
         ];
@@ -220,19 +257,55 @@ class DashboardController extends Controller
             'crecimiento' => round($crecimiento, 1)
         ];
 
-        // Productividad semanal - Órdenes creadas por día de la semana actual
+        // Productividad - Órdenes creadas por día del período filtrado
         $productividadSemanal = [];
-        $inicioSemana = now()->startOfWeek(); // Lunes
+        $etiquetasDias = [];
         
-        for ($i = 0; $i < 7; $i++) {
-            $fecha = $inicioSemana->copy()->addDays($i);
-            $ordenesCreadas = DB::table('ordenes_servicio')
-                ->where('servicio_tecnico_id', $servicioTecnicoId)
-                ->whereDate('created_at', $fecha->toDateString())
-                ->count();
-            
-            $productividadSemanal[] = $ordenesCreadas;
+        // Si es una semana específica o menos de 14 días, mostrar días
+        $diasDiferencia = $fechaInicio->diffInDays($fechaFin);
+        
+        if ($diasDiferencia <= 7) {
+            // Mostrar por días (para semanas específicas)
+            for ($i = 0; $i <= $diasDiferencia; $i++) {
+                $fecha = $fechaInicio->copy()->addDays($i);
+                $ordenesCreadas = DB::table('ordenes_servicio')
+                    ->where('servicio_tecnico_id', $servicioTecnicoId)
+                    ->whereDate('created_at', $fecha->toDateString())
+                    ->count();
+                
+                $productividadSemanal[] = $ordenesCreadas;
+                $etiquetasDias[] = $fecha->translatedFormat('D d');
+            }
+        } else {
+            // Mostrar por semanas del mes
+            $inicioMes = $fechaInicio->copy();
+            for ($semanaNum = 1; $semanaNum <= 5; $semanaNum++) {
+                $inicioSemanaCalc = $inicioMes->copy()->addDays(($semanaNum - 1) * 7);
+                $finSemanaCalc = $inicioSemanaCalc->copy()->addDays(6)->endOfDay();
+                
+                if ($finSemanaCalc->gt($fechaFin)) {
+                    $finSemanaCalc = $fechaFin;
+                }
+                
+                if ($inicioSemanaCalc->lte($fechaFin)) {
+                    $ordenesCreadas = DB::table('ordenes_servicio')
+                        ->where('servicio_tecnico_id', $servicioTecnicoId)
+                        ->whereBetween('created_at', [$inicioSemanaCalc, $finSemanaCalc])
+                        ->count();
+                    
+                    $productividadSemanal[] = $ordenesCreadas;
+                    $etiquetasDias[] = "S{$semanaNum} (" . $inicioSemanaCalc->format('d/m') . ")";
+                    
+                    if ($finSemanaCalc->gte($fechaFin)) {
+                        break;
+                    }
+                }
+            }
         }
+        
+        // Fecha de inicio y fin para mostrar en el gráfico
+        $fechaInicioGrafico = $fechaInicio->format('d/m');
+        $fechaFinGrafico = $fechaFin->format('d/m/Y');
 
         // Cálculo de ingresos
         $ingresoMensual = DB::table('ordenes_servicio')
@@ -248,6 +321,62 @@ class DashboardController extends Controller
             ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
             ->sum('precio_presupuestado');
 
+        // 🏆 Empleado del Mes - Basado en órdenes completadas y calificación promedio
+        $empleadoDelMes = DB::table('tecnicos')
+            ->where('tecnicos.servicio_tecnico_id', $servicioTecnicoId)
+            ->whereNull('tecnicos.deleted_at')
+            ->select(
+                'tecnicos.id',
+                DB::raw('CONCAT(tecnicos.nombre, " ", tecnicos.apellido) as nombre'),
+                'tecnicos.especialidades',
+                // Contar órdenes completadas del rango filtrado
+                DB::raw("(SELECT COUNT(*) FROM ordenes_servicio 
+                         WHERE tecnico_id = tecnicos.id 
+                         AND estado = 'completada' 
+                         AND updated_at BETWEEN '{$fechaInicio->toDateTimeString()}' AND '{$fechaFin->toDateTimeString()}') as ordenes_completadas"),
+                // Calcular calificación promedio general (todas las calificaciones)
+                DB::raw('(SELECT COALESCE(ROUND(AVG(calificacion), 1), 0) 
+                         FROM calificacion_tecnicos 
+                         WHERE tecnico_id = tecnicos.id) as calificacion_promedio'),
+                // Contar total de calificaciones
+                DB::raw('(SELECT COUNT(*) 
+                         FROM calificacion_tecnicos 
+                         WHERE tecnico_id = tecnicos.id) as total_calificaciones'),
+                // Suma total de puntos de calificación
+                DB::raw('(SELECT COALESCE(SUM(calificacion), 0) 
+                         FROM calificacion_tecnicos 
+                         WHERE tecnico_id = tecnicos.id) as suma_calificaciones')
+            )
+            ->havingRaw('ordenes_completadas > 0')
+            ->orderByDesc('ordenes_completadas')
+            ->orderByDesc('calificacion_promedio')
+            ->first();
+
+        // Formatear empleado del mes
+        if ($empleadoDelMes) {
+            $especialidades = json_decode($empleadoDelMes->especialidades, true);
+            
+            // Calcular calificación real: suma de calificaciones / número de calificaciones
+            $calificacionReal = $empleadoDelMes->total_calificaciones > 0 
+                ? round($empleadoDelMes->suma_calificaciones / $empleadoDelMes->total_calificaciones, 1)
+                : 0;
+            
+            $empleadoDelMes = [
+                'id' => $empleadoDelMes->id,
+                'nombre' => $empleadoDelMes->nombre,
+                'especialidad' => is_array($especialidades) && count($especialidades) > 0 
+                    ? ucfirst($especialidades[0]) 
+                    : 'General',
+                'ordenes_completadas' => $empleadoDelMes->ordenes_completadas,
+                'calificacion' => $calificacionReal,
+                'suma_puntos' => floatval($empleadoDelMes->suma_calificaciones),
+                'total_calificaciones' => intval($empleadoDelMes->total_calificaciones),
+                'calificacion_max' => 5
+            ];
+        } else {
+            $empleadoDelMes = null;
+        }
+
         return view('admin.dashboard-admin', compact(
             'user', 
             'estadisticasClientes',
@@ -257,8 +386,16 @@ class DashboardController extends Controller
             'alertas',
             'metricas',
             'productividadSemanal',
+            'etiquetasDias',
+            'fechaInicioGrafico',
+            'fechaFinGrafico',
             'ingresoMensual',
-            'ingresoSemanal'
+            'ingresoSemanal',
+            'empleadoDelMes',
+            'mes',
+            'anio',
+            'semana',
+            'rangoSemana'
         ));
     }
 

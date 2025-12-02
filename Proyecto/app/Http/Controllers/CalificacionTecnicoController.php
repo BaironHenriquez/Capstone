@@ -43,6 +43,7 @@ class CalificacionTecnicoController extends Controller
             'orden_servicio_id' => $orden->id,
             'tecnico_id' => $orden->tecnico_id,
             'cliente_id' => $orden->cliente_id,
+            'servicio_tecnico_id' => $orden->servicio_tecnico_id,
             'calificacion' => $request->calificacion,
             'comentario' => $request->comentario
         ]);

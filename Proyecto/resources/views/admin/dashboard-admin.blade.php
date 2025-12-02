@@ -32,16 +32,310 @@
 <div class="space-y-6">
     {{-- Header --}}
     <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-        <div class="flex justify-between items-start">
+        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 mb-1">Panel de Control Técnico</h1>
                 <p class="text-gray-600">Resumen general del estado del servicio técnico</p>
                 <p class="text-sm text-gray-500 mt-2">Última actualización: <span id="last-update">{{ now()->format('d/m/Y H:i') }}</span></p>
             </div>
-            <button onclick="location.reload()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center transition-colors">
-                <i class="fas fa-sync-alt mr-2"></i>
-                Actualizar
-            </button>
+            
+            <div class="flex flex-wrap items-center gap-3">
+                {{-- Selectores de Fecha --}}
+                <div class="flex items-center gap-2 bg-gray-50 rounded-lg p-2">
+                    <div class="flex items-center">
+                        <label class="text-sm font-medium text-gray-700 mr-2">
+                            <i class="fas fa-calendar-alt mr-1"></i>
+                            Mes:
+                        </label>
+                        <select id="filtro-mes" onchange="actualizarRangoSemana()" class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            @for($m = 1; $m <= 12; $m++)
+                                <option value="{{ $m }}" {{ $m == ($mes ?? now()->month) ? 'selected' : '' }}>
+                                    {{ \Carbon\Carbon::create(null, $m)->translatedFormat('F') }}
+                                </option>
+                            @endfor
+                        </select>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <label class="text-sm font-medium text-gray-700 mr-2">Año:</label>
+                        <select id="filtro-anio" onchange="actualizarRangoSemana()" class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            @for($y = now()->year; $y >= now()->year - 5; $y--)
+                                <option value="{{ $y }}" {{ $y == ($anio ?? now()->year) ? 'selected' : '' }}>{{ $y }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <label class="text-sm font-medium text-gray-700 mr-2">
+                            <i class="fas fa-calendar-week mr-1"></i>
+                            Semana:
+                        </label>
+                        <select id="filtro-semana" class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="0" {{ ($semana ?? 0) == 0 ? 'selected' : '' }}>Todo el mes</option>
+                            <option value="1" {{ ($semana ?? 0) == 1 ? 'selected' : '' }}>Semana 1</option>
+                            <option value="2" {{ ($semana ?? 0) == 2 ? 'selected' : '' }}>Semana 2</option>
+                            <option value="3" {{ ($semana ?? 0) == 3 ? 'selected' : '' }}>Semana 3</option>
+                            <option value="4" {{ ($semana ?? 0) == 4 ? 'selected' : '' }}>Semana 4</option>
+                            <option value="5" {{ ($semana ?? 0) == 5 ? 'selected' : '' }}>Semana 5</option>
+                        </select>
+                    </div>
+                    
+                    <div id="rango-semana" class="text-xs text-gray-600 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        <span id="texto-rango">{{ $rangoSemana ?? 'Todo el mes seleccionado' }}</span>
+                    </div>
+                    
+                    <button onclick="filtrarDashboard()" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2 rounded-lg flex items-center transition-all duration-200 shadow-md hover:shadow-lg">
+                        <i class="fas fa-filter mr-2"></i>
+                        Filtrar
+                    </button>
+                </div>
+                
+                <button onclick="location.reload()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg flex items-center transition-colors">
+                    <i class="fas fa-sync-alt mr-2"></i>
+                    Actualizar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Grid para Empleado del Mes y otras métricas --}}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {{-- 🏆 Empleado del Mes --}}
+        @if($empleadoDelMes)
+        <div class="lg:col-span-2 relative bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-600 rounded-2xl shadow-2xl overflow-hidden">
+        {{-- Patrón de fondo decorativo --}}
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 right-0 w-64 h-64 transform translate-x-16 -translate-y-16">
+                <svg fill="currentColor" viewBox="0 0 20 20" class="text-white">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+            </div>
+            <div class="absolute bottom-0 left-0 w-48 h-48 transform -translate-x-12 translate-y-12">
+                <svg fill="currentColor" viewBox="0 0 20 20" class="text-white">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="relative z-10 p-6">
+            {{-- Header con Trofeo y Calificación --}}
+            {{-- Mostrar período filtrado --}}
+            <div class="mb-2 text-xs text-white/90 bg-black/20 px-3 py-1 rounded-lg inline-block font-semibold">
+                📅 Período: {{ $rangoSemana ?? 'Todo el mes' }}
+            </div>
+            
+            <div class="flex items-start justify-between mb-6">
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-yellow-300 rounded-2xl blur-xl opacity-50 animate-pulse"></div>
+                        <div class="relative bg-gradient-to-br from-yellow-200 to-yellow-300 rounded-2xl p-4 shadow-2xl">
+                            <svg class="w-12 h-12 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="inline-flex items-center bg-white bg-opacity-25 backdrop-blur-sm rounded-full px-3 py-1 mb-2">
+                            <span class="text-xs font-bold text-white uppercase tracking-wider">
+                                {{ \Carbon\Carbon::create($anio ?? now()->year, $mes ?? now()->month)->translatedFormat('F Y') }}
+                            </span>
+                        </div>
+                        <h2 class="text-2xl font-black text-white tracking-tight drop-shadow-lg">
+                            Empleado del Mes
+                        </h2>
+                    </div>
+                </div>
+
+                {{-- Tarjeta de Calificación Mejorada --}}
+                <div class="bg-white rounded-2xl shadow-2xl p-5 transform hover:scale-105 transition-transform duration-200">
+                    <div class="flex items-center justify-center space-x-1 mb-2">
+                        @php
+                            $calificacion = $empleadoDelMes['calificacion'];
+                            $calificacionEntera = floor($calificacion);
+                            $tieneMedia = ($calificacion - $calificacionEntera) >= 0.5;
+                        @endphp
+                        @for($i = 1; $i <= 5; $i++)
+                            @if($i <= $calificacionEntera)
+                                <svg class="w-6 h-6 text-yellow-400 drop-shadow-md" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            @elseif($i == $calificacionEntera + 1 && $tieneMedia)
+                                <div class="relative w-6 h-6">
+                                    <svg class="absolute inset-0 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                    </svg>
+                                    <svg class="absolute inset-0 text-yellow-400 drop-shadow-md" fill="currentColor" viewBox="0 0 20 20" style="clip-path: inset(0 50% 0 0);">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                    </svg>
+                                </div>
+                            @else
+                                <svg class="w-6 h-6 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            @endif
+                        @endfor
+                    </div>
+                    <div class="text-center">
+                        <p class="text-4xl font-black bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent mb-1">
+                            {{ number_format($empleadoDelMes['calificacion'], 1) }}<span class="text-xl text-gray-400">/5</span>
+                        </p>
+                        <p class="text-xs font-semibold text-gray-600">
+                            {{ $empleadoDelMes['total_calificaciones'] }} {{ $empleadoDelMes['total_calificaciones'] == 1 ? 'calificación' : 'calificaciones' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Contenido Principal --}}
+            <div class="bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-xl rounded-xl p-5 border border-white/30 shadow-xl">
+                <div class="flex items-center justify-between mb-5">
+                    <div class="flex-1">
+                        <p class="text-xs font-semibold text-white/70 uppercase tracking-wider mb-1">Técnico Destacado</p>
+                        <h3 class="text-2xl font-black text-white drop-shadow-lg mb-2">{{ $empleadoDelMes['nombre'] }}</h3>
+                        <div class="inline-flex items-center bg-white/20 backdrop-blur-sm rounded-full px-3 py-1.5">
+                            <svg class="w-4 h-4 text-white mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="text-sm font-bold text-white">{{ $empleadoDelMes['especialidad'] }}</span>
+                        </div>
+                    </div>
+
+                    <a href="{{ route('admin.tecnicos.resumen', $empleadoDelMes['id']) }}" 
+                       class="group bg-white hover:bg-yellow-50 text-orange-600 font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:scale-105 flex items-center space-x-2">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>Ver Perfil</span>
+                        <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </a>
+                </div>
+
+                {{-- Estadísticas --}}
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-gradient-to-br from-green-400/30 to-emerald-500/30 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:border-white/40 transition-all duration-300 hover:shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-white/80 uppercase tracking-wider mb-1">Órdenes</p>
+                                <p class="text-3xl font-black text-white drop-shadow-lg">{{ $empleadoDelMes['ordenes_completadas'] }}</p>
+                                <p class="text-xs text-white/70 mt-1">Completadas</p>
+                            </div>
+                            <div class="bg-white/20 rounded-full p-3">
+                                <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-yellow-400/30 to-amber-500/30 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:border-white/40 transition-all duration-300 hover:shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-white/80 uppercase tracking-wider mb-1">Desempeño</p>
+                                <p class="text-3xl font-black text-white drop-shadow-lg">{{ now()->format('M') }}</p>
+                                <p class="text-xs text-white/70 mt-1">Este Mes</p>
+                            </div>
+                            <div class="bg-white/20 rounded-full p-3">
+                                <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        @endif
+
+        {{-- Espacio para widget adicional (opcional) --}}
+        <div class="hidden lg:block">
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200 h-full">
+                <div class="flex items-center mb-4">
+                    <div class="bg-blue-100 rounded-lg p-3 mr-3">
+                        <i class="fas fa-chart-line text-blue-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Rendimiento</h3>
+                        <p class="text-sm text-gray-600">Este Mes</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4">
+                        <p class="text-xs font-semibold text-gray-600 mb-1">Órdenes Procesadas</p>
+                        <p class="text-2xl font-bold text-blue-600">{{ $resumenOrdenes['total'] ?? 0 }}</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4">
+                        <p class="text-xs font-semibold text-gray-600 mb-1">Tasa de Éxito</p>
+                        <p class="text-2xl font-bold text-green-600">
+                            {{ $resumenOrdenes['total'] > 0 ? number_format(($resumenOrdenes['completadas'] / $resumenOrdenes['total']) * 100, 0) : 0 }}%
+                        </p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4">
+                        <p class="text-xs font-semibold text-gray-600 mb-1">Técnicos Activos</p>
+                        <p class="text-2xl font-bold text-purple-600">{{ count($tecnicos) }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Ingresos y Comisiones --}}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {{-- Ingreso Semanal --}}
+        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                    <i class="fas fa-calendar-week text-2xl"></i>
+                </div>
+                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">Esta Semana</span>
+            </div>
+            <p class="text-3xl font-bold mb-1">${{ number_format($ingresoSemanal ?? 0, 0, ',', '.') }}</p>
+            <p class="text-sm text-emerald-100">Ingreso Semanal</p>
+            <p class="text-xs text-emerald-200 mt-2">
+                <i class="fas fa-calendar mr-1"></i>
+                {{ now()->startOfWeek()->format('d/m') }} - {{ now()->endOfWeek()->format('d/m/Y') }}
+            </p>
+        </div>
+
+        {{-- Ingreso Mensual --}}
+        <div class="bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                    <i class="fas fa-calendar-alt text-2xl"></i>
+                </div>
+                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">Este Mes</span>
+            </div>
+            <p class="text-3xl font-bold mb-1">${{ number_format($ingresoMensual ?? 0, 0, ',', '.') }}</p>
+            <p class="text-sm text-violet-100">Ingreso Mensual</p>
+            <p class="text-xs text-violet-200 mt-2">
+                <i class="fas fa-calendar mr-1"></i>
+                {{ \Carbon\Carbon::create($anio ?? now()->year, $mes ?? now()->month)->translatedFormat('F Y') }}
+            </p>
+        </div>
+
+        {{-- Comisiones Totales --}}
+        @php
+            $comisionesTotales = array_sum(array_column($tecnicos, 'comision_total'));
+        @endphp
+        <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                    <i class="fas fa-dollar-sign text-2xl"></i>
+                </div>
+                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">Este Mes</span>
+            </div>
+            <p class="text-3xl font-bold mb-1">${{ number_format($comisionesTotales, 0, ',', '.') }}</p>
+            <p class="text-sm text-amber-100">Comisiones Totales</p>
+            <p class="text-xs text-amber-200 mt-2">
+                <i class="fas fa-users mr-1"></i>
+                {{ count($tecnicos) }} técnico(s)
+            </p>
         </div>
     </div>
 
@@ -288,60 +582,6 @@
         </div>
     </div>
 
-    {{-- Ingresos y Comisiones --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {{-- Ingreso Semanal --}}
-        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between mb-2">
-                <div class="bg-white bg-opacity-20 rounded-lg p-3">
-                    <i class="fas fa-calendar-week text-2xl"></i>
-                </div>
-                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">Esta Semana</span>
-            </div>
-            <p class="text-3xl font-bold mb-1">${{ number_format($ingresoSemanal ?? 0, 0, ',', '.') }}</p>
-            <p class="text-sm text-emerald-100">Ingreso Semanal</p>
-            <p class="text-xs text-emerald-200 mt-2">
-                <i class="fas fa-calendar mr-1"></i>
-                {{ now()->startOfWeek()->format('d/m') }} - {{ now()->endOfWeek()->format('d/m/Y') }}
-            </p>
-        </div>
-
-        {{-- Ingreso Mensual --}}
-        <div class="bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between mb-2">
-                <div class="bg-white bg-opacity-20 rounded-lg p-3">
-                    <i class="fas fa-calendar-alt text-2xl"></i>
-                </div>
-                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">Este Mes</span>
-            </div>
-            <p class="text-3xl font-bold mb-1">${{ number_format($ingresoMensual ?? 0, 0, ',', '.') }}</p>
-            <p class="text-sm text-violet-100">Ingreso Mensual</p>
-            <p class="text-xs text-violet-200 mt-2">
-                <i class="fas fa-calendar mr-1"></i>
-                {{ now()->format('F Y') }}
-            </p>
-        </div>
-
-        {{-- Comisiones Totales --}}
-        @php
-            $comisionesTotales = array_sum(array_column($tecnicos, 'comision_total'));
-        @endphp
-        <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between mb-2">
-                <div class="bg-white bg-opacity-20 rounded-lg p-3">
-                    <i class="fas fa-dollar-sign text-2xl"></i>
-                </div>
-                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">Este Mes</span>
-            </div>
-            <p class="text-3xl font-bold mb-1">${{ number_format($comisionesTotales, 0, ',', '.') }}</p>
-            <p class="text-sm text-amber-100">Comisiones Totales</p>
-            <p class="text-xs text-amber-200 mt-2">
-                <i class="fas fa-users mr-1"></i>
-                {{ count($tecnicos) }} técnico(s)
-            </p>
-        </div>
-    </div>
-
     {{-- Productividad Semanal y Carga Laboral --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {{-- Productividad Semanal --}}
@@ -352,13 +592,13 @@
                     <div>
                         <h2 class="text-xl font-bold text-gray-900">Órdenes Creadas por Día</h2>
                         <p class="text-xs text-gray-500">
-                            {{ now()->startOfWeek()->format('d/m') }} - {{ now()->endOfWeek()->format('d/m/Y') }}
+                            {{ $fechaInicioGrafico ?? now()->startOfWeek()->format('d/m') }} - {{ $fechaFinGrafico ?? now()->endOfWeek()->format('d/m/Y') }}
                         </p>
                     </div>
                 </div>
                 <div class="text-right">
                     <p class="text-2xl font-bold text-blue-600">{{ array_sum($productividadSemanal) }}</p>
-                    <p class="text-xs text-gray-500">Órdenes creadas esta semana</p>
+                    <p class="text-xs text-gray-500">Órdenes creadas en este período</p>
                 </div>
             </div>
             <div style="height: 300px;">
@@ -501,6 +741,61 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
+// Función para filtrar el dashboard por mes y año
+function filtrarDashboard() {
+    const mes = document.getElementById('filtro-mes').value;
+    const anio = document.getElementById('filtro-anio').value;
+    const semana = document.getElementById('filtro-semana').value;
+    
+    // Mostrar indicador de carga
+    const btnFiltrar = event.target;
+    const textoOriginal = btnFiltrar.innerHTML;
+    btnFiltrar.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Cargando...';
+    btnFiltrar.disabled = true;
+    
+    // Redirigir con parámetros de fecha
+    window.location.href = `{{ route('dashboard') }}?mes=${mes}&anio=${anio}&semana=${semana}`;
+}
+
+function actualizarRangoSemana() {
+    const mes = parseInt(document.getElementById('filtro-mes').value);
+    const anio = parseInt(document.getElementById('filtro-anio').value);
+    const semana = parseInt(document.getElementById('filtro-semana').value);
+    const textoRango = document.getElementById('texto-rango');
+    
+    if (semana === 0) {
+        const nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                             'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        textoRango.textContent = `Todo el mes: ${nombresMeses[mes - 1]} ${anio}`;
+        return;
+    }
+    
+    // Calcular el rango de la semana
+    const inicioMes = new Date(anio, mes - 1, 1);
+    const diasDesplazamiento = (semana - 1) * 7;
+    const inicioSemana = new Date(inicioMes);
+    inicioSemana.setDate(inicioMes.getDate() + diasDesplazamiento);
+    
+    const finSemana = new Date(inicioSemana);
+    finSemana.setDate(inicioSemana.getDate() + 6);
+    
+    // Ajustar si excede el mes
+    const ultimoDiaMes = new Date(anio, mes, 0).getDate();
+    if (finSemana.getDate() > ultimoDiaMes || finSemana.getMonth() !== mes - 1) {
+        finSemana.setDate(ultimoDiaMes);
+        finSemana.setMonth(mes - 1);
+    }
+    
+    const formatoFecha = (fecha) => {
+        const dia = String(fecha.getDate()).padStart(2, '0');
+        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+        const anio = fecha.getFullYear();
+        return `${dia}/${mes}/${anio}`;
+    };
+    
+    textoRango.textContent = `${formatoFecha(inicioSemana)} - ${formatoFecha(finSemana)}`;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Gráfico de Donut - Distribución de Órdenes
     const ctxDonut = document.getElementById('ordenesChart').getContext('2d');
@@ -538,7 +833,11 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(ctxLine, {
         type: 'line',
         data: {
-            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+            labels: [
+                @foreach($etiquetasDias as $etiqueta)
+                    '{{ $etiqueta }}',
+                @endforeach
+            ],
             datasets: [{
                 label: 'Órdenes Creadas',
                 data: [
