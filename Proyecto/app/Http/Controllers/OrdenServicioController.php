@@ -219,6 +219,12 @@ class OrdenServicioController extends Controller
     public function show($id)
     {
         $orden = OrdenServicio::with(['cliente', 'equipo.marca', 'tecnico', 'user'])->findOrFail($id);
+        
+        // Si es una petición AJAX, devolver JSON
+        if (request()->expectsJson() || request()->ajax()) {
+            return response()->json(['orden' => $orden]);
+        }
+        
         return view('admin.ordenes.show', compact('orden'));
     }
 

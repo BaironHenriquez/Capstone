@@ -223,9 +223,9 @@
                 @forelse($ordenes ?? [] as $orden)
                 <tr class="hover:bg-gray-50 transition-colors duration-200">
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 text-center">
-                        <a href="{{ route('ordenes.show', $orden) }}" class="hover:text-blue-800">
+                        <button onclick="abrirModalOrden({{ $orden->id }})" class="hover:text-blue-800 hover:underline cursor-pointer">
                             {{ $orden->numero_orden ?? 'TS-000' }}
-                        </a>
+                        </button>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-center">
                         <div class="text-sm font-medium text-gray-900">
@@ -300,9 +300,9 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div class="flex items-center justify-center space-x-2">
-                            <a href="{{ route('ordenes.show', $orden) }}" class="text-blue-600 hover:text-blue-900 transition-colors duration-200" title="Ver orden">
+                            <button onclick="abrirModalOrden({{ $orden->id }})" class="text-blue-600 hover:text-blue-900 transition-colors duration-200" title="Ver orden">
                                 <i class="fas fa-eye"></i>
-                            </a>
+                            </button>
                             @if($orden->puedeSerEditada ?? true)
                             <a href="{{ route('ordenes.edit', $orden) }}" class="text-indigo-600 hover:text-indigo-900 transition-colors duration-200" title="Editar orden">
                                 <i class="fas fa-edit"></i>
@@ -471,4 +471,6 @@ function showNotification(message, type = 'success') {
     }, 3000);
 }
 </script>
+
+@include('admin.ordenes.modal-orden')
 @endpush
