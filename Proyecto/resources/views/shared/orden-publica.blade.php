@@ -103,10 +103,14 @@
                             @php
                                 $estadoConfig = [
                                     'pendiente' => ['bg' => 'bg-yellow-500', 'texto' => '⏳ Pendiente'],
+                                    'asignada' => ['bg' => 'bg-blue-500', 'texto' => '👤 Asignada'],
                                     'asignado' => ['bg' => 'bg-blue-500', 'texto' => '👤 Asignado'],
+                                    'diagnostico' => ['bg' => 'bg-amber-500', 'texto' => '🔍 Diagnóstico'],
+                                    'espera_repuesto' => ['bg' => 'bg-purple-500', 'texto' => '⏰ Espera Repuesto'],
                                     'en_progreso' => ['bg' => 'bg-indigo-500', 'texto' => '⚙️ En Progreso'],
-                                    'completada' => ['bg' => 'bg-teal-500', 'texto' => '✓ Completada'],
-                                    'entregada' => ['bg' => 'bg-green-500', 'texto' => '📦 Entregada'],
+                                    'listo_retiro' => ['bg' => 'bg-teal-500', 'texto' => '✓ Listo Retiro'],
+                                    'completada' => ['bg' => 'bg-green-500', 'texto' => '✅ Completada'],
+                                    'entregada' => ['bg' => 'bg-emerald-500', 'texto' => '📦 Entregada'],
                                     'cancelada' => ['bg' => 'bg-red-500', 'texto' => '✕ Cancelada'],
                                 ];
                                 $config = $estadoConfig[$orden->estado] ?? ['bg' => 'bg-gray-500', 'texto' => '● Desconocido'];

@@ -315,10 +315,23 @@
                                 Descripción del Problema *
                             </label>
                             <textarea name="descripcion_problema" 
+                                      id="descripcion_problema"
                                       required 
-                                      rows="4" 
+                                      rows="4"
+                                      minlength="20"
+                                      maxlength="1000" 
+                                      oninput="actualizarContador('descripcion_problema', 'contador_descripcion', 1000)"
                                       class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all resize-none"
                                       placeholder="Describa detalladamente el problema reportado por el cliente..."></textarea>
+                            <div class="flex justify-between items-center mt-1">
+                                <p class="text-xs text-gray-500">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Mínimo 20 caracteres, máximo 1000
+                                </p>
+                                <p class="text-xs font-semibold text-gray-600">
+                                    <span id="contador_descripcion">0</span>/1000
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -352,12 +365,16 @@
                                     <span>Nuevo Cliente</span>
                                 </button>
                             </label>
-                            <select name="cliente_id" 
-                                    required 
+                            <select name="cliente_id"
+                                    id="cliente_id" 
+                                    required
+                                    onchange="cargarDatosCliente()" 
                                     class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-all">
                                 <option value="">-- Seleccione un cliente --</option>
                                 @foreach($clientes as $cliente)
-                                    <option value="{{ $cliente->id }}">
+                                    <option value="{{ $cliente->id }}"
+                                            data-telefono="{{ $cliente->telefono }}"
+                                            data-direccion="{{ $cliente->direccion }}">
                                         👤 {{ $cliente->nombre }} 
                                         @if($cliente->apellido){{ $cliente->apellido }}@endif 
                                         - {{ $cliente->correo ?? $cliente->telefono ?? 'Sin contacto' }}
@@ -366,7 +383,7 @@
                             </select>
                             <p class="text-xs text-gray-500 mt-1">
                                 <i class="fas fa-shield-alt mr-1 text-green-500"></i>
-                                Solo se muestran clientes de su servicio técnico
+                                Los datos del cliente se cargarán automáticamente
                             </p>
                         </div>
 
@@ -377,7 +394,10 @@
                                 Contacto en Sitio
                             </label>
                             <input type="text" 
-                                   name="contacto_en_sitio" 
+                                   name="contacto_en_sitio"
+                                   id="contacto_en_sitio"
+                                   minlength="3"
+                                   maxlength="100" 
                                    class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-all"
                                    placeholder="Nombre del contacto">
                         </div>
@@ -389,9 +409,17 @@
                                 Teléfono de Contacto
                             </label>
                             <input type="tel" 
-                                   name="telefono_contacto" 
+                                   name="telefono_contacto"
+                                   id="telefono_contacto"
+                                   pattern="[+]?[0-9]{9,15}"
+                                   minlength="9"
+                                   maxlength="15" 
                                    class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-all"
-                                   placeholder="+56 9 1234 5678">
+                                   placeholder="+56912345678">
+                            <p class="text-xs text-gray-500 mt-1">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Se auto-completará con datos del cliente (editable)
+                            </p>
                         </div>
 
                         <!-- Ubicación del Servicio -->
@@ -400,10 +428,17 @@
                                 <i class="fas fa-map-marker-alt text-green-500 mr-2"></i>
                                 Ubicación del Servicio
                             </label>
-                            <textarea name="ubicacion_servicio" 
-                                      rows="3" 
+                            <textarea name="ubicacion_servicio"
+                                      id="ubicacion_servicio" 
+                                      rows="3"
+                                      minlength="10"
+                                      maxlength="500" 
                                       class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-all resize-none"
                                       placeholder="Dirección completa donde se realizará el servicio..."></textarea>
+                            <p class="text-xs text-gray-500 mt-1">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Mínimo 10, máximo 500 caracteres • Se auto-completará (editable)
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -443,9 +478,7 @@
                                 <option value="">-- Seleccione un equipo --</option>
                                 @foreach($equipos as $equipo)
                                     <option value="{{ $equipo->id }}">
-                                        💻 {{ $equipo->modelo ?? $equipo->tipo_equipo }} 
-                                        - {{ $equipo->marca->nombre_marca ?? 'Sin marca' }} 
-                                        @if($equipo->numero_serie)- S/N: {{ $equipo->numero_serie }}@endif
+                                        {{ $equipo->tipo_equipo }} - {{ $equipo->marca->nombre_marca ?? 'Sin marca' }} - {{ $equipo->modelo }}@if($equipo->numero_serie) - S/N: {{ $equipo->numero_serie }}@endif
                                     </option>
                                 @endforeach
                             </select>
@@ -676,8 +709,9 @@
                         <i class="fas fa-arrow-right"></i>
                     </button>
 
-                    <button type="submit" 
+                    <button type="button" 
                             id="submitBtn" 
+                            onclick="validarFormularioCompleto()"
                             class="btn-animate bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 px-8 rounded-xl flex items-center space-x-2 shadow-lg hidden">
                         <i class="fas fa-check-circle"></i>
                         <span>Crear Orden</span>
@@ -1180,9 +1214,186 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    // ========== CONTADOR DE CARACTERES ==========
+    function actualizarContador(inputId, contadorId, maxLength) {
+        const input = document.getElementById(inputId);
+        const contador = document.getElementById(contadorId);
+        if (input && contador) {
+            contador.textContent = input.value.length;
+            
+            // Cambiar color según límite
+            if (input.value.length > maxLength * 0.9) {
+                contador.classList.add('text-red-600');
+                contador.classList.remove('text-gray-600');
+            } else {
+                contador.classList.add('text-gray-600');
+                contador.classList.remove('text-red-600');
+            }
+        }
+    }
+    
+    // ========== AUTO-CARGAR DATOS DEL CLIENTE ==========
+    window.cargarDatosCliente = function() {
+        const selectCliente = document.getElementById('cliente_id');
+        const selectedOption = selectCliente.options[selectCliente.selectedIndex];
+        
+        if (selectedOption && selectedOption.value) {
+            // Obtener datos del atributo data-*
+            const telefono = selectedOption.getAttribute('data-telefono');
+            const direccion = selectedOption.getAttribute('data-direccion');
+            
+            // Auto-rellenar campos (son editables)
+            if (telefono) {
+                document.getElementById('telefono_contacto').value = telefono;
+            }
+            if (direccion) {
+                document.getElementById('ubicacion_servicio').value = direccion;
+            }
+            
+            // Mostrar mensaje de confirmación
+            if (telefono || direccion) {
+                toastr?.success('Datos del cliente cargados automáticamente');
+            }
+        } else {
+            // Limpiar campos si se deselecciona
+            document.getElementById('telefono_contacto').value = '';
+            document.getElementById('ubicacion_servicio').value = '';
+        }
+    };
+    
+    // Inicializar contador de descripción
+    const descripcionInput = document.getElementById('descripcion_problema');
+    if (descripcionInput) {
+        actualizarContador('descripcion_problema', 'contador_descripcion', 1000);
+    }
+    
     // Inicializar
     updateStep();
 });
+
+// ========== VALIDACIÓN COMPLETA DEL FORMULARIO ==========
+function validarFormularioCompleto() {
+    const form = document.getElementById('multiStepForm');
+    const camposRequeridos = form.querySelectorAll('[required]');
+    const camposFaltantes = [];
+    const pasosFaltantes = new Set();
+    
+    // Validar cada campo requerido
+    camposRequeridos.forEach((campo, index) => {
+        const valor = campo.value ? campo.value.trim() : '';
+        
+        if (!valor || valor === '' || valor === '-- Seleccione un equipo --' || valor === '-- Seleccione un cliente --') {
+            // Encontrar el paso donde está el campo
+            const stepContent = campo.closest('.step-content');
+            const paso = stepContent ? stepContent.getAttribute('data-step') : '?';
+            
+            // Obtener el nombre del campo
+            let nombreCampo = campo.getAttribute('name');
+            const label = campo.closest('div')?.querySelector('label');
+            if (label) {
+                nombreCampo = label.textContent.replace('*', '').trim();
+            }
+            
+            camposFaltantes.push({
+                paso: paso,
+                nombre: nombreCampo,
+                elemento: campo
+            });
+            
+            pasosFaltantes.add(paso);
+        }
+    });
+    
+    // Si hay campos faltantes, mostrar notificación detallada
+    if (camposFaltantes.length > 0) {
+        let mensajeHTML = '<div class="text-left">';
+        mensajeHTML += '<p class="font-semibold mb-3 text-red-700">Debe completar los siguientes campos obligatorios:</p>';
+        mensajeHTML += '<ul class="space-y-2">';
+        
+        // Agrupar por paso
+        const pasos = {
+            '1': 'Paso 1: Información Básica',
+            '2': 'Paso 2: Cliente',
+            '3': 'Paso 3: Equipo y Problema',
+            '4': 'Paso 4: Planificación y Costos',
+            '5': 'Paso 5: Fotos de Ingreso'
+        };
+        
+        Array.from(pasosFaltantes).sort().forEach(paso => {
+            mensajeHTML += `<li class="font-bold text-blue-600 mt-3"><i class="fas fa-arrow-right mr-2"></i>${pasos[paso]}</li>`;
+            
+            camposFaltantes
+                .filter(campo => campo.paso === paso)
+                .forEach(campo => {
+                    mensajeHTML += `<li class="ml-6 text-gray-700"><i class="fas fa-circle text-xs mr-2 text-red-500"></i>${campo.nombre}</li>`;
+                });
+        });
+        
+        mensajeHTML += '</ul></div>';
+        
+        Swal.fire({
+            icon: 'error',
+            title: '❌ Formulario Incompleto',
+            html: mensajeHTML,
+            confirmButtonText: 'Ir al primer campo incompleto',
+            confirmButtonColor: '#3b82f6',
+            width: '600px',
+            customClass: {
+                popup: 'text-sm'
+            }
+        }).then((result) => {
+            if (result.isConfirmed && camposFaltantes.length > 0) {
+                // Ir al primer campo faltante
+                const primerCampo = camposFaltantes[0];
+                const primerPaso = parseInt(primerCampo.paso);
+                
+                // Cambiar al paso correspondiente
+                currentStep = primerPaso;
+                updateStep();
+                
+                // Enfocar el campo después de un pequeño delay
+                setTimeout(() => {
+                    primerCampo.elemento.focus();
+                    primerCampo.elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    primerCampo.elemento.classList.add('border-red-500', 'animate-pulse');
+                    
+                    setTimeout(() => {
+                        primerCampo.elemento.classList.remove('animate-pulse');
+                    }, 2000);
+                }, 300);
+            }
+        });
+        
+        return false;
+    }
+    
+    // Si todo está completo, enviar el formulario
+    Swal.fire({
+        title: '¿Crear Orden de Servicio?',
+        text: "Se creará una nueva orden con la información proporcionada",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Sí, crear orden',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Mostrar loading
+            Swal.fire({
+                title: 'Creando orden...',
+                html: 'Por favor espere',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Enviar el formulario
+            form.submit();
+        }
+    });
+}
 </script>
 
 <!-- SweetAlert2 para notificaciones -->

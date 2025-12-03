@@ -49,7 +49,10 @@ class TecnicoOrdenController extends Controller
             'canceladas' => $ordenesCanceladas,
         ];
 
-        return view('tecnico.dashboard', compact('tecnico', 'ordenesEnProceso', 'estadisticas'));
+        // Alias para mantener compatibilidad con la vista
+        $ordenesAsignadas = $ordenesEnProceso;
+
+        return view('tecnico.dashboard', compact('tecnico', 'ordenesEnProceso', 'ordenesAsignadas', 'estadisticas'));
     }
 
     public function index()

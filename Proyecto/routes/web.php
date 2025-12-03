@@ -202,6 +202,7 @@ Route::middleware(['auth', 'subscription'])->group(function () {
     // Rutas para actualización inline de órdenes
     Route::put('/ordenes/{id}/estado', [OrdenServicioController::class, 'updateEstado'])->name('ordenes.update-estado');
     Route::put('/ordenes/{id}/prioridad', [OrdenServicioController::class, 'updatePrioridad'])->name('ordenes.update-prioridad');
+    Route::post('/ordenes/{id}/registrar-pago', [OrdenServicioController::class, 'registrarPago'])->name('ordenes.registrar-pago');
 
     // Rutas para manejo de imágenes en Bunny CDN
     Route::post('/ordenes/upload-fotos', [OrdenServicioController::class, 'uploadFotosIngreso'])->name('ordenes.upload-fotos');

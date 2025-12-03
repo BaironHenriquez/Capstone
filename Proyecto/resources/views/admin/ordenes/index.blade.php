@@ -256,15 +256,33 @@
                                 <i class="fas fa-chevron-down text-xs ml-2"></i>
                             </button>
                             
-                            <div x-show="open" @click.away="open = false" x-cloak class="absolute z-50 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[140px] left-0">
+                            <div x-show="open" @click.away="open = false" x-cloak class="absolute z-50 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[160px] left-0">
                                 <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'pendiente')" class="block w-full text-center px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors">
                                     <span class="inline-block px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold">Pendiente</span>
+                                </button>
+                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'asignada')" class="block w-full text-center px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors">
+                                    <span class="inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold">Asignada</span>
+                                </button>
+                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'diagnostico')" class="block w-full text-center px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors">
+                                    <span class="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">Diagnóstico</span>
+                                </button>
+                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'espera_repuesto')" class="block w-full text-center px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors">
+                                    <span class="inline-block px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-semibold">Espera Repuesto</span>
                                 </button>
                                 <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'en_progreso')" class="block w-full text-center px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors">
                                     <span class="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-semibold">En Progreso</span>
                                 </button>
+                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'listo_retiro')" class="block w-full text-center px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors">
+                                    <span class="inline-block px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-xs font-semibold">Listo para Retiro</span>
+                                </button>
                                 <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'completada')" class="block w-full text-center px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors">
                                     <span class="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 text-xs font-semibold">Completada</span>
+                                </button>
+                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'entregada')" class="block w-full text-center px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors">
+                                    <span class="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">Entregada</span>
+                                </button>
+                                <button type="button" onclick="cambiarEstado({{ $orden->id }}, 'cancelada')" class="block w-full text-center px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors">
+                                    <span class="inline-block px-3 py-1 rounded-full bg-red-100 text-red-800 text-xs font-semibold">Cancelada</span>
                                 </button>
                             </div>
                         </div>
@@ -386,17 +404,20 @@ function cambiarEstado(ordenId, nuevoEstado) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Mostrar notificación de éxito
             showNotification('Estado actualizado correctamente', 'success');
-            // Recargar la página para actualizar el badge
             setTimeout(() => location.reload(), 1000);
         } else {
-            throw new Error(data.message || 'Error al actualizar');
+            // Si hay saldo pendiente y requiere pago
+            if (data.requiere_pago && data.saldo_pendiente) {
+                mostrarModalPagoPendiente(ordenId, data.saldo_pendiente, data.message);
+            } else {
+                throw new Error(data.message || 'Error al actualizar');
+            }
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showNotification('Error al actualizar el estado', 'error');
+        showNotification(error.message || 'Error al actualizar el estado', 'error');
     });
 }
 
@@ -470,6 +491,127 @@ function showNotification(message, type = 'success') {
         }, 300);
     }, 3000);
 }
+
+// Función para mostrar modal de pago pendiente
+function mostrarModalPagoPendiente(ordenId, saldoPendiente, mensaje) {
+    const modal = document.getElementById('modalPagoPendiente');
+    const mensajeModal = document.getElementById('mensajeSaldoPendiente');
+    const montoSaldo = document.getElementById('montoSaldoPendiente');
+    
+    mensajeModal.textContent = mensaje;
+    montoSaldo.textContent = '$' + Math.round(saldoPendiente).toLocaleString('es-CL');
+    
+    // Configurar botones
+    document.getElementById('btnVerOrden').onclick = async () => {
+        // Registrar el pago automáticamente
+        await registrarPagoAutomatico(ordenId, saldoPendiente);
+    };
+    
+    document.getElementById('btnCancelarModal').onclick = cerrarModalPago;
+    document.getElementById('btnCerrarModal').onclick = cerrarModalPago;
+    
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.querySelector('.transform').classList.remove('scale-95', 'opacity-0');
+        modal.querySelector('.transform').classList.add('scale-100', 'opacity-100');
+    }, 10);
+}
+
+function cerrarModalPago() {
+    const modal = document.getElementById('modalPagoPendiente');
+    modal.querySelector('.transform').classList.add('scale-95', 'opacity-0');
+    modal.querySelector('.transform').classList.remove('scale-100', 'opacity-100');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
+}
+
+// Función para registrar el pago automáticamente
+async function registrarPagoAutomatico(ordenId, montoPago) {
+    const btnPagar = document.getElementById('btnVerOrden');
+    const textoOriginal = btnPagar.innerHTML;
+    
+    // Cambiar botón a estado de carga
+    btnPagar.disabled = true;
+    btnPagar.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Procesando...';
+    
+    try {
+        const response = await fetch(`/ordenes/${ordenId}/registrar-pago`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                monto: montoPago,
+                medio_pago: 'efectivo',
+                notas: 'Pago automático del saldo pendiente'
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification('✅ Pago registrado exitosamente. Saldo: $0', 'success');
+            cerrarModalPago();
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            throw new Error(result.message || 'Error al procesar el pago');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('❌ Error al procesar el pago: ' + error.message, 'error');
+        btnPagar.disabled = false;
+        btnPagar.innerHTML = textoOriginal;
+    }
+}
+</script>
+
+<!-- Modal de Pago Pendiente -->
+<div id="modalPagoPendiente" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="transform transition-all duration-300 scale-95 opacity-0 bg-white rounded-2xl shadow-2xl max-w-md w-full">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-4 rounded-t-2xl">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-2xl mr-3"></i>
+                    <h3 class="text-xl font-bold">Saldo Pendiente</h3>
+                </div>
+                <button onclick="cerrarModalPago()" id="btnCerrarModal" class="hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Body -->
+        <div class="p-6">
+            <div class="text-center mb-6">
+                <div class="bg-orange-100 text-orange-800 rounded-lg p-4 mb-4">
+                    <i class="fas fa-dollar-sign text-3xl mb-2"></i>
+                    <p class="text-sm font-medium mb-2" id="mensajeSaldoPendiente"></p>
+                    <p class="text-2xl font-bold" id="montoSaldoPendiente"></p>
+                </div>
+                <p class="text-gray-600 text-sm">
+                    Para completar o entregar esta orden, debe registrar el pago del saldo pendiente.
+                </p>
+            </div>
+            
+            <!-- Botones -->
+            <div class="flex gap-3">
+                <button onclick="cerrarModalPago()" id="btnCancelarModal" 
+                    class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-times mr-2"></i>Cancelar
+                </button>
+                <button id="btnVerOrden"
+                    class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-medium transition-all shadow-md hover:shadow-lg">
+                    <i class="fas fa-dollar-sign mr-2"></i>Registrar Pago
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 </script>
 
 @include('admin.ordenes.modal-orden')

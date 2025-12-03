@@ -194,17 +194,29 @@
                 <div class="space-y-4">
                     <div>
                         <label class="text-sm font-semibold text-gray-600">Precio Presupuestado</label>
-                        <p class="text-2xl font-bold text-gray-900">${{ number_format($orden->precio_presupuestado, 2) }}</p>
+                        <p class="text-2xl font-bold text-gray-900">${{ number_format($orden->precio_presupuestado, 0, ',', '.') }}</p>
                     </div>
 
                     <div>
-                        <label class="text-sm font-semibold text-gray-600">Abono</label>
-                        <p class="text-2xl font-bold text-blue-600">${{ number_format($orden->abono, 2) }}</p>
+                        <label class="text-sm font-semibold text-gray-600">Abono Realizado</label>
+                        <p class="text-2xl font-bold text-blue-600">${{ number_format($orden->abono ?? 0, 0, ',', '.') }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ $orden->porcentaje_pagado }}% pagado</p>
                     </div>
 
                     <div>
                         <label class="text-sm font-semibold text-gray-600">Saldo Pendiente</label>
-                        <p class="text-2xl font-bold text-orange-600">${{ number_format($orden->saldo, 2) }}</p>
+                        <p class="text-2xl font-bold {{ $orden->saldo_pendiente > 0 ? 'text-orange-600' : 'text-green-600' }}">
+                            ${{ number_format($orden->saldo_pendiente, 0, ',', '.') }}
+                        </p>
+                        @if($orden->saldo_pendiente <= 0 && $orden->precio_presupuestado > 0)
+                        <span class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 mt-2">
+                            <i class="fas fa-check-circle mr-1"></i>Pagado Completamente
+                        </span>
+                        @elseif($orden->saldo_pendiente > 0 && $orden->estado === 'completada')
+                        <button onclick="abrirModalPago()" class="mt-2 inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-md bg-orange-600 hover:bg-orange-700 text-white transition-colors">
+                            <i class="fas fa-dollar-sign mr-1"></i>Registrar Pago
+                        </button>
+                        @endif
                     </div>
 
                     <div class="pt-4 border-t">
@@ -213,6 +225,30 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Alerta de Saldo Pendiente -->
+            @if($orden->estado === 'completada' && $orden->saldo_pendiente > 0)
+            <div class="mt-4 bg-orange-50 border-l-4 border-orange-500 rounded-lg p-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-orange-500 text-xl"></i>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <h3 class="text-sm font-semibold text-orange-800">Orden Completada con Saldo Pendiente</h3>
+                        <p class="text-sm text-orange-700 mt-1">
+                            Esta orden está marcada como completada pero tiene un saldo pendiente de 
+                            <strong>${{ number_format($orden->saldo_pendiente, 0, ',', '.') }}</strong>.
+                            Registra el pago restante o marca como entregada cuando se haya pagado.
+                        </p>
+                        <div class="mt-2 flex gap-2">
+                            <button onclick="abrirModalPago()" class="inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-md bg-orange-600 hover:bg-orange-700 text-white transition-colors">
+                                <i class="fas fa-dollar-sign mr-1"></i>Registrar Pago
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
         </div>
 
         <!-- Detalles Adicionales -->
@@ -321,6 +357,103 @@
             </div>
         </div>
 
+        <!-- Modal para Registrar Pago -->
+        <div id="modalPago" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+            <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-lg bg-white">
+                <div class="flex items-center justify-between mb-4 pb-3 border-b">
+                    <h3 class="text-xl font-bold text-gray-900">
+                        <i class="fas fa-dollar-sign text-green-600 mr-2"></i>Registrar Pago
+                    </h3>
+                    <button onclick="cerrarModalPago()" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <form id="formPago" onsubmit="registrarPago(event)">
+                    <div class="space-y-4">
+                        <!-- Resumen -->
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-sm text-gray-600">Total:</span>
+                                <span class="font-semibold">${{ number_format($orden->precio_presupuestado, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-sm text-gray-600">Pagado:</span>
+                                <span class="font-semibold text-blue-600">${{ number_format($orden->abono ?? 0, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="flex justify-between pt-2 border-t">
+                                <span class="text-sm font-semibold text-gray-900">Saldo:</span>
+                                <span class="font-bold text-orange-600">${{ number_format($orden->saldo_pendiente, 0, ',', '.') }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Monto a Pagar -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Monto a Pagar <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2.5 text-gray-500">$</span>
+                                <input type="number" 
+                                       name="monto_pago" 
+                                       id="montoPago"
+                                       step="1"
+                                       min="1"
+                                       max="{{ $orden->saldo_pendiente }}"
+                                       class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                       placeholder="0"
+                                       required>
+                            </div>
+                            <button type="button" 
+                                    onclick="document.getElementById('montoPago').value = {{ $orden->saldo_pendiente }}"
+                                    class="mt-2 text-xs text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-hand-pointer mr-1"></i>Pagar todo el saldo
+                            </button>
+                        </div>
+
+                        <!-- Medio de Pago -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Medio de Pago <span class="text-red-500">*</span>
+                            </label>
+                            <select name="medio_pago" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required>
+                                <option value="">Seleccionar...</option>
+                                <option value="Efectivo">Efectivo</option>
+                                <option value="Transferencia">Transferencia</option>
+                                <option value="Tarjeta Débito">Tarjeta Débito</option>
+                                <option value="Tarjeta Crédito">Tarjeta Crédito</option>
+                            </select>
+                        </div>
+
+                        <!-- Notas -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Notas (opcional)
+                            </label>
+                            <textarea name="notas_pago" 
+                                      rows="3"
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                      placeholder="Referencia, comprobante, etc..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end space-x-3 mt-6 pt-4 border-t">
+                        <button type="button" 
+                                onclick="cerrarModalPago()"
+                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
+                            <i class="fas fa-times mr-2"></i>Cancelar
+                        </button>
+                        <button type="submit"
+                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-check mr-2"></i>Registrar Pago
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -338,10 +471,67 @@ function cerrarModalImagen() {
     modal.classList.remove('active');
 }
 
+// Modal de Pago
+function abrirModalPago() {
+    const saldoPendiente = {{ $orden->saldo_pendiente }};
+    document.getElementById('montoPago').value = saldoPendiente;
+    document.getElementById('modalPago').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function cerrarModalPago() {
+    document.getElementById('modalPago').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    document.getElementById('formPago').reset();
+}
+
+async function registrarPago(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const monto = parseFloat(formData.get('monto_pago'));
+    const saldoActual = {{ $orden->saldo_pendiente }};
+    
+    if (monto > saldoActual) {
+        alert('El monto no puede ser mayor al saldo pendiente');
+        return;
+    }
+    
+    const data = {
+        monto: monto,
+        medio_pago: formData.get('medio_pago'),
+        notas: formData.get('notas_pago')
+    };
+    
+    try {
+        const response = await fetch('{{ route("ordenes.registrar-pago", $orden->id) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('✓ Pago registrado exitosamente');
+            location.reload();
+        } else {
+            alert('Error: ' + (result.message || 'No se pudo registrar el pago'));
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al registrar el pago. Por favor intenta de nuevo.');
+    }
+}
+
 // Cerrar modal al presionar ESC
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
         cerrarModalImagen();
+        cerrarModalPago();
     }
 });
 
@@ -349,6 +539,29 @@ document.addEventListener('keydown', function(event) {
 document.getElementById('modalImagen')?.addEventListener('click', function(event) {
     if (event.target === this) {
         cerrarModalImagen();
+    }
+});
+
+document.getElementById('modalPago')?.addEventListener('click', function(event) {
+    if (event.target === this) {
+        cerrarModalPago();
+    }
+});
+
+// Auto-abrir modal de pago si se viene desde el listado con saldo pendiente
+document.addEventListener('DOMContentLoaded', function() {
+    if (sessionStorage.getItem('autoAbrirPago') === 'true') {
+        const montoAuto = sessionStorage.getItem('montoPagoAuto');
+        if (montoAuto) {
+            document.getElementById('montoPago').value = montoAuto;
+        }
+        sessionStorage.removeItem('autoAbrirPago');
+        sessionStorage.removeItem('montoPagoAuto');
+        
+        // Abrir el modal automáticamente
+        setTimeout(() => {
+            abrirModalPago();
+        }, 500);
     }
 });
 </script>

@@ -212,10 +212,14 @@ class OrdenServicio extends Model
     {
         $badges = [
             'pendiente' => 'bg-yellow-100 text-yellow-800',
-            'asignado' => 'bg-blue-100 text-blue-800',
+            'asignada' => 'bg-blue-100 text-blue-800',
+            'asignado' => 'bg-blue-100 text-blue-800', // Alias para compatibilidad
+            'diagnostico' => 'bg-amber-100 text-amber-800',
+            'espera_repuesto' => 'bg-purple-100 text-purple-800',
             'en_progreso' => 'bg-indigo-100 text-indigo-800',
+            'listo_retiro' => 'bg-teal-100 text-teal-800',
             'completada' => 'bg-green-100 text-green-800',
-            'entregada' => 'bg-teal-100 text-teal-800',
+            'entregada' => 'bg-emerald-100 text-emerald-800',
             'cancelada' => 'bg-red-100 text-red-800',
         ];
 
@@ -235,5 +239,35 @@ class OrdenServicio extends Model
         ];
 
         return $badges[$this->prioridad] ?? 'bg-blue-100 text-blue-800';
+    }
+
+    /**
+     * 💰 Accessor para calcular el saldo pendiente
+     */
+    public function getSaldoPendienteAttribute()
+    {
+        $total = $this->precio_presupuestado ?? 0;
+        $abonado = $this->abono ?? 0;
+        return max(0, $total - $abonado);
+    }
+
+    /**
+     * 💵 Accessor para verificar si está pagado completamente
+     */
+    public function getEstaPagadoAttribute()
+    {
+        return $this->saldo_pendiente <= 0 && $this->precio_presupuestado > 0;
+    }
+
+    /**
+     * 📊 Accessor para calcular el porcentaje pagado
+     */
+    public function getPorcentajePagadoAttribute()
+    {
+        if (!$this->precio_presupuestado || $this->precio_presupuestado <= 0) {
+            return 0;
+        }
+        $abonado = $this->abono ?? 0;
+        return round(($abonado / $this->precio_presupuestado) * 100, 2);
     }
 }

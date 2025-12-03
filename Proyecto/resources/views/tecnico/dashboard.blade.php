@@ -164,16 +164,6 @@
                     </div>
                 </div>
             </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500 mb-1">Completadas (Mes)</p>
-                            <p class="text-3xl font-bold text-green-600">{{ $estadisticas['completadas_mes'] }}</p>
-                        </div>
-                        <div class="flex-shrink-0 bg-green-100 rounded-full p-4">
-                            <i class="fas fa-check-circle text-2xl text-green-600"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Órdenes Asignadas -->
             <div class="bg-white rounded-lg shadow-lg">

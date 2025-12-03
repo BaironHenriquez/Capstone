@@ -89,28 +89,36 @@ class OrdenServicioController extends Controller
         try {
             $request->validate([
                 'tipo_servicio'        => 'required|string|max:100',
-                'descripcion_problema' => 'required|string|min:5',
+                'descripcion_problema' => 'required|string|min:20|max:1000',
                 'prioridad'            => 'required|string|in:baja,media,alta,urgente',
                 'estado'               => 'nullable|string|max:45',
                 'precio_presupuestado' => 'required|numeric|min:0|max:99999999.99',
                 'abono'                => 'required|numeric|min:0|max:99999999.99',
-                'contacto_en_sitio'    => 'nullable|string|max:100',
-                'telefono_contacto'    => 'nullable|string|max:20',
-                'ubicacion_servicio'   => 'nullable|string|max:200',
+                'contacto_en_sitio'    => 'nullable|string|min:3|max:100',
+                'telefono_contacto'    => 'nullable|string|min:9|max:15',
+                'ubicacion_servicio'   => 'nullable|string|min:10|max:500',
                 'medio_de_pago'        => 'nullable|string|max:45',
                 'tipo_de_trabajo'      => 'nullable|string|max:45',
                 'fecha_programada'     => 'nullable|date',
-                'fecha_aprox_entrega'  => 'nullable|date',
+                'fecha_aprox_entrega'  => 'nullable|date|after_or_equal:fecha_programada',
                 'horas_estimadas'      => 'nullable|numeric|min:0|max:999.99',
                 'cliente_id'           => 'required|exists:clientes,id',
                 'equipo_id'            => 'required|exists:equipos,id',
                 'fotos_ingreso.*'      => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
             ], [
+                'descripcion_problema.min' => 'La descripción del problema debe tener al menos 20 caracteres',
+                'descripcion_problema.max' => 'La descripción del problema no puede exceder 1000 caracteres',
+                'contacto_en_sitio.min' => 'El contacto debe tener al menos 3 caracteres',
+                'telefono_contacto.min' => 'El teléfono debe tener al menos 9 dígitos',
+                'telefono_contacto.max' => 'El teléfono no puede exceder 15 dígitos',
+                'ubicacion_servicio.min' => 'La ubicación debe tener al menos 10 caracteres',
+                'ubicacion_servicio.max' => 'La ubicación no puede exceder 500 caracteres',
                 'precio_presupuestado.max' => 'El precio presupuestado no puede exceder $99,999,999.99',
                 'abono.max' => 'El abono no puede exceder $99,999,999.99',
                 'horas_estimadas.max' => 'Las horas estimadas no pueden exceder 999.99',
                 'precio_presupuestado.required' => 'El precio presupuestado es requerido',
                 'abono.required' => 'El abono es requerido',
+                'fecha_aprox_entrega.after_or_equal' => 'La fecha de entrega debe ser posterior o igual a la fecha programada',
             ]);
 
             // Validar que el abono no sea mayor que el precio
@@ -149,6 +157,14 @@ class OrdenServicioController extends Controller
 
             $precio = (float) $request->input('precio_presupuestado', 0);
             $abono  = (float) $request->input('abono', 0);
+            
+            // Validar que el abono no exceda el precio
+            if ($abono > $precio) {
+                return redirect()->back()
+                    ->withErrors(['abono' => 'El abono no puede ser mayor al precio presupuestado ($' . number_format($precio, 2) . ')'])
+                    ->withInput();
+            }
+            
             $saldo  = $precio - $abono;
 
             // Procesar imágenes de ingreso con Bunny CDN
@@ -323,11 +339,38 @@ class OrdenServicioController extends Controller
     {
         try {
             $request->validate([
-                'estado' => 'required|string|in:pendiente,en_progreso,completada'
+                'estado' => 'required|string|in:pendiente,asignada,diagnostico,espera_repuesto,en_progreso,listo_retiro,completada,entregada,cancelada'
             ]);
 
             $orden = OrdenServicio::findOrFail($id);
+            
+            // VALIDACIÓN: Si intenta marcar como "completada" o "entregada", verificar que esté pagado completamente
+            if (in_array($request->estado, ['completada', 'entregada'])) {
+                $saldoPendiente = ($orden->precio_presupuestado ?? 0) - ($orden->abono ?? 0);
+                
+                if ($saldoPendiente > 0) {
+                    $estadoTexto = $request->estado === 'completada' ? 'completada' : 'entregada';
+                    return response()->json([
+                        'success' => false,
+                        'message' => '❌ No se puede marcar como ' . $estadoTexto . '. Saldo pendiente: $' . number_format($saldoPendiente, 0, ',', '.') . '. El cliente debe pagar el monto total antes de cambiar a este estado.',
+                        'saldo_pendiente' => $saldoPendiente,
+                        'requiere_pago' => true
+                    ], 400);
+                }
+            }
+            
             $orden->estado = $request->estado;
+            
+            // Si se cambia a en_progreso por primera vez, registrar fecha de inicio
+            if ($request->estado === 'en_progreso' && !$orden->fecha_inicio_trabajo) {
+                $orden->fecha_inicio_trabajo = now();
+            }
+            
+            // Si se marca como completada, registrar fecha de completado
+            if ($request->estado === 'completada' && !$orden->fecha_completada) {
+                $orden->fecha_completada = now();
+            }
+            
             $orden->save();
 
             return response()->json([
@@ -368,6 +411,58 @@ class OrdenServicioController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al actualizar la prioridad: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * 💰 Registrar pago adicional para una orden
+     */
+    public function registrarPago(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'monto' => 'required|numeric|min:0',
+                'medio_pago' => 'required|string',
+                'notas' => 'nullable|string'
+            ]);
+
+            $orden = OrdenServicio::findOrFail($id);
+            
+            // Calcular nuevo abono
+            $nuevoAbono = ($orden->abono ?? 0) + $request->monto;
+            
+            // No permitir pagar más del total
+            if ($nuevoAbono > $orden->precio_presupuestado) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El monto excede el saldo pendiente'
+                ], 400);
+            }
+            
+            // Actualizar abono y saldo
+            $orden->abono = $nuevoAbono;
+            $orden->saldo = $orden->precio_presupuestado - $nuevoAbono;
+            $orden->medio_de_pago = $request->medio_pago;
+            
+            // Si se pagó todo, actualizar estado a entregada (si estaba completada)
+            if ($orden->saldo <= 0 && $orden->estado === 'completada') {
+                $orden->estado = 'entregada';
+            }
+            
+            $orden->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pago registrado correctamente',
+                'orden' => $orden,
+                'nuevo_saldo' => $orden->saldo
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al registrar el pago: ' . $e->getMessage()
             ], 500);
         }
     }
