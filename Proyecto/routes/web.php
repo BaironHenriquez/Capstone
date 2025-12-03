@@ -12,12 +12,14 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\TecnicoController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\PayPalController;
+use App\Http\Controllers\TransbankController;
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\IAController;
 use App\Http\Controllers\GestionTecnicosController;
 use App\Http\Controllers\GestionClientesController;
 use App\Http\Controllers\GestionEquiposMarcasController;
 use App\Http\Controllers\ConfiguracionController;
+use App\Http\Controllers\SuperAdminController;
 
 // Página principal
 Route::get('/', function () {
@@ -54,6 +56,12 @@ Route::middleware('auth:tecnico')->group(function () {
     Route::post('/tecnico/logout', [TecnicoAuthController::class, 'logout'])->name('tecnico.logout');
     Route::get('/tecnico/dashboard', [TecnicoOrdenController::class, 'dashboard'])->name('tecnico.dashboard');
     
+    // Rutas de ganancias y perfil para técnico
+    Route::get('/tecnico/ganancias', [TecnicoOrdenController::class, 'ganancias'])->name('tecnico.ganancias');
+    Route::get('/tecnico/ordenes-trabajadas', [TecnicoOrdenController::class, 'ordenesTrabajadas'])->name('tecnico.ordenes-trabajadas');
+    Route::get('/tecnico/perfil', [TecnicoOrdenController::class, 'perfil'])->name('tecnico.perfil');
+    Route::put('/tecnico/perfil', [TecnicoOrdenController::class, 'actualizarPerfil'])->name('tecnico.perfil.actualizar');
+    
     // Rutas de órdenes para técnico
     Route::prefix('tecnico/ordenes')->name('tecnico.ordenes.')->group(function () {
         Route::get('/', [TecnicoOrdenController::class, 'index'])->name('index');
@@ -84,7 +92,6 @@ Route::middleware('auth')->prefix('subscription')->name('subscription.')->group(
 Route::middleware('auth')->prefix('paypal')->name('paypal.')->group(function () {
     Route::post('/create-payment', [PayPalController::class, 'createPayment'])->name('create.payment');
     Route::get('/approve/{paymentId}', [PayPalController::class, 'approvePayment'])->name('approve');
-    // Ruta temporal para manejar el formato anterior con query parameters
     Route::get('/approve', function (Request $request) {
         $paymentId = $request->query('payment_id');
         if ($paymentId) {
@@ -95,6 +102,12 @@ Route::middleware('auth')->prefix('paypal')->name('paypal.')->group(function () 
     Route::post('/execute', [PayPalController::class, 'executePayment'])->name('execute');
     Route::get('/success', [PayPalController::class, 'success'])->name('success');
     Route::get('/cancel', [PayPalController::class, 'cancel'])->name('cancel');
+});
+
+// Rutas de Transbank (requieren autenticación)
+Route::middleware('auth')->prefix('transbank')->name('transbank.')->group(function () {
+    Route::post('/create', [TransbankController::class, 'createTransaction'])->name('create');
+    Route::get('/return', [TransbankController::class, 'returnFromTransbank'])->name('return');
 });
 
 // Ruta para usuarios sin suscripción activa
@@ -292,6 +305,23 @@ Route::post('/logout', function () {
     request()->session()->regenerateToken();
     return redirect('/');
 })->name('logout');
+
+// ============================================
+// MÓDULO SUPER ADMIN (SOLO JERARQUÍA 4)
+// ============================================
+
+Route::prefix('super-usuario')->name('super-admin.')->group(function () {
+    Route::get('/', [SuperAdminController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [SuperAdminController::class, 'login'])->name('login.submit');
+    
+    Route::middleware(['auth', 'super.admin'])->group(function () {
+        Route::post('/logout', [SuperAdminController::class, 'logout'])->name('logout');
+        Route::get('/dashboard', [SuperAdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/servicios-tecnicos', [SuperAdminController::class, 'serviciosTecnicos'])->name('servicios-tecnicos');
+        Route::get('/reporte-financiero', [SuperAdminController::class, 'reporteFinanciero'])->name('reporte-financiero');
+        Route::get('/alertas', [SuperAdminController::class, 'alertas'])->name('alertas');
+    });
+});
 
 // ============================================
 // MÓDULO DE GESTIÓN DE TÉCNICOS (ADMINISTRADOR)

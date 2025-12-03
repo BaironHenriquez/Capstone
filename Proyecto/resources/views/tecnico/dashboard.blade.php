@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Técnico - TechService Pro</title>
+    <title>Dashboard Técnico - Baieco</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -16,17 +16,25 @@
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <i class="fas fa-tools text-2xl text-white mr-3"></i>
-                        <span class="text-white text-xl font-bold">TechService Pro</span>
+                        <span class="text-white text-xl font-bold">Baieco</span>
                     </div>
-                    <div class="ml-8">
-                        <h1 class="text-white text-lg font-semibold">
-                            <i class="fas fa-tachometer-alt mr-2"></i>
-                            Panel del Técnico
-                        </h1>
+                    <div class="ml-8 flex space-x-6">
+                        <a href="{{ route('tecnico.dashboard') }}" class="text-white font-semibold border-b-2 border-white flex items-center">
+                            <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                        </a>
+                        <a href="{{ route('tecnico.ganancias') }}" class="text-white hover:text-purple-200 transition-colors flex items-center">
+                            <i class="fas fa-dollar-sign mr-2"></i>Ganancias
+                        </a>
+                        <a href="{{ route('tecnico.ordenes-trabajadas') }}" class="text-white hover:text-purple-200 transition-colors flex items-center">
+                            <i class="fas fa-history mr-2"></i>Órdenes Trabajadas
+                        </a>
+                        <a href="{{ route('tecnico.perfil') }}" class="text-white hover:text-purple-200 transition-colors flex items-center">
+                            <i class="fas fa-user mr-2"></i>Perfil
+                        </a>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <span class="text-white text-sm">{{ $tecnico->nombre_completo }}</span>
+                    <span class="text-white text-sm">{{ $tecnico->nombre }} {{ $tecnico->apellido }}</span>
                     <form method="POST" action="{{ route('tecnico.logout') }}">
                         @csrf
                         <button type="submit" class="text-white hover:text-gray-200 transition-colors">

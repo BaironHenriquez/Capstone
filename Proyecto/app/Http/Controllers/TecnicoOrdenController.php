@@ -287,4 +287,210 @@ class TecnicoOrdenController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Vista de ganancias del técnico
+     */
+    public function ganancias(Request $request)
+    {
+        $tecnico = Auth::guard('tecnico')->user();
+        
+        // Filtros de fecha
+        $fechaInicio = $request->get('fecha_inicio', now()->startOfMonth()->format('Y-m-d'));
+        $fechaFin = $request->get('fecha_fin', now()->format('Y-m-d'));
+
+        // Obtener órdenes completadas con ganancias
+        $ordenesCompletadas = OrdenServicio::where('tecnico_id', $tecnico->id)
+            ->where('estado', 'completada')
+            ->whereBetween('fecha_completada', [$fechaInicio, $fechaFin])
+            ->with(['cliente', 'equipo.marca'])
+            ->orderBy('fecha_completada', 'desc')
+            ->get();
+
+        // Calcular ganancias totales
+        $gananciaTotal = $ordenesCompletadas->sum('comision_tecnico');
+        
+        // Ganancias por mes (últimos 6 meses)
+        $gananciasPorMes = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $mes = now()->subMonths($i);
+            $mesNombre = $mes->locale('es')->isoFormat('MMM YYYY');
+            $ganancia = OrdenServicio::where('tecnico_id', $tecnico->id)
+                ->where('estado', 'completada')
+                ->whereYear('fecha_completada', $mes->year)
+                ->whereMonth('fecha_completada', $mes->month)
+                ->sum('comision_tecnico');
+            
+            $gananciasPorMes[] = [
+                'mes' => $mesNombre,
+                'ganancia' => $ganancia
+            ];
+        }
+
+        // Estadísticas
+        $estadisticas = [
+            'total_ganado' => $gananciaTotal,
+            'ordenes_completadas' => $ordenesCompletadas->count(),
+            'promedio_por_orden' => $ordenesCompletadas->count() > 0 ? $gananciaTotal / $ordenesCompletadas->count() : 0,
+            'mes_actual' => OrdenServicio::where('tecnico_id', $tecnico->id)
+                ->where('estado', 'completada')
+                ->whereMonth('fecha_completada', now()->month)
+                ->whereYear('fecha_completada', now()->year)
+                ->sum('comision_tecnico'),
+        ];
+
+        // Top 5 órdenes más rentables
+        $topOrdenes = OrdenServicio::where('tecnico_id', $tecnico->id)
+            ->where('estado', 'completada')
+            ->with(['cliente', 'equipo.marca'])
+            ->orderBy('comision_tecnico', 'desc')
+            ->limit(5)
+            ->get();
+
+        return view('tecnico.ganancias', compact(
+            'tecnico',
+            'ordenesCompletadas',
+            'estadisticas',
+            'gananciasPorMes',
+            'topOrdenes',
+            'fechaInicio',
+            'fechaFin'
+        ));
+    }
+
+    /**
+     * Vista de órdenes trabajadas (historial completo)
+     */
+    public function ordenesTrabajadas(Request $request)
+    {
+        $tecnico = Auth::guard('tecnico')->user();
+        
+        // Consulta base
+        $query = OrdenServicio::where('tecnico_id', $tecnico->id)
+            ->where('estado', 'completada')
+            ->with(['cliente', 'equipo.marca']);
+
+        // Filtros
+        if ($request->filled('fecha_inicio') && $request->filled('fecha_fin')) {
+            $query->whereBetween('fecha_completada', [$request->fecha_inicio, $request->fecha_fin]);
+        }
+
+        if ($request->filled('cliente')) {
+            $query->whereHas('cliente', function($q) use ($request) {
+                $q->where('nombre_completo', 'like', '%' . $request->cliente . '%');
+            });
+        }
+
+        if ($request->filled('equipo_tipo')) {
+            $query->whereHas('equipo', function($q) use ($request) {
+                $q->where('tipo_equipo', $request->equipo_tipo);
+            });
+        }
+
+        if ($request->filled('comision_min')) {
+            $query->where('comision_tecnico', '>=', $request->comision_min);
+        }
+
+        // Ordenamiento
+        $ordenPor = $request->get('orden_por', 'fecha_completada');
+        $direccion = $request->get('direccion', 'desc');
+        $query->orderBy($ordenPor, $direccion);
+
+        $ordenes = $query->paginate(15)->withQueryString();
+
+        // Estadísticas del período
+        $estadisticas = [
+            'total_completadas' => OrdenServicio::where('tecnico_id', $tecnico->id)
+                ->where('estado', 'completada')
+                ->count(),
+            'total_ganado' => OrdenServicio::where('tecnico_id', $tecnico->id)
+                ->where('estado', 'completada')
+                ->sum('comision_tecnico'),
+            'promedio_duracion' => OrdenServicio::where('tecnico_id', $tecnico->id)
+                ->where('estado', 'completada')
+                ->whereNotNull('fecha_inicio_trabajo')
+                ->whereNotNull('fecha_completada')
+                ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, fecha_inicio_trabajo, fecha_completada)) as promedio')
+                ->value('promedio'),
+            'mes_actual' => OrdenServicio::where('tecnico_id', $tecnico->id)
+                ->where('estado', 'completada')
+                ->whereMonth('fecha_completada', now()->month)
+                ->count(),
+        ];
+
+        return view('tecnico.ordenes-trabajadas', compact('tecnico', 'ordenes', 'estadisticas'));
+    }
+
+    /**
+     * Vista de perfil del técnico
+     */
+    public function perfil()
+    {
+        $tecnico = Auth::guard('tecnico')->user();
+        
+        // Cargar estadísticas del técnico
+        $estadisticas = [
+            'total_ordenes' => OrdenServicio::where('tecnico_id', $tecnico->id)->count(),
+            'completadas' => OrdenServicio::where('tecnico_id', $tecnico->id)
+                ->where('estado', 'completada')
+                ->count(),
+            'en_progreso' => OrdenServicio::where('tecnico_id', $tecnico->id)
+                ->whereIn('estado', ['asignada', 'diagnostico', 'en_progreso', 'espera_repuesto'])
+                ->count(),
+            'calificacion_promedio' => OrdenServicio::where('tecnico_id', $tecnico->id)
+                ->where('estado', 'completada')
+                ->whereNotNull('calificacion_cliente')
+                ->avg('calificacion_cliente'),
+            'total_ganado' => OrdenServicio::where('tecnico_id', $tecnico->id)
+                ->where('estado', 'completada')
+                ->sum('comision_tecnico'),
+        ];
+
+        return view('tecnico.perfil', compact('tecnico', 'estadisticas'));
+    }
+
+    /**
+     * Actualizar perfil del técnico
+     */
+    public function actualizarPerfil(Request $request)
+    {
+        $tecnico = Auth::guard('tecnico')->user();
+
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'apellido' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:tecnicos,email,' . $tecnico->id,
+            'telefono' => 'nullable|string|max:20',
+            'especialidades' => 'nullable|string|max:500',
+            'password' => 'nullable|min:8|confirmed',
+        ]);
+
+        try {
+            // Actualizar datos básicos
+            $tecnico->nombre = $request->nombre;
+            $tecnico->apellido = $request->apellido;
+            $tecnico->email = $request->email;
+            $tecnico->telefono = $request->telefono;
+            
+            // Si especialidades viene como string, convertir a array
+            if ($request->filled('especialidades')) {
+                $especialidadesArray = array_map('trim', explode(',', $request->especialidades));
+                $tecnico->especialidades = $especialidadesArray;
+            }
+
+            // Actualizar contraseña si se proporcionó
+            if ($request->filled('password')) {
+                $tecnico->password = bcrypt($request->password);
+            }
+
+            $tecnico->save();
+
+            return redirect()->route('tecnico.perfil')
+                ->with('success', 'Perfil actualizado correctamente');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error al actualizar el perfil: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
 }

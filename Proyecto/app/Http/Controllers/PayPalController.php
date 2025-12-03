@@ -38,13 +38,14 @@ class PayPalController extends Controller
             // Crear registro de pago pendiente
             Payment::create([
                 'user_id' => $user->id,
-                'paypal_payment_id' => $paymentId,
+                'payment_method' => 'paypal',
+                'payment_provider_id' => $paymentId,
                 'amount' => $amount,
                 'currency' => $currency,
                 'status' => 'pending',
                 'type' => 'subscription',
                 'description' => "{$subscription['name']} - {$period['name']}",
-                'paypal_response' => [
+                'payment_provider_response' => [
                     'period_type' => $periodType,
                     'period_name' => $period['name'],
                     'created_at' => now()->toISOString()
@@ -64,7 +65,9 @@ class PayPalController extends Controller
      */
     public function approvePayment(Request $request, $paymentId)
     {
-        $payment = Payment::where('paypal_payment_id', $paymentId)->firstOrFail();
+        $payment = Payment::where('payment_method', 'paypal')
+            ->where('payment_provider_id', $paymentId)
+            ->firstOrFail();
         
         return view('paypal.approve', compact('payment'));
     }
@@ -79,23 +82,23 @@ class PayPalController extends Controller
             'payer_id' => 'required|string',
         ]);
 
-        $payment = Payment::where('paypal_payment_id', $request->payment_id)->firstOrFail();
+        $payment = Payment::where('payment_method', 'paypal')
+            ->where('payment_provider_id', $request->payment_id)
+            ->firstOrFail();
         $user = $payment->user;
 
         try {
-            // Simular ejecución del pago (en producción usarías PayPal SDK)
             $payment->update([
                 'status' => 'completed',
-                'paypal_payer_id' => $request->payer_id,
                 'paid_at' => now(),
-                'paypal_response' => array_merge($payment->paypal_response ?? [], [
+                'payment_provider_response' => array_merge($payment->payment_provider_response ?? [], [
                     'executed_at' => now()->toISOString(),
                     'payer_id' => $request->payer_id,
                 ])
             ]);
 
             // Crear suscripción
-            $periodType = $payment->paypal_response['period_type'];
+            $periodType = $payment->payment_provider_response['period_type'];
             $periods = config('paypal.periods');
             $period = $periods[$periodType];
             $subscription = config('paypal.subscription');
@@ -125,7 +128,8 @@ class PayPalController extends Controller
                 'paypal_data' => [
                     'subscription_name' => $subscription['name'],
                     'period_name' => $period['name'],
-                    'payment_id' => $payment->paypal_payment_id,
+                    'payment_method' => 'paypal',
+                    'payment_id' => $payment->payment_provider_id,
                 ]
             ]);
 
@@ -173,7 +177,9 @@ class PayPalController extends Controller
         $paymentId = $request->get('payment_id');
         
         if ($paymentId) {
-            $payment = Payment::where('paypal_payment_id', $paymentId)->first();
+            $payment = Payment::where('payment_method', 'paypal')
+                ->where('payment_provider_id', $paymentId)
+                ->first();
             if ($payment) {
                 $payment->update(['status' => 'cancelled']);
             }

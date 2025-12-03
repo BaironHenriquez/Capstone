@@ -55,7 +55,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h2 class="text-lg font-semibold text-gray-900">TechService Pro</h2>
+                            <h2 class="text-lg font-semibold text-gray-900">Baieco</h2>
                             <p class="text-gray-600">Sistema de Gestión de Servicio Técnico</p>
                         </div>
                     </div>
@@ -164,7 +164,7 @@
 
         <!-- Footer Info -->
         <div class="mt-8 text-center text-sm text-gray-500">
-            <p>Al completar este pago, aceptas los términos de servicio de PayPal y TechService Pro.</p>
+            <p>Al completar este pago, aceptas los términos de servicio de PayPal y Baieco.</p>
             <p class="mt-1">¿Necesitas ayuda? <a href="#" class="text-blue-600 hover:underline">Contacta soporte</a></p>
         </div>
     </div>

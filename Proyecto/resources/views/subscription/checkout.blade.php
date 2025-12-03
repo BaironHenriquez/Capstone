@@ -19,7 +19,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                         </svg>
                     </div>
-                    <span class="ml-3 text-xl font-bold text-gray-900">TechService Pro</span>
+                    <span class="ml-3 text-xl font-bold text-gray-900">Baieco</span>
                 </div>
                 <div class="flex items-center space-x-4">
                     <a href="{{ route('subscription.plans') }}" class="text-gray-500 hover:text-gray-700 text-sm">
@@ -197,11 +197,11 @@
                             <h3 class="text-lg font-medium text-gray-900 mb-4">Método de Pago</h3>
                             
                             <!-- PayPal Option -->
-                            <div class="border border-gray-200 rounded-lg p-4 bg-blue-50">
+                            <div class="border border-gray-200 rounded-lg p-4 mb-3 transition-all cursor-pointer hover:border-blue-400" id="paypal-option">
                                 <div class="flex items-center">
                                     <input type="radio" id="paypal" name="payment_method" value="paypal" checked 
                                            class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
-                                    <label for="paypal" class="ml-3 flex items-center cursor-pointer">
+                                    <label for="paypal" class="ml-3 flex items-center cursor-pointer flex-1">
                                         <svg class="h-8 w-8 mr-2" viewBox="0 0 24 24">
                                             <path fill="#0070ba" d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.258-.93 4.778-4.005 7.201-9.138 7.201H8.817l-.542 3.437c-.07.445.263.85.712.85h2.876c.457 0 .845-.334.918-.788l.038-.207.732-4.63.047-.268c.073-.454.461-.788.918-.788h.579c3.583 0 6.389-1.457 7.205-5.671.342-1.768.166-3.24-.824-4.28z"/>
                                         </svg>
@@ -210,6 +210,24 @@
                                 </div>
                                 <p class="ml-7 mt-1 text-sm text-gray-600">
                                     Paga de forma segura con tu cuenta PayPal o tarjeta de crédito
+                                </p>
+                            </div>
+
+                            <!-- Transbank Option -->
+                            <div class="border border-gray-200 rounded-lg p-4 transition-all cursor-pointer hover:border-red-400" id="transbank-option">
+                                <div class="flex items-center">
+                                    <input type="radio" id="transbank" name="payment_method" value="transbank"
+                                           class="h-4 w-4 text-red-600 border-gray-300 focus:ring-red-500">
+                                    <label for="transbank" class="ml-3 flex items-center cursor-pointer flex-1">
+                                        <svg class="h-8 w-8 mr-2" viewBox="0 0 50 50" fill="none">
+                                            <rect width="50" height="50" rx="6" fill="#ED1C24"/>
+                                            <path d="M15 25h20M25 15v20" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                                        </svg>
+                                        <span class="font-medium text-gray-900">Transbank Webpay Plus</span>
+                                    </label>
+                                </div>
+                                <p class="ml-7 mt-1 text-sm text-gray-600">
+                                    Paga con tarjetas de débito o crédito chilenas a través de Transbank
                                 </p>
                             </div>
                         </div>
@@ -239,10 +257,10 @@
                             <button type="submit" id="payButton"
                                     class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
                                 <span id="buttonText" class="flex items-center justify-center">
-                                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="buttonIcon">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                                     </svg>
-                                    Pagar con PayPal - ${{ number_format($selectedPeriod['price'], 0, ',', '.') }} {{ $selectedPeriod['currency'] }}
+                                    <span id="buttonLabel">Pagar con PayPal - ${{ number_format($selectedPeriod['price'], 0, ',', '.') }} {{ $selectedPeriod['currency'] }}</span>
                                 </span>
                                 <span id="loadingText" class="hidden flex items-center justify-center">
                                     <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -274,18 +292,50 @@
             const form = document.getElementById('paymentForm');
             const payButton = document.getElementById('payButton');
             const buttonText = document.getElementById('buttonText');
+            const buttonLabel = document.getElementById('buttonLabel');
             const loadingText = document.getElementById('loadingText');
             const termsCheckbox = document.getElementById('terms');
+            const paypalRadio = document.getElementById('paypal');
+            const transbankRadio = document.getElementById('transbank');
+            const paypalOption = document.getElementById('paypal-option');
+            const transbankOption = document.getElementById('transbank-option');
             
-            // Enable/disable button based on terms acceptance
+            const amount = {{ $selectedPeriod['price'] }};
+            const currency = '{{ $selectedPeriod['currency'] }}';
+            
+            function updatePaymentMethod() {
+                const selectedMethod = document.querySelector('input[name="payment_method"]:checked').value;
+                
+                if (selectedMethod === 'paypal') {
+                    form.action = '{{ route('paypal.create.payment') }}';
+                    buttonLabel.textContent = `Pagar con PayPal - $${amount.toLocaleString('es-CL')} ${currency}`;
+                    paypalOption.classList.add('bg-blue-50', 'border-blue-400');
+                    paypalOption.classList.remove('bg-white');
+                    transbankOption.classList.remove('bg-red-50', 'border-red-400');
+                    transbankOption.classList.add('bg-white');
+                } else {
+                    form.action = '{{ route('transbank.create') }}';
+                    buttonLabel.textContent = `Pagar con Transbank - $${amount.toLocaleString('es-CL')} ${currency}`;
+                    transbankOption.classList.add('bg-red-50', 'border-red-400');
+                    transbankOption.classList.remove('bg-white');
+                    paypalOption.classList.remove('bg-blue-50', 'border-blue-400');
+                    paypalOption.classList.add('bg-white');
+                }
+            }
+            
+            // Inicializar estado del botón
+            payButton.disabled = true;
+            updatePaymentMethod();
+            
+            paypalRadio.addEventListener('change', updatePaymentMethod);
+            transbankRadio.addEventListener('change', updatePaymentMethod);
+            paypalOption.addEventListener('click', () => { paypalRadio.checked = true; updatePaymentMethod(); });
+            transbankOption.addEventListener('click', () => { transbankRadio.checked = true; updatePaymentMethod(); });
+            
             termsCheckbox.addEventListener('change', function() {
                 payButton.disabled = !this.checked;
             });
             
-            // Initially disable button
-            payButton.disabled = true;
-            
-            // Handle form submission
             form.addEventListener('submit', function(e) {
                 if (!termsCheckbox.checked) {
                     e.preventDefault();
@@ -293,7 +343,6 @@
                     return false;
                 }
                 
-                // Show loading state
                 payButton.disabled = true;
                 buttonText.classList.add('hidden');
                 loadingText.classList.remove('hidden');

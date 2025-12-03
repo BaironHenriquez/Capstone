@@ -12,14 +12,18 @@ class Payment extends Model
     protected $fillable = [
         'user_id',
         'subscription_id',
-        'paypal_payment_id',
-        'paypal_payer_id',
+        'payment_method',
+        'payment_provider_id',
+        'transaction_token',
+        'payment_provider_response',
+        'legacy_paypal_id',
+        'legacy_payer_id',
         'amount',
         'currency',
         'status',
         'type',
         'description',
-        'paypal_response',
+        'legacy_paypal_response',
         'paid_at',
     ];
 
@@ -27,9 +31,29 @@ class Payment extends Model
     {
         return [
             'amount' => 'decimal:2',
-            'paypal_response' => 'array',
+            'payment_provider_response' => 'array',
+            'legacy_paypal_response' => 'array',
             'paid_at' => 'datetime',
         ];
+    }
+
+    public function isPayPal(): bool
+    {
+        return $this->payment_method === 'paypal';
+    }
+
+    public function isTransbank(): bool
+    {
+        return $this->payment_method === 'transbank';
+    }
+
+    public function getProviderName(): string
+    {
+        return match($this->payment_method) {
+            'paypal' => 'PayPal',
+            'transbank' => 'Transbank Webpay Plus',
+            default => 'Desconocido'
+        };
     }
 
     /**

@@ -184,7 +184,7 @@
     <footer class="bg-white border-t border-gray-200 mt-12">
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="text-center text-sm text-gray-500">
-                <p>&copy; 2025 TechService Pro - Panel Técnico Administrador</p>
+                <p>&copy; 2025 Baieco - Panel Técnico Administrador</p>
                 <p class="mt-1">Última actualización: {{ date('d/m/Y H:i') }}</p>
             </div>
         </div>

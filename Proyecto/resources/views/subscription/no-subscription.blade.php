@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suscripción Requerida - TechService Pro</title>
+    <title>Suscripción Requerida - Baieco</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -23,7 +23,7 @@
                     Suscripción Requerida
                 </h1>
                 <p class="text-xl text-gray-600">
-                    Tu período de prueba ha expirado. Selecciona un plan para continuar usando TechService Pro.
+                    Tu período de prueba ha expirado. Selecciona un plan para continuar usando Baieco.
                 </p>
             </div>
 
@@ -60,7 +60,7 @@
                                     <h4 class="text-sm font-medium text-orange-800">Período de Prueba Expirado</h4>
                                     <p class="text-sm text-orange-700 mt-1">
                                         Tu período de prueba gratuito de 7 días ha llegado a su fin. 
-                                        Para seguir disfrutando de todas las funcionalidades de TechService Pro, 
+                                        Para seguir disfrutando de todas las funcionalidades de Baieco, 
                                         necesitas activar una suscripción.
                                     </p>
                                 </div>
