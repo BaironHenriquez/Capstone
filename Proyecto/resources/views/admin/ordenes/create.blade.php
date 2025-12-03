@@ -89,7 +89,7 @@
         
         <!-- Header -->
         <div class="mb-8 animate-fade-in-up">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between bg-white rounded-2xl shadow-lg p-6 border border-gray-100 mb-4">
                 <div class="flex items-center space-x-4 mb-4 md:mb-0">
                     <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                         <i class="fas fa-file-medical text-white text-2xl"></i>
@@ -110,6 +110,33 @@
                     <span>Volver</span>
                 </a>
             </div>
+        </div>
+
+        <!-- Alertas de Estadísticas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <!-- Total de Órdenes -->
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 border-l-4 border-blue-500 rounded-lg p-4 flex items-center space-x-4 animate-fade-in-up">
+                <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center shadow-md">
+                    <i class="fas fa-file-invoice-dollar text-white text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-blue-600 font-semibold">Total de Órdenes</p>
+                    <p class="text-2xl font-bold text-blue-700">{{ $totalOrdenes ?? 0 }}</p>
+                </div>
+            </div>
+
+            <!-- Advertencia de Órdenes Pendientes -->
+            @if($ordenesPendientes > 5)
+            <div class="bg-gradient-to-br from-yellow-50 to-orange-100 border-l-4 border-orange-500 rounded-lg p-4 flex items-center space-x-4 animate-fade-in-up">
+                <div class="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center shadow-md">
+                    <i class="fas fa-exclamation-triangle text-white text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-orange-600 font-semibold">⚠️ Advertencia</p>
+                    <p class="text-lg font-bold text-orange-700">{{ $ordenesPendientes }} órdenes pendientes</p>
+                </div>
+            </div>
+            @endif
         </div>
 
         <!-- Barra de Progreso -->

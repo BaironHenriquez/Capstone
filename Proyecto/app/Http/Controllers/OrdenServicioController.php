@@ -65,22 +65,20 @@ class OrdenServicioController extends Controller
     public function create()
     {
         // Obtener solo los clientes del servicio técnico del usuario autenticado
-        // El trait BelongsToServicioTecnico filtra automáticamente
+        $servicioTecnicoId = Auth::user()->servicioTecnico->id ?? null;
         $clientes = Cliente::orderBy('nombre')->get();
         
-        // Obtener equipos que pertenecen a clientes del servicio técnico
-        $servicioTecnicoId = Auth::user()->servicioTecnico->id;
-        $equipos = Equipo::with('marca')
-            ->whereHas('clienteEquipos.cliente', function($query) use ($servicioTecnicoId) {
-                $query->where('servicio_tecnico_id', $servicioTecnicoId);
-            })
-            ->orderBy('modelo')
-            ->get();
+        // Obtener todos los equipos con sus marcas ordenados por modelo
+        $equipos = Equipo::with('marca')->where('activo', 1)->orderBy('modelo')->get();
         
         // Generar número de orden sugerido
-        $numeroOrdenSugerido = OrdenServicio::generarNumeroOrden($servicioTecnicoId);
+        $numeroOrdenSugerido = $servicioTecnicoId ? OrdenServicio::generarNumeroOrden($servicioTecnicoId) : null;
         
-        return view('admin.ordenes.create', compact('clientes', 'equipos', 'numeroOrdenSugerido'));
+        // Estadísticas de órdenes
+        $totalOrdenes = OrdenServicio::count();
+        $ordenesPendientes = OrdenServicio::where('estado', 'pendiente')->count();
+        
+        return view('admin.ordenes.create', compact('clientes', 'equipos', 'numeroOrdenSugerido', 'totalOrdenes', 'ordenesPendientes'));
     }
 
     /**

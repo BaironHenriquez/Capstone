@@ -19,11 +19,17 @@ class BunnyCdnService
         $this->storageZone = config('bunny.storage_zone');
         $this->cdnUrl = config('bunny.cdn_url');
         
+        // Construir hostname según la región
+        $region = config('bunny.storage_region', '');
+        $hostname = (!empty($region)) ? "{$region}.storage.bunnycdn.com" : "storage.bunnycdn.com";
+        
         $this->client = new Client([
-            'base_uri' => 'https://storage.bunnycdn.com/',
+            'base_uri' => "https://{$hostname}/",
             'headers' => [
                 'AccessKey' => $this->accessKey,
-            ]
+                'Content-Type' => 'application/octet-stream',
+            ],
+            'verify' => false, // Desactivar verificación SSL para desarrollo
         ]);
     }
 

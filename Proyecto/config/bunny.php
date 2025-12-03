@@ -4,6 +4,7 @@ return [
     'api_key' => env('BUNNY_API_KEY', ''),
     'access_key' => env('BUNNY_ACCESS_KEY', ''),
     'storage_zone' => env('BUNNY_STORAGE_ZONE', 'capstone'),
+    'storage_region' => env('BUNNY_STORAGE_REGION', ''), // '', 'uk', 'ny', 'la', 'sg', 'se', 'br', 'jh'
     'cdn_url' => env('BUNNY_CDN_URL', 'https://capstone.b-cdn.net'),
     
     'upload' => [
