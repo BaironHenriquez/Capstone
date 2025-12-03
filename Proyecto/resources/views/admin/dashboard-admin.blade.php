@@ -32,7 +32,8 @@
 <div class="space-y-6">
     {{-- Header Simplificado --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+        <div class="flex flex-col gap-6">
+            {{-- Título --}}
             <div class="flex items-start gap-4">
                 <div class="bg-gray-100 rounded-xl p-3">
                     <svg class="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,55 +47,65 @@
                 </div>
             </div>
             
-            <div class="flex flex-wrap items-center gap-3">
-                {{-- Selectores de Fecha --}}
-                <div class="flex items-center gap-3 bg-gray-50 rounded-lg p-3 border border-gray-200">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-calendar-alt text-gray-500"></i>
-                        <select id="filtro-mes" onchange="actualizarRangoSemana()" class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all cursor-pointer">
-                            @for($m = 1; $m <= 12; $m++)
-                                <option value="{{ $m }}" {{ $m == ($mes ?? now()->month) ? 'selected' : '' }}>
-                                    {{ \Carbon\Carbon::create(null, $m)->translatedFormat('F') }}
-                                </option>
-                            @endfor
-                        </select>
+            {{-- Filtros Centrados --}}
+            <div class="flex flex-col items-center gap-4 w-full">
+                {{-- Selectores de Fecha - Responsivos --}}
+                <div class="w-full max-w-6xl bg-gray-50 rounded-xl p-4 border border-gray-200">
+                    <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-center gap-3">
+                        {{-- Mes --}}
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <i class="fas fa-calendar-alt text-gray-600 hidden sm:block"></i>
+                            <select id="filtro-mes" onchange="actualizarRangoSemana()" class="w-full sm:w-auto bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer shadow-sm">
+                                @for($m = 1; $m <= 12; $m++)
+                                    <option value="{{ $m }}" {{ $m == ($mes ?? now()->month) ? 'selected' : '' }}>
+                                        {{ \Carbon\Carbon::create(null, $m)->translatedFormat('F') }}
+                                    </option>
+                                @endfor
+                            </select>
+                        </div>
+                        
+                        {{-- Año --}}
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <select id="filtro-anio" onchange="actualizarRangoSemana()" class="w-full sm:w-auto bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer shadow-sm">
+                                @for($y = now()->year; $y >= now()->year - 5; $y--)
+                                    <option value="{{ $y }}" {{ $y == ($anio ?? now()->year) ? 'selected' : '' }}>{{ $y }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        
+                        {{-- Semana --}}
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <i class="fas fa-calendar-week text-gray-600 hidden sm:block"></i>
+                            <select id="filtro-semana" class="w-full sm:w-auto bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer shadow-sm">
+                                <option value="0" {{ ($semana ?? 0) == 0 ? 'selected' : '' }}>Todo el mes</option>
+                                <option value="1" {{ ($semana ?? 0) == 1 ? 'selected' : '' }}>Semana 1</option>
+                                <option value="2" {{ ($semana ?? 0) == 2 ? 'selected' : '' }}>Semana 2</option>
+                                <option value="3" {{ ($semana ?? 0) == 3 ? 'selected' : '' }}>Semana 3</option>
+                                <option value="4" {{ ($semana ?? 0) == 4 ? 'selected' : '' }}>Semana 4</option>
+                                <option value="5" {{ ($semana ?? 0) == 5 ? 'selected' : '' }}>Semana 5</option>
+                            </select>
+                        </div>
+                        
+                        {{-- Botones --}}
+                        <div class="flex gap-2 flex-shrink-0">
+                            <button onclick="filtrarDashboard()" class="flex-1 sm:flex-none bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2.5 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg">
+                                <i class="fas fa-filter"></i>
+                                <span class="hidden sm:inline">Filtrar</span>
+                            </button>
+                            
+                            <button onclick="location.reload()" class="flex-1 sm:flex-none bg-white hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition-all border-2 border-gray-300 hover:border-gray-400 shadow-sm">
+                                <i class="fas fa-sync-alt"></i>
+                                <span class="hidden sm:inline">Actualizar</span>
+                            </button>
+                        </div>
                     </div>
-                    
-                    <div class="flex items-center gap-2">
-                        <select id="filtro-anio" onchange="actualizarRangoSemana()" class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all cursor-pointer">
-                            @for($y = now()->year; $y >= now()->year - 5; $y--)
-                                <option value="{{ $y }}" {{ $y == ($anio ?? now()->year) ? 'selected' : '' }}>{{ $y }}</option>
-                            @endfor
-                        </select>
-                    </div>
-                    
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-calendar-week text-gray-500"></i>
-                        <select id="filtro-semana" class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all cursor-pointer">
-                            <option value="0" {{ ($semana ?? 0) == 0 ? 'selected' : '' }}>Todo el mes</option>
-                            <option value="1" {{ ($semana ?? 0) == 1 ? 'selected' : '' }}>Semana 1</option>
-                            <option value="2" {{ ($semana ?? 0) == 2 ? 'selected' : '' }}>Semana 2</option>
-                            <option value="3" {{ ($semana ?? 0) == 3 ? 'selected' : '' }}>Semana 3</option>
-                            <option value="4" {{ ($semana ?? 0) == 4 ? 'selected' : '' }}>Semana 4</option>
-                            <option value="5" {{ ($semana ?? 0) == 5 ? 'selected' : '' }}>Semana 5</option>
-                        </select>
-                    </div>
-                    
-                    <button onclick="filtrarDashboard()" class="bg-gray-900 hover:bg-gray-800 text-white px-5 py-2 rounded-lg font-medium flex items-center gap-2 transition-all duration-200">
-                        <i class="fas fa-filter"></i>
-                        <span>Filtrar</span>
-                    </button>
                 </div>
                 
-                <div id="rango-semana" class="bg-gray-50 px-4 py-2 rounded-lg border border-gray-200 flex items-center gap-2">
-                    <i class="fas fa-info-circle text-gray-500"></i>
-                    <span id="texto-rango" class="text-xs font-medium text-gray-700">{{ $rangoSemana ?? 'Todo el mes seleccionado' }}</span>
+                {{-- Indicador de rango seleccionado --}}
+                <div id="rango-semana" class="bg-blue-50 px-4 py-2.5 rounded-lg border-2 border-blue-200 flex items-center gap-2 max-w-full">
+                    <i class="fas fa-info-circle text-blue-600 flex-shrink-0"></i>
+                    <span id="texto-rango" class="text-sm font-semibold text-blue-700 text-center break-words">{{ $rangoSemana ?? 'Todo el mes seleccionado' }}</span>
                 </div>
-                
-                <button onclick="location.reload()" class="bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-all border border-gray-300">
-                    <i class="fas fa-sync-alt"></i>
-                    <span>Actualizar</span>
-                </button>
             </div>
         </div>
     </div>
@@ -309,22 +320,6 @@
 
     {{-- Ingresos y Comisiones --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {{-- Ingreso Semanal --}}
-        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between mb-2">
-                <div class="bg-white bg-opacity-20 rounded-lg p-3">
-                    <i class="fas fa-calendar-week text-2xl"></i>
-                </div>
-                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">Esta Semana</span>
-            </div>
-            <p class="text-3xl font-bold mb-1">${{ number_format($ingresoSemanal ?? 0, 0, ',', '.') }}</p>
-            <p class="text-sm text-emerald-100">Ingreso Semanal</p>
-            <p class="text-xs text-emerald-200 mt-2">
-                <i class="fas fa-calendar mr-1"></i>
-                {{ $rangoSemanalTexto ?? (now()->startOfWeek()->format('d/m') . ' - ' . now()->endOfWeek()->format('d/m/Y')) }}
-            </p>
-        </div>
-
         {{-- Ingreso Mensual --}}
         <div class="bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
             <div class="flex items-center justify-between mb-2">
@@ -338,6 +333,22 @@
             <p class="text-xs text-violet-200 mt-2">
                 <i class="fas fa-calendar mr-1"></i>
                 {{ \Carbon\Carbon::create($anio ?? now()->year, $mes ?? now()->month)->translatedFormat('F Y') }}
+            </p>
+        </div>
+
+        {{-- Ingreso Semanal --}}
+        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                    <i class="fas fa-calendar-week text-2xl"></i>
+                </div>
+                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">Esta Semana</span>
+            </div>
+            <p class="text-3xl font-bold mb-1">${{ number_format($ingresoSemanal ?? 0, 0, ',', '.') }}</p>
+            <p class="text-sm text-emerald-100">Ingreso Semanal</p>
+            <p class="text-xs text-emerald-200 mt-2">
+                <i class="fas fa-calendar mr-1"></i>
+                {{ $rangoSemanalTexto ?? (now()->startOfWeek()->format('d/m') . ' - ' . now()->endOfWeek()->format('d/m/Y')) }}
             </p>
         </div>
 
