@@ -209,6 +209,84 @@
                     </p>
                 </div>
 
+                <!-- Galería de Fotos Antes -->
+                <div class="border-t mt-4 pt-4">
+                    <h4 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-camera text-purple-600 mr-2"></i>
+                        Fotos Antes de la Reparación
+                    </h4>
+                    
+                    @if($orden->fotos_antes && is_array($orden->fotos_antes) && count($orden->fotos_antes) > 0)
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                            @foreach($orden->fotos_antes as $foto)
+                                <div class="relative group overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+                                    <img src="{{ $foto }}" alt="Foto antes" class="w-full h-32 object-cover" onclick="abrirVisorFoto(this.src)">
+                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center">
+                                        <button type="button" onclick="abrirVisorFoto(this.parentElement.querySelector('img').src)" 
+                                                class="opacity-0 group-hover:opacity-100 transition-opacity bg-white text-gray-800 px-2 py-1 rounded text-xs font-medium">
+                                            Ver
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-xs text-gray-500 mb-3">No hay fotos aún</p>
+                    @endif
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <button type="button" onclick="abrirModalCamaraBefore()" 
+                                class="flex items-center justify-center px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-md transition-colors">
+                            <i class="fas fa-camera mr-2"></i>Tomar Foto
+                        </button>
+                        <button type="button" onclick="document.getElementById('inputFotoBefore').click()" 
+                                class="flex items-center justify-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors">
+                            <i class="fas fa-upload mr-2"></i>Cargar Archivo
+                        </button>
+                    </div>
+                    <input type="file" id="inputFotoBefore" class="hidden" accept="image/*" onchange="subirFotoTecnico(event, 'fotos_antes')">
+                </div>
+
+                <!-- Galería de Fotos Después -->
+                @if($orden->estado === 'en_progreso' || $orden->estado === 'completada')
+                <div class="border-t mt-4 pt-4">
+                    <h4 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-camera text-green-600 mr-2"></i>
+                        Fotos Después de la Reparación
+                    </h4>
+                    
+                    @if($orden->fotos_despues && is_array($orden->fotos_despues) && count($orden->fotos_despues) > 0)
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                            @foreach($orden->fotos_despues as $foto)
+                                <div class="relative group overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+                                    <img src="{{ $foto }}" alt="Foto después" class="w-full h-32 object-cover" onclick="abrirVisorFoto(this.src)">
+                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center">
+                                        <button type="button" onclick="abrirVisorFoto(this.parentElement.querySelector('img').src)" 
+                                                class="opacity-0 group-hover:opacity-100 transition-opacity bg-white text-gray-800 px-2 py-1 rounded text-xs font-medium">
+                                            Ver
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-xs text-gray-500 mb-3">No hay fotos aún</p>
+                    @endif
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <button type="button" onclick="abrirModalCamaraAfter()" 
+                                class="flex items-center justify-center px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md transition-colors">
+                            <i class="fas fa-camera mr-2"></i>Tomar Foto
+                        </button>
+                        <button type="button" onclick="document.getElementById('inputFotoAfter').click()" 
+                                class="flex items-center justify-center px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm rounded-md transition-colors">
+                            <i class="fas fa-upload mr-2"></i>Cargar Archivo
+                        </button>
+                    </div>
+                    <input type="file" id="inputFotoAfter" class="hidden" accept="image/*" onchange="subirFotoTecnico(event, 'fotos_despues')">
+                </div>
+                @endif
+
                 @if($orden->dictamen_tecnico)
                     <div class="border-t mt-4 pt-4">
                         <h4 class="text-sm font-medium text-gray-700 mb-2 flex items-center">
@@ -532,6 +610,284 @@
                 }
             });
         }
+    </script>
+
+    <!-- Modal Captura de Cámara - Fotos Antes -->
+    <div id="modalCamaraBefore" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Capturar Foto - Antes</h3>
+                <button onclick="cerrarModalCamaraBefore()" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div class="relative bg-black rounded-lg overflow-hidden" style="aspect-ratio: 16/9;">
+                    <video id="videoCamaraBefore" class="w-full h-full object-cover" playsinline></video>
+                    <div id="estadoCamaraBefore" class="absolute inset-0 flex items-center justify-center text-white">
+                        <span>Solicitando acceso a cámara...</span>
+                    </div>
+                </div>
+                <canvas id="canvasFotoBefore" class="hidden"></canvas>
+                <div id="previsualizacionBefore" class="hidden">
+                    <p class="text-sm text-gray-600 mb-2">Vista previa:</p>
+                    <img id="imgPreviewBefore" class="w-full rounded-lg border border-gray-300" alt="Preview">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3 mt-4">
+                <button type="button" onclick="capturarFoto('before')" id="btnCapturarBefore"
+                        class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md">
+                    <i class="fas fa-camera mr-2"></i>Capturar
+                </button>
+                <button type="button" onclick="subirFotoCapturada('fotos_antes')" id="btnSubirBefore" class="hidden px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md">
+                    <i class="fas fa-upload mr-2"></i>Subir
+                </button>
+                <button type="button" onclick="reiniciarCaptura('before')" id="btnReiniciarBefore" class="hidden px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md">
+                    <i class="fas fa-redo mr-2"></i>Reintentar
+                </button>
+                <button type="button" onclick="cerrarModalCamaraBefore()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Captura de Cámara - Fotos Después -->
+    <div id="modalCamaraAfter" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Capturar Foto - Después</h3>
+                <button onclick="cerrarModalCamaraAfter()" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div class="relative bg-black rounded-lg overflow-hidden" style="aspect-ratio: 16/9;">
+                    <video id="videoCamaraAfter" class="w-full h-full object-cover" playsinline></video>
+                    <div id="estadoCamaraAfter" class="absolute inset-0 flex items-center justify-center text-white">
+                        <span>Solicitando acceso a cámara...</span>
+                    </div>
+                </div>
+                <canvas id="canvasFotoAfter" class="hidden"></canvas>
+                <div id="previsualizacionAfter" class="hidden">
+                    <p class="text-sm text-gray-600 mb-2">Vista previa:</p>
+                    <img id="imgPreviewAfter" class="w-full rounded-lg border border-gray-300" alt="Preview">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3 mt-4">
+                <button type="button" onclick="capturarFoto('after')" id="btnCapturarAfter"
+                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md">
+                    <i class="fas fa-camera mr-2"></i>Capturar
+                </button>
+                <button type="button" onclick="subirFotoCapturada('fotos_despues')" id="btnSubirAfter" class="hidden px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md">
+                    <i class="fas fa-upload mr-2"></i>Subir
+                </button>
+                <button type="button" onclick="reiniciarCaptura('after')" id="btnReiniciarAfter" class="hidden px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md">
+                    <i class="fas fa-redo mr-2"></i>Reintentar
+                </button>
+                <button type="button" onclick="cerrarModalCamaraAfter()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visor de Fotos -->
+    <div id="visorFoto" class="hidden fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center p-4" onclick="cerrarVisorFoto()">
+        <div class="max-w-4xl max-h-full" onclick="event.stopPropagation()">
+            <button onclick="cerrarVisorFoto()" class="absolute top-4 right-4 text-white hover:text-gray-300">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+            <img id="fotoAmpliada" class="max-w-full max-h-screen object-contain" alt="Foto ampliada">
+        </div>
+    </div>
+
+    <script>
+        let cameraStreamBefore = null;
+        let cameraStreamAfter = null;
+        let fotoCapturada = null;
+
+        // Modales y visor
+        function abrirModalCamaraBefore() {
+            document.getElementById('modalCamaraBefore').classList.remove('hidden');
+            iniciarCamara('before');
+        }
+
+        function cerrarModalCamaraBefore() {
+            document.getElementById('modalCamaraBefore').classList.add('hidden');
+            detenerCamara('before');
+            reiniciarCaptura('before');
+        }
+
+        function abrirModalCamaraAfter() {
+            document.getElementById('modalCamaraAfter').classList.remove('hidden');
+            iniciarCamara('after');
+        }
+
+        function cerrarModalCamaraAfter() {
+            document.getElementById('modalCamaraAfter').classList.add('hidden');
+            detenerCamara('after');
+            reiniciarCaptura('after');
+        }
+
+        function abrirVisorFoto(src) {
+            document.getElementById('visorFoto').classList.remove('hidden');
+            document.getElementById('fotoAmpliada').src = src;
+        }
+
+        function cerrarVisorFoto() {
+            document.getElementById('visorFoto').classList.add('hidden');
+        }
+
+        // Cámara
+        async function iniciarCamara(tipo) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' },
+                    audio: false 
+                });
+                const video = tipo === 'before' ? document.getElementById('videoCamaraBefore') : document.getElementById('videoCamaraAfter');
+                const estadoDiv = tipo === 'before' ? document.getElementById('estadoCamaraBefore') : document.getElementById('estadoCamaraAfter');
+                
+                video.srcObject = stream;
+                estadoDiv.classList.add('hidden');
+                video.play();
+
+                if (tipo === 'before') cameraStreamBefore = stream;
+                else cameraStreamAfter = stream;
+            } catch (error) {
+                console.error('Error al acceder a la cámara:', error);
+                const estadoDiv = tipo === 'before' ? document.getElementById('estadoCamaraBefore') : document.getElementById('estadoCamaraAfter');
+                estadoDiv.innerHTML = '<span class="text-red-400">No se pudo acceder a la cámara</span>';
+            }
+        }
+
+        function detenerCamara(tipo) {
+            const stream = tipo === 'before' ? cameraStreamBefore : cameraStreamAfter;
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                if (tipo === 'before') cameraStreamBefore = null;
+                else cameraStreamAfter = null;
+            }
+        }
+
+        function capturarFoto(tipo) {
+            const videoId = tipo === 'before' ? 'videoCamaraBefore' : 'videoCamaraAfter';
+            const canvasId = tipo === 'before' ? 'canvasFotoBefore' : 'canvasFotoAfter';
+            
+            const video = document.getElementById(videoId);
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            
+            fotoCapturada = canvas.toDataURL('image/jpeg');
+            
+            const imgPreviewId = tipo === 'before' ? 'imgPreviewBefore' : 'imgPreviewAfter';
+            const previsualizacionId = tipo === 'before' ? 'previsualizacionBefore' : 'previsualizacionAfter';
+            
+            document.getElementById(imgPreviewId).src = fotoCapturada;
+            
+            document.getElementById(videoId).classList.add('hidden');
+            document.getElementById(previsualizacionId).classList.remove('hidden');
+            document.getElementById(`btnCapturar${tipo === 'before' ? 'Before' : 'After'}`).classList.add('hidden');
+            document.getElementById(`btnSubir${tipo === 'before' ? 'Before' : 'After'}`).classList.remove('hidden');
+            document.getElementById(`btnReiniciar${tipo === 'before' ? 'Before' : 'After'}`).classList.remove('hidden');
+        }
+
+        function reiniciarCaptura(tipo) {
+            const videoId = tipo === 'before' ? 'videoCamaraBefore' : 'videoCamaraAfter';
+            const previsualizacionId = tipo === 'before' ? 'previsualizacionBefore' : 'previsualizacionAfter';
+            
+            document.getElementById(videoId).classList.remove('hidden');
+            document.getElementById(previsualizacionId).classList.add('hidden');
+            document.getElementById(`btnCapturar${tipo === 'before' ? 'Before' : 'After'}`).classList.remove('hidden');
+            document.getElementById(`btnSubir${tipo === 'before' ? 'Before' : 'After'}`).classList.add('hidden');
+            document.getElementById(`btnReiniciar${tipo === 'before' ? 'Before' : 'After'}`).classList.add('hidden');
+            fotoCapturada = null;
+        }
+
+        async function subirFotoCapturada(columna) {
+            if (!fotoCapturada) {
+                alert('Por favor captura una foto primero');
+                return;
+            }
+            
+            const response = await fetch(fotoCapturada);
+            const blob = await response.blob();
+            
+            const formData = new FormData();
+            formData.append('foto', blob, `captura_${Date.now()}.jpg`);
+            formData.append('orden_id', {{ $orden->id }});
+            formData.append('columna', columna);
+            
+            try {
+                const res = await fetch('{{ route("tecnico.ordenes.upload-foto", $orden->id) }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: formData
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    alert('¡Foto subida correctamente!');
+                    if (columna === 'fotos_antes') cerrarModalCamaraBefore();
+                    else cerrarModalCamaraAfter();
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.message || 'No se pudo subir la foto'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al subir la foto');
+            }
+        }
+
+        async function subirFotoTecnico(event, columna) {
+            const archivo = event.target.files[0];
+            if (!archivo) return;
+            
+            const formData = new FormData();
+            formData.append('foto', archivo);
+            formData.append('orden_id', {{ $orden->id }});
+            formData.append('columna', columna);
+            
+            try {
+                const res = await fetch('{{ route("tecnico.ordenes.upload-foto", $orden->id) }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: formData
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    alert('¡Foto subida correctamente!');
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.message || 'No se pudo subir la foto'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al subir la foto');
+            }
+            
+            event.target.value = '';
+        }
+
+        // Cerrar visor con ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cerrarVisorFoto();
+            }
+        });
     </script>
 </body>
 </html>

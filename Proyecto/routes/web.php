@@ -62,6 +62,7 @@ Route::middleware('auth:tecnico')->group(function () {
         Route::post('/{orden}/agregar-diagnostico', [TecnicoOrdenController::class, 'agregarDiagnostico'])->name('agregar-diagnostico');
         Route::post('/{orden}/agregar-observacion', [TecnicoOrdenController::class, 'agregarObservacion'])->name('agregar-observacion');
         Route::post('/{orden}/completar', [TecnicoOrdenController::class, 'completar'])->name('completar');
+        Route::post('/{orden}/upload-foto', [TecnicoOrdenController::class, 'subirFoto'])->name('upload-foto');
     });
 });
 

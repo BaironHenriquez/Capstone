@@ -141,6 +141,42 @@
                     </div>
                 </div>
 
+                <!-- Galería de Fotos -->
+                <div class="info-card bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                    <div class="flex items-center mb-4">
+                        <div class="flex-shrink-0 w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-900">Fotos del Equipo</h2>
+                    </div>
+                    
+                    <!-- Galería de fotos existentes -->
+                    @if($orden->fotos_ingreso && is_array($orden->fotos_ingreso) && count($orden->fotos_ingreso) > 0)
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                            @foreach($orden->fotos_ingreso as $foto)
+                                <div class="relative group overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
+                                    <img src="{{ $foto }}" alt="Foto del equipo" class="w-full h-40 object-cover cursor-pointer" onclick="abrirVisorFoto(this.src)">
+                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center">
+                                        <button onclick="abrirVisorFoto(this.parentElement.querySelector('img').src)" 
+                                                class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white text-gray-800 px-3 py-1 rounded-full text-sm font-medium">
+                                            Ver Grande
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                            <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <p class="text-gray-500 text-sm">No hay fotos aún</p>
+                        </div>
+                    @endif
+                </div>
+
                 <!-- Dictamen Técnico -->
                 @if($orden->dictamen_tecnico)
                 <div class="info-card bg-white rounded-xl shadow-lg p-6 border border-gray-200">
@@ -461,6 +497,18 @@
         </div>
     </footer>
 
+    <!-- Visor de Fotos -->
+    <div id="visorFoto" class="fixed inset-0 z-50 hidden bg-black bg-opacity-90 flex items-center justify-center p-4" onclick="cerrarVisorFoto()">
+        <div class="max-w-4xl max-h-full" onclick="event.stopPropagation()">
+            <button onclick="cerrarVisorFoto()" class="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            <img id="fotoAmpliada" class="max-w-full max-h-screen object-contain" alt="Foto ampliada">
+        </div>
+    </div>
+
     <!-- Modal de Calificación -->
     <div id="modalCalificacion" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -559,6 +607,7 @@
     <script>
         let calificacionSeleccionada = 0;
 
+        // ==================== CALIFICACIÓN ====================
         function abrirModalCalificacion() {
             document.getElementById('modalCalificacion').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
@@ -568,12 +617,10 @@
             document.getElementById('modalCalificacion').classList.add('hidden');
             document.body.style.overflow = 'auto';
             
-            // Resetear formulario
             document.getElementById('formCalificacion').reset();
             calificacionSeleccionada = 0;
             document.getElementById('calificacionInput').value = '';
             
-            // Resetear estrellas
             const estrellas = document.querySelectorAll('.estrella svg');
             estrellas.forEach(estrella => {
                 estrella.classList.remove('text-yellow-400');
@@ -634,7 +681,7 @@
                 if (response.ok) {
                     alert('¡Gracias por tu calificación!');
                     cerrarModalCalificacion();
-                    location.reload(); // Recargar para mostrar que ya fue calificado
+                    location.reload();
                 } else {
                     alert(data.message || 'Error al enviar la calificación');
                 }
@@ -643,6 +690,25 @@
                 alert('Error al enviar la calificación. Por favor intenta de nuevo.');
             }
         }
+
+        // ==================== VISOR DE FOTOS ====================
+        function abrirVisorFoto(src) {
+            document.getElementById('visorFoto').classList.remove('hidden');
+            document.getElementById('fotoAmpliada').src = src;
+            document.body.style.overflow = 'hidden';
+        }
+
+        function cerrarVisorFoto() {
+            document.getElementById('visorFoto').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Cerrar visor con ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cerrarVisorFoto();
+            }
+        });
     </script>
 
 </body>

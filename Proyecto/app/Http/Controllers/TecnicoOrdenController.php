@@ -212,4 +212,66 @@ class TecnicoOrdenController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Subir fotos del técnico (antes y después)
+     */
+    public function subirFoto(Request $request, OrdenServicio $orden)
+    {
+        $tecnico = Auth::guard('tecnico')->user();
+        
+        // Verificar que la orden pertenece al técnico
+        if ($orden->tecnico_id !== $tecnico->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No tienes permiso para modificar esta orden'
+            ], 403);
+        }
+
+        $request->validate([
+            'foto' => 'required|image|mimes:jpeg,jpg,png,gif,webp|max:10240',
+            'columna' => 'required|in:fotos_antes,fotos_despues'
+        ]);
+
+        try {
+            $columna = $request->columna;
+            $archivo = $request->file('foto');
+
+            // Usar el servicio BunnyCDN para subir
+            $bunnyCdnService = new \App\Services\BunnyCdnService();
+            $resultado = $bunnyCdnService->uploadImage($archivo, 'tecnico-fotos');
+
+            if (!$resultado['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al subir la foto a Bunny CDN'
+                ], 500);
+            }
+
+            // Obtener las fotos actuales
+            $fotosActuales = $orden->$columna ?? [];
+            if (!is_array($fotosActuales)) {
+                $fotosActuales = [];
+            }
+
+            // Agregar la nueva foto
+            $fotosActuales[] = $resultado['url'];
+
+            // Actualizar la orden
+            $orden->update([
+                $columna => $fotosActuales
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Foto subida correctamente',
+                'url' => $resultado['url']
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al subir la foto: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
