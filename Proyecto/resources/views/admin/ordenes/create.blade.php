@@ -194,6 +194,28 @@
               enctype="multipart/form-data">
             @csrf
 
+            <!-- Mostrar errores de validación -->
+            @if($errors->any())
+            <div class="bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 rounded-lg p-5 mb-8 shadow-sm">
+                <div class="flex items-start space-x-3">
+                    <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                        <i class="fas fa-exclamation-circle text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-red-800 text-lg mb-2">❌ Error en la validación del formulario</h3>
+                        <ul class="text-red-700 text-sm space-y-1">
+                            @foreach($errors->all() as $error)
+                                <li class="flex items-center">
+                                    <i class="fas fa-times-circle mr-2 text-red-600"></i>
+                                    {{ $error }}
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <!-- Paso 1: Información Básica -->
             <div class="step-content active" data-step="1">
                 <div class="bg-white rounded-2xl shadow-lg p-8 animate-fade-in-up">

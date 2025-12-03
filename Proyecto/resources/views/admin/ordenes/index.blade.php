@@ -105,6 +105,31 @@
     </div>
 </div>
 
+<!-- Alertas -->
+@if(($estadisticas['pendientes'] ?? 0) > 5)
+<div class="bg-gradient-to-r from-orange-50 to-red-50 border-l-4 border-orange-500 rounded-lg p-5 mb-8 flex items-start space-x-4 shadow-sm">
+    <div class="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-exclamation-triangle text-white text-lg"></i>
+    </div>
+    <div>
+        <h3 class="font-bold text-orange-800 text-lg">⚠️ Advertencia: Órdenes Pendientes Acumuladas</h3>
+        <p class="text-orange-700 text-sm mt-1">Hay <strong>{{ $estadisticas['pendientes'] }} órdenes pendientes</strong>. Se recomienda revisar y asignar los trabajos pendientes para optimizar el flujo de trabajo.</p>
+    </div>
+</div>
+@endif
+
+@if(($estadisticas['retrasadas'] ?? 0) > 0)
+<div class="bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 rounded-lg p-5 mb-8 flex items-start space-x-4 shadow-sm">
+    <div class="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-calendar-times text-white text-lg"></i>
+    </div>
+    <div>
+        <h3 class="font-bold text-red-800 text-lg">🚨 Atención: Órdenes Retrasadas</h3>
+        <p class="text-red-700 text-sm mt-1">Hay <strong>{{ $estadisticas['retrasadas'] }} órdenes retrasadas</strong>. Por favor, acelera su resolución para mantener la calidad del servicio.</p>
+    </div>
+</div>
+@endif
+
 <!-- Filtros y búsqueda -->
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
     <form method="GET" action="{{ route('ordenes.index') }}" class="space-y-4 md:space-y-0 md:flex md:items-end md:space-x-4">
