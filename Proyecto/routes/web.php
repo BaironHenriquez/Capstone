@@ -1,8 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Authuse Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -202,6 +201,10 @@ Route::middleware(['auth', 'subscription'])->group(function () {
     // Rutas para actualización inline de órdenes
     Route::put('/ordenes/{id}/estado', [OrdenServicioController::class, 'updateEstado'])->name('ordenes.update-estado');
     Route::put('/ordenes/{id}/prioridad', [OrdenServicioController::class, 'updatePrioridad'])->name('ordenes.update-prioridad');
+
+    // Rutas para manejo de imágenes en Bunny CDN
+    Route::post('/ordenes/upload-fotos', [OrdenServicioController::class, 'uploadFotosIngreso'])->name('ordenes.upload-fotos');
+    Route::delete('/ordenes/delete-foto', [OrdenServicioController::class, 'deleteFotoIngreso'])->name('ordenes.delete-foto');
 
     // Alias para crear equipos desde modales
     Route::post('equipos', [GestionEquiposMarcasController::class, 'equiposStore'])->name('equipos.store');

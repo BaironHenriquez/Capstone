@@ -533,33 +533,40 @@
                             <i class="fas fa-paperclip text-white text-xl"></i>
                         </div>
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-800">Archivos Adjuntos</h2>
-                            <p class="text-sm text-gray-500">Fotos, documentos y archivos relacionados</p>
+                            <h2 class="text-2xl font-bold text-gray-800">Fotos del Ingreso del Equipo</h2>
+                            <p class="text-sm text-gray-500">Cargue imágenes del equipo al ingreso (se almacenan en Bunny CDN)</p>
                         </div>
                     </div>
 
                     <div class="space-y-6">
-                        <!-- Área de carga de archivos -->
-                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-yellow-500 transition-all duration-300 bg-gradient-to-br from-yellow-50 to-orange-50">
+                        <!-- Área de carga de archivos con drag & drop -->
+                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-yellow-500 transition-all duration-300 bg-gradient-to-br from-yellow-50 to-orange-50 cursor-pointer"
+                             id="dropZone">
                             <div class="mb-4">
                                 <i class="fas fa-cloud-upload-alt text-6xl text-yellow-500"></i>
                             </div>
                             <label class="cursor-pointer">
                                 <input type="file" 
-                                       name="archivos[]" 
+                                       name="fotos_ingreso[]" 
                                        multiple 
-                                       accept="image/*,.pdf,.doc,.docx"
+                                       accept="image/*"
                                        class="hidden" 
-                                       id="fileInput">
+                                       id="fotosInput">
                                 <span class="btn-animate inline-block bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold py-3 px-8 rounded-xl shadow-lg">
-                                    <i class="fas fa-folder-open mr-2"></i>
-                                    Seleccionar Archivos
+                                    <i class="fas fa-image mr-2"></i>
+                                    Seleccionar Imágenes
                                 </span>
                             </label>
                             <p class="text-sm text-gray-500 mt-3">
-                                Formatos: JPG, PNG, PDF, DOC, DOCX (Máx. 10MB por archivo)
+                                O arrastra imágenes aquí • Formatos: JPG, PNG, GIF, WEBP (Máx. 10MB por imagen)
                             </p>
-                            <div id="fileList" class="mt-4 text-left"></div>
+                            <div id="fotosPreview" class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                        </div>
+
+                        <!-- Galería de imágenes cargadas -->
+                        <div id="fotosGaleria" class="hidden">
+                            <h3 class="text-lg font-semibold text-gray-700 mb-4">Imágenes Cargadas</h3>
+                            <div id="fotosLista" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                         </div>
 
                         <!-- Información adicional -->
@@ -569,9 +576,10 @@
                                 <div class="text-sm text-blue-800">
                                     <p class="font-semibold mb-1">Recomendaciones:</p>
                                     <ul class="list-disc list-inside space-y-1 text-blue-700">
-                                        <li>Incluya fotos del equipo y el problema</li>
-                                        <li>Adjunte documentos de garantía si aplica</li>
-                                        <li>Agregue cotizaciones previas si existen</li>
+                                        <li>Incluya múltiples fotos del equipo desde diferentes ángulos</li>
+                                        <li>Capture el problema o daño visible</li>
+                                        <li>Asegúrese de buena iluminación para claridad</li>
+                                        <li>Las imágenes se guardarán en Bunny CDN automáticamente</li>
                                     </ul>
                                 </div>
                             </div>
@@ -738,6 +746,169 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    // Manejo de imágenes con Bunny CDN
+    const dropZone = document.getElementById('dropZone');
+    const fotosInput = document.getElementById('fotosInput');
+    const fotosPreview = document.getElementById('fotosPreview');
+    const fotosGaleria = document.getElementById('fotosGaleria');
+    const fotosLista = document.getElementById('fotosLista');
+    
+    let fotosSubidas = [];
+    
+    // Drag and drop
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-yellow-500', 'bg-yellow-100');
+    });
+    
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('border-yellow-500', 'bg-yellow-100');
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-yellow-500', 'bg-yellow-100');
+        
+        const files = Array.from(e.dataTransfer.files);
+        fotosInput.files = new DataTransfer().items.add(...files);
+        subirFotos(files);
+    });
+    
+    fotosInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files);
+        subirFotos(files);
+    });
+    
+    function subirFotos(files) {
+        files.forEach((file, index) => {
+            if (file.type.startsWith('image/')) {
+                // Mostrar preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const previewDiv = document.createElement('div');
+                    previewDiv.className = 'relative group';
+                    previewDiv.innerHTML = `
+                        <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden relative">
+                            <img src="${e.target.result}" class="w-full h-full object-cover" alt="Preview">
+                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
+                                <div class="opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                    <i class="fas fa-spinner fa-spin text-white text-2xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    fotosPreview.appendChild(previewDiv);
+                    
+                    // Subir a Bunny CDN
+                    const formData = new FormData();
+                    formData.append('imagen', file);
+                    
+                    fetch('{{ route("ordenes.upload-fotos") }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                        },
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Agregar a la lista de fotos subidas
+                            fotosSubidas.push(data.url);
+                            
+                            // Actualizar input hidden
+                            actualizarInputFotos();
+                            
+                            // Mostrar en galería
+                            mostrarFotoEnGaleria(data.url, data.filename);
+                            
+                            // Cambiar spinner a check
+                            const spinner = previewDiv.querySelector('.fa-spinner');
+                            if (spinner) {
+                                spinner.className = 'fas fa-check text-green-500 text-2xl';
+                            }
+                        } else {
+                            alert('Error al subir imagen: ' + data.message);
+                            previewDiv.remove();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        previewDiv.remove();
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    function mostrarFotoEnGaleria(url, filename) {
+        fotosGaleria.classList.remove('hidden');
+        
+        const fotoItem = document.createElement('div');
+        fotoItem.className = 'relative group';
+        fotoItem.innerHTML = `
+            <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                <img src="${url}" class="w-full h-full object-cover" alt="${filename}">
+            </div>
+            <button type="button" 
+                    onclick="eliminarFoto('${url}')"
+                    class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        `;
+        fotosLista.appendChild(fotoItem);
+    }
+    
+    function actualizarInputFotos() {
+        // Crear un input hidden con las URLs de las fotos
+        let hiddenInput = document.getElementById('fotosSubidasInput');
+        if (!hiddenInput) {
+            hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.id = 'fotosSubidasInput';
+            hiddenInput.name = 'fotos_ingreso_urls';
+            document.getElementById('multiStepForm').appendChild(hiddenInput);
+        }
+        hiddenInput.value = JSON.stringify(fotosSubidas);
+    }
+    
+    window.eliminarFoto = function(url) {
+        if (confirm('¿Estás seguro de que deseas eliminar esta imagen?')) {
+            fetch('{{ route("ordenes.delete-foto") }}', {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url: url })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remover de la lista
+                    fotosSubidas = fotosSubidas.filter(f => f !== url);
+                    actualizarInputFotos();
+                    
+                    // Remover de la UI
+                    const items = fotosLista.querySelectorAll('div');
+                    items.forEach(item => {
+                        const img = item.querySelector('img');
+                        if (img && img.src === url) {
+                            item.parentElement.remove();
+                        }
+                    });
+                    
+                    if (fotosSubidas.length === 0) {
+                        fotosGaleria.classList.add('hidden');
+                    }
+                } else {
+                    alert('Error al eliminar imagen: ' + data.message);
+                }
+            });
+        }
+    };
     
     // Manejo de archivos
     const fileInput = document.getElementById('fileInput');

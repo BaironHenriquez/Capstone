@@ -7,11 +7,18 @@ use App\Models\Cliente;
 use App\Models\Equipo;
 use App\Models\ServicioTecnico;
 use App\Models\User;
+use App\Services\BunnyCdnService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class OrdenServicioController extends Controller
 {
+    protected $bunnyCdn;
+
+    public function __construct(BunnyCdnService $bunnyCdn)
+    {
+        $this->bunnyCdn = $bunnyCdn;
+    }
     /**
      * 📋 Listar órdenes de servicio
      */
@@ -99,6 +106,7 @@ class OrdenServicioController extends Controller
                 'horas_estimadas'      => 'nullable|numeric',
                 'cliente_id'           => 'required|exists:clientes,id',
                 'equipo_id'            => 'required|exists:equipos,id',
+                'fotos_ingreso.*'      => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
             ]);
 
             // Obtener servicio técnico del usuario autenticado
@@ -132,6 +140,24 @@ class OrdenServicioController extends Controller
             $abono  = $request->input('abono', 0);
             $saldo  = $precio - $abono;
 
+            // Procesar imágenes de ingreso con Bunny CDN
+            $fotosIngreso = [];
+            if ($request->hasFile('fotos_ingreso')) {
+                $archivos = $request->file('fotos_ingreso');
+                $archivos = is_array($archivos) ? $archivos : [$archivos];
+
+                foreach ($archivos as $archivo) {
+                    try {
+                        $resultado = $this->bunnyCdn->uploadImage($archivo, "ordenes-servicio/{$servicioTecnicoId}");
+                        if ($resultado && $resultado['success']) {
+                            $fotosIngreso[] = $resultado['url'];
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error("Error subiendo imagen a Bunny CDN: {$e->getMessage()}");
+                    }
+                }
+            }
+
             // Crear orden (el trait asigna automáticamente servicio_tecnico_id)
             $orden = OrdenServicio::create([
                 'numero_orden'         => $numeroOrden,
@@ -156,11 +182,13 @@ class OrdenServicioController extends Controller
                 'user_id'              => $user->id,
                 'cliente_id'           => $request->cliente_id,
                 'equipo_id'            => $request->equipo_id,
-                'tecnico_id'           => $request->tecnico_id ?? null, // Asignar técnico si viene en el request
+                'tecnico_id'           => $request->tecnico_id ?? null,
+                'fotos_ingreso'        => !empty($fotosIngreso) ? $fotosIngreso : null,
             ]);
 
             return redirect()->route('ordenes.index')
                 ->with('success', '✅ Orden #' . $orden->numero_orden . ' creada correctamente');
+
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()->back()
@@ -417,4 +445,88 @@ class OrdenServicioController extends Controller
 
         return view('admin.ordenes.historicas', compact('ordenes', 'estadisticas', 'tecnicos'));
     }
+
+    /**
+     * 📸 Endpoint AJAX para subir imágenes a Bunny CDN
+     */
+    public function uploadFotosIngreso(Request $request)
+    {
+        try {
+            $request->validate([
+                'imagen' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            ]);
+
+            if (!$request->hasFile('imagen')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No file provided'
+                ], 400);
+            }
+
+            $archivo = $request->file('imagen');
+            $user = Auth::user();
+
+            // Subir a Bunny CDN
+            $resultado = $this->bunnyCdn->uploadImage(
+                $archivo,
+                "ordenes-servicio/{$user->servicioTecnico->id}"
+            );
+
+            if ($resultado && $resultado['success']) {
+                return response()->json([
+                    'success' => true,
+                    'url' => $resultado['url'],
+                    'filename' => $resultado['filename'],
+                    'message' => 'Imagen subida exitosamente'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al subir imagen a Bunny CDN'
+            ], 500);
+
+        } catch (\Exception $e) {
+            \Log::error('Error en uploadFotosIngreso: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * 🗑️ Eliminar imagen de Bunny CDN
+     */
+    public function deleteFotoIngreso(Request $request)
+    {
+        try {
+            $request->validate([
+                'url' => 'required|url',
+            ]);
+
+            $url = $request->input('url');
+            $resultado = $this->bunnyCdn->deleteImage($url);
+
+            if ($resultado) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Imagen eliminada correctamente'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar imagen'
+            ], 500);
+
+        } catch (\Exception $e) {
+            \Log::error('Error eliminando imagen: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
+
