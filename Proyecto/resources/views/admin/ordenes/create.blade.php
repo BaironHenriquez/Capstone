@@ -547,28 +547,36 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                                 <i class="fas fa-dollar-sign text-indigo-500 mr-2"></i>
-                                Precio Presupuestado
+                                Precio Presupuestado <span class="text-red-500">*</span>
                             </label>
                             <input type="number" 
+                                   id="precio_presupuestado"
                                    name="precio_presupuestado" 
                                    step="0.01" 
                                    min="0"
+                                   max="99999999.99"
+                                   required
                                    class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:outline-none transition-all"
                                    placeholder="$0.00">
+                            <p class="text-xs text-gray-500 mt-1">Máximo: $99,999,999.99</p>
                         </div>
 
                         <!-- Abono -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                                 <i class="fas fa-money-bill-wave text-indigo-500 mr-2"></i>
-                                Abono Inicial
+                                Abono Inicial <span class="text-red-500">*</span>
                             </label>
                             <input type="number" 
+                                   id="abono"
                                    name="abono" 
                                    step="0.01" 
                                    min="0"
+                                   max="99999999.99"
+                                   required
                                    class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:outline-none transition-all"
                                    placeholder="$0.00">
+                            <p class="text-xs text-gray-500 mt-1">Máximo: $99,999,999.99</p>
                         </div>
                     </div>
                 </div>
@@ -1031,6 +1039,146 @@ document.addEventListener('DOMContentLoaded', function() {
         fechaProgramada.addEventListener('change', calcularHorasEstimadas);
         fechaEntrega.addEventListener('change', calcularHorasEstimadas);
     }
+
+    // ========== VALIDACIONES DE FORMULARIO ==========
+    const form = document.getElementById('multiStepForm');
+    
+    // Validar que el abono no exceda el precio
+    function validarAbono() {
+        const precio = parseFloat(document.getElementById('precio_presupuestado').value) || 0;
+        const abono = parseFloat(document.getElementById('abono').value) || 0;
+        
+        if (abono > precio) {
+            document.getElementById('abono').classList.add('border-red-500');
+            showValidationError('El abono no puede ser mayor que el precio presupuestado');
+            return false;
+        } else {
+            document.getElementById('abono').classList.remove('border-red-500');
+            return true;
+        }
+    }
+    
+    // Validar rango de valores numéricos
+    function validarValoresNumericos() {
+        const precio = document.getElementById('precio_presupuestado');
+        const abono = document.getElementById('abono');
+        const horas = document.getElementById('horas_estimadas');
+        
+        const maxPrecio = 99999999.99;
+        const maxHoras = 999.99;
+        
+        let valido = true;
+        
+        // Validar precio
+        if (precio.value) {
+            const valorPrecio = parseFloat(precio.value);
+            if (valorPrecio > maxPrecio) {
+                precio.classList.add('border-red-500');
+                showValidationError(`Precio máximo permitido: $${maxPrecio}`);
+                valido = false;
+            } else {
+                precio.classList.remove('border-red-500');
+            }
+        }
+        
+        // Validar abono
+        if (abono.value) {
+            const valorAbono = parseFloat(abono.value);
+            if (valorAbono > maxPrecio) {
+                abono.classList.add('border-red-500');
+                showValidationError(`Abono máximo permitido: $${maxPrecio}`);
+                valido = false;
+            } else {
+                abono.classList.remove('border-red-500');
+            }
+        }
+        
+        // Validar horas
+        if (horas.value) {
+            const valorHoras = parseFloat(horas.value);
+            if (valorHoras > maxHoras) {
+                horas.classList.add('border-red-500');
+                showValidationError(`Horas máximas permitidas: ${maxHoras}`);
+                valido = false;
+            } else {
+                horas.classList.remove('border-red-500');
+            }
+        }
+        
+        return valido;
+    }
+    
+    // Validar campos requeridos
+    function validarCamposRequeridos() {
+        const campos = {
+            'tipo_servicio': 'Tipo de servicio',
+            'descripcion_problema': 'Descripción del problema',
+            'prioridad': 'Prioridad',
+            'cliente_id': 'Cliente',
+            'equipo_id': 'Equipo',
+            'precio_presupuestado': 'Precio presupuestado',
+            'abono': 'Abono'
+        };
+        
+        let valido = true;
+        
+        for (const [campo, nombre] of Object.entries(campos)) {
+            const elemento = document.querySelector(`[name="${campo}"]`);
+            if (elemento) {
+                if (!elemento.value || elemento.value.trim() === '') {
+                    elemento.classList.add('border-red-500');
+                    showValidationError(`${nombre} es requerido`);
+                    valido = false;
+                } else {
+                    elemento.classList.remove('border-red-500');
+                }
+            }
+        }
+        
+        return valido;
+    }
+    
+    // Función para mostrar errores de validación
+    function showValidationError(mensaje) {
+        // Scroll a la parte superior del formulario
+        document.querySelector('form').scrollIntoView({ behavior: 'smooth' });
+        
+        // Mostrar alerta temporal
+        if (window.toastr) {
+            toastr.error(mensaje);
+        } else {
+            alert(mensaje);
+        }
+    }
+    
+    // Agregar listeners para validaciones en tiempo real
+    document.getElementById('precio_presupuestado')?.addEventListener('change', validarValoresNumericos);
+    document.getElementById('abono')?.addEventListener('change', () => {
+        validarValoresNumericos();
+        validarAbono();
+    });
+    document.getElementById('horas_estimadas')?.addEventListener('change', validarValoresNumericos);
+    
+    // Validar al enviar el formulario
+    form.addEventListener('submit', function(e) {
+        // Validar campos requeridos
+        if (!validarCamposRequeridos()) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Validar valores numéricos
+        if (!validarValoresNumericos()) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Validar abono vs precio
+        if (!validarAbono()) {
+            e.preventDefault();
+            return false;
+        }
+    });
     
     // Inicializar
     updateStep();

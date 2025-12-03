@@ -92,8 +92,8 @@ class OrdenServicioController extends Controller
                 'descripcion_problema' => 'required|string|min:5',
                 'prioridad'            => 'required|string|in:baja,media,alta,urgente',
                 'estado'               => 'nullable|string|max:45',
-                'precio_presupuestado' => 'nullable|numeric',
-                'abono'                => 'nullable|numeric',
+                'precio_presupuestado' => 'required|numeric|min:0|max:99999999.99',
+                'abono'                => 'required|numeric|min:0|max:99999999.99',
                 'contacto_en_sitio'    => 'nullable|string|max:100',
                 'telefono_contacto'    => 'nullable|string|max:20',
                 'ubicacion_servicio'   => 'nullable|string|max:200',
@@ -101,11 +101,24 @@ class OrdenServicioController extends Controller
                 'tipo_de_trabajo'      => 'nullable|string|max:45',
                 'fecha_programada'     => 'nullable|date',
                 'fecha_aprox_entrega'  => 'nullable|date',
-                'horas_estimadas'      => 'nullable|numeric',
+                'horas_estimadas'      => 'nullable|numeric|min:0|max:999.99',
                 'cliente_id'           => 'required|exists:clientes,id',
                 'equipo_id'            => 'required|exists:equipos,id',
                 'fotos_ingreso.*'      => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            ], [
+                'precio_presupuestado.max' => 'El precio presupuestado no puede exceder $99,999,999.99',
+                'abono.max' => 'El abono no puede exceder $99,999,999.99',
+                'horas_estimadas.max' => 'Las horas estimadas no pueden exceder 999.99',
+                'precio_presupuestado.required' => 'El precio presupuestado es requerido',
+                'abono.required' => 'El abono es requerido',
             ]);
+
+            // Validar que el abono no sea mayor que el precio
+            if ($request->abono > $request->precio_presupuestado) {
+                return redirect()->back()
+                    ->withErrors(['abono' => 'El abono no puede ser mayor que el precio presupuestado'])
+                    ->withInput();
+            }
 
             // Obtener servicio técnico del usuario autenticado
             $user = Auth::user();
@@ -134,8 +147,8 @@ class OrdenServicioController extends Controller
             // Generar número de orden correlativo por servicio técnico
             $numeroOrden = $request->numero_orden ?? OrdenServicio::generarNumeroOrden($servicioTecnicoId);
 
-            $precio = $request->input('precio_presupuestado', 0);
-            $abono  = $request->input('abono', 0);
+            $precio = (float) $request->input('precio_presupuestado', 0);
+            $abono  = (float) $request->input('abono', 0);
             $saldo  = $precio - $abono;
 
             // Procesar imágenes de ingreso con Bunny CDN
