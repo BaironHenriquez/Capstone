@@ -15,9 +15,9 @@ class TecnicoOrdenController extends Controller
     {
         $tecnico = Auth::guard('tecnico')->user();
         
-        // Obtener órdenes asignadas al técnico
-        $ordenesAsignadas = OrdenServicio::where('tecnico_id', $tecnico->id)
-            ->whereIn('estado', ['asignada', 'en_progreso', 'diagnostico'])
+        // Obtener órdenes en proceso (activas)
+        $ordenesEnProceso = OrdenServicio::where('tecnico_id', $tecnico->id)
+            ->whereIn('estado', ['asignada', 'diagnostico', 'espera_repuesto', 'en_progreso', 'listo_retiro'])
             ->with(['cliente', 'equipo.marca'])
             ->orderBy('prioridad', 'desc')
             ->orderBy('fecha_programada', 'asc')
@@ -28,18 +28,28 @@ class TecnicoOrdenController extends Controller
             ->whereMonth('fecha_completada', now()->month)
             ->count();
 
-        $ordenesPendientes = $ordenesAsignadas->whereIn('estado', ['asignada', 'diagnostico'])->count();
-        $ordenesEnProgreso = $ordenesAsignadas->where('estado', 'en_progreso')->count();
+        $ordenesCanceladas = OrdenServicio::where('tecnico_id', $tecnico->id)
+            ->where('estado', 'cancelada')
+            ->count();
+
+        $ordenesPendientes = $ordenesEnProceso->whereIn('estado', ['asignada', 'diagnostico'])->count();
+        $ordenesEnProgreso = $ordenesEnProceso->where('estado', 'en_progreso')->count();
+        $ordenesEsperandoRepuesto = $ordenesEnProceso->where('estado', 'espera_repuesto')->count();
+        $ordenesListasRetiro = $ordenesEnProceso->where('estado', 'listo_retiro')->count();
 
         // Estadísticas del técnico
         $estadisticas = [
-            'asignadas' => $ordenesAsignadas->count(),
-            'pendientes' => $ordenesPendientes,
+            'activas' => $ordenesEnProceso->count(),
+            'asignadas' => $ordenesPendientes,
+            'diagnostico' => $ordenesEnProceso->where('estado', 'diagnostico')->count(),
             'en_progreso' => $ordenesEnProgreso,
+            'espera_repuesto' => $ordenesEsperandoRepuesto,
+            'listo_retiro' => $ordenesListasRetiro,
             'completadas_mes' => $ordenesCompletadas,
+            'canceladas' => $ordenesCanceladas,
         ];
 
-        return view('tecnico.dashboard', compact('tecnico', 'ordenesAsignadas', 'estadisticas'));
+        return view('tecnico.dashboard', compact('tecnico', 'ordenesEnProceso', 'estadisticas'));
     }
 
     public function index()

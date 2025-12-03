@@ -49,7 +49,7 @@
                             <i class="fas fa-user-tie mr-2"></i>¡Bienvenido, {{ $tecnico->nombre_completo }}!
                         </h2>
                         <p class="text-purple-100">
-                            Tienes <strong class="text-white">{{ $estadisticas['pendientes'] + $estadisticas['en_progreso'] }}</strong> órdenes activas que requieren tu atención
+                            Tienes <strong class="text-white">{{ $estadisticas['activas'] }}</strong> órdenes activas en proceso
                         </p>
                     </div>
                     <div class="hidden md:block">
@@ -59,45 +59,111 @@
             </div>
 
             <!-- Estadísticas -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Total Activas -->
                 <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-500 mb-1">Total Asignadas</p>
-                            <p class="text-3xl font-bold text-purple-600">{{ $estadisticas['asignadas'] }}</p>
+                            <p class="text-sm font-medium text-gray-500 mb-1">Órdenes Activas</p>
+                            <p class="text-3xl font-bold text-purple-600">{{ $estadisticas['activas'] }}</p>
                         </div>
                         <div class="flex-shrink-0 bg-purple-100 rounded-full p-4">
-                            <i class="fas fa-clipboard-list text-2xl text-purple-600"></i>
+                            <i class="fas fa-list text-2xl text-purple-600"></i>
                         </div>
                     </div>
                 </div>
 
+                <!-- Asignadas -->
                 <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-500 mb-1">Pendientes</p>
-                            <p class="text-3xl font-bold text-yellow-600">{{ $estadisticas['pendientes'] }}</p>
-                        </div>
-                        <div class="flex-shrink-0 bg-yellow-100 rounded-full p-4">
-                            <i class="fas fa-clock text-2xl text-yellow-600"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 p-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-500 mb-1">En Progreso</p>
-                            <p class="text-3xl font-bold text-blue-600">{{ $estadisticas['en_progreso'] }}</p>
+                            <p class="text-sm font-medium text-gray-500 mb-1">Asignadas</p>
+                            <p class="text-3xl font-bold text-blue-600">{{ $estadisticas['asignadas'] }}</p>
                         </div>
                         <div class="flex-shrink-0 bg-blue-100 rounded-full p-4">
-                            <i class="fas fa-tools text-2xl text-blue-600"></i>
+                            <i class="fas fa-inbox text-2xl text-blue-600"></i>
                         </div>
                     </div>
                 </div>
 
+                <!-- Diagnóstico -->
                 <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 p-6">
                     <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 mb-1">En Diagnóstico</p>
+                            <p class="text-3xl font-bold text-yellow-600">{{ $estadisticas['diagnostico'] }}</p>
+                        </div>
+                        <div class="flex-shrink-0 bg-yellow-100 rounded-full p-4">
+                            <i class="fas fa-stethoscope text-2xl text-yellow-600"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- En Progreso -->
+                <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 mb-1">En Reparación</p>
+                            <p class="text-3xl font-bold text-orange-600">{{ $estadisticas['en_progreso'] }}</p>
+                        </div>
+                        <div class="flex-shrink-0 bg-orange-100 rounded-full p-4">
+                            <i class="fas fa-wrench text-2xl text-orange-600"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Espera de Repuesto -->
+                <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 mb-1">Espera de Repuesto</p>
+                            <p class="text-3xl font-bold text-indigo-600">{{ $estadisticas['espera_repuesto'] }}</p>
+                        </div>
+                        <div class="flex-shrink-0 bg-indigo-100 rounded-full p-4">
+                            <i class="fas fa-hourglass-half text-2xl text-indigo-600"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Listo para Retiro -->
+                <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 mb-1">Listo para Retiro</p>
+                            <p class="text-3xl font-bold text-green-600">{{ $estadisticas['listo_retiro'] }}</p>
+                        </div>
+                        <div class="flex-shrink-0 bg-green-100 rounded-full p-4">
+                            <i class="fas fa-check-double text-2xl text-green-600"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Completadas (Mes) -->
+                <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 mb-1">Completadas (Mes)</p>
+                            <p class="text-3xl font-bold text-emerald-600">{{ $estadisticas['completadas_mes'] }}</p>
+                        </div>
+                        <div class="flex-shrink-0 bg-emerald-100 rounded-full p-4">
+                            <i class="fas fa-check-circle text-2xl text-emerald-600"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Canceladas -->
+                <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 mb-1">Canceladas</p>
+                            <p class="text-3xl font-bold text-red-600">{{ $estadisticas['canceladas'] }}</p>
+                        </div>
+                        <div class="flex-shrink-0 bg-red-100 rounded-full p-4">
+                            <i class="fas fa-times-circle text-2xl text-red-600"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
                         <div>
                             <p class="text-sm font-medium text-gray-500 mb-1">Completadas (Mes)</p>
                             <p class="text-3xl font-bold text-green-600">{{ $estadisticas['completadas_mes'] }}</p>
