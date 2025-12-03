@@ -118,24 +118,37 @@ class DashboardController extends Controller
         }
 
         // Resumen de órdenes reales desde la base de datos (filtrado por rango)
+        // Nota: Usamos updated_at para estados completados/entregados y created_at para estados activos
         $resumenOrdenes = [
             'total' => DB::table('ordenes_servicio')
                 ->where('servicio_tecnico_id', $servicioTecnicoId)
-                ->whereBetween('created_at', [$fechaInicio, $fechaFin])
+                ->where(function($query) use ($fechaInicio, $fechaFin) {
+                    $query->whereBetween('created_at', [$fechaInicio, $fechaFin])
+                          ->orWhere(function($q) use ($fechaInicio, $fechaFin) {
+                              $q->whereIn('estado', ['completada', 'entregada'])
+                                ->whereBetween('updated_at', [$fechaInicio, $fechaFin]);
+                          });
+                })
                 ->count(),
             'pendientes' => DB::table('ordenes_servicio')
                 ->where('servicio_tecnico_id', $servicioTecnicoId)
                 ->where('estado', 'pendiente')
-                ->whereBetween('created_at', [$fechaInicio, $fechaFin])
+                ->where(function($query) use ($fechaInicio, $fechaFin) {
+                    $query->whereBetween('created_at', [$fechaInicio, $fechaFin])
+                          ->orWhereBetween('updated_at', [$fechaInicio, $fechaFin]);
+                })
                 ->count(),
             'en_progreso' => DB::table('ordenes_servicio')
                 ->where('servicio_tecnico_id', $servicioTecnicoId)
-                ->where('estado', 'en_progreso')
-                ->whereBetween('created_at', [$fechaInicio, $fechaFin])
+                ->whereIn('estado', ['en_progreso', 'asignada', 'diagnostico'])
+                ->where(function($query) use ($fechaInicio, $fechaFin) {
+                    $query->whereBetween('created_at', [$fechaInicio, $fechaFin])
+                          ->orWhereBetween('updated_at', [$fechaInicio, $fechaFin]);
+                })
                 ->count(),
             'completadas' => DB::table('ordenes_servicio')
                 ->where('servicio_tecnico_id', $servicioTecnicoId)
-                ->where('estado', 'completada')
+                ->whereIn('estado', ['completada', 'entregada'])
                 ->whereBetween('updated_at', [$fechaInicio, $fechaFin])
                 ->count(),
             'en_revision' => 0 // Estado no usado actualmente
@@ -151,8 +164,8 @@ class DashboardController extends Controller
                 'tecnicos.especialidades',
                 'tecnicos.comision_por_orden',
                 DB::raw('(SELECT COUNT(*) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND estado IN ("asignada", "en_progreso", "diagnostico")) as ordenes_asignadas'),
-                DB::raw('(SELECT COUNT(*) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND estado = "completada") as ordenes_completadas'),
-                DB::raw('(SELECT SUM(precio_presupuestado) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW())) as ingresos_mes')
+                DB::raw("(SELECT COUNT(*) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND estado IN ('completada', 'entregada') AND updated_at BETWEEN '{$fechaInicio->toDateTimeString()}' AND '{$fechaFin->toDateTimeString()}') as ordenes_completadas"),
+                DB::raw("(SELECT SUM(precio_presupuestado) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND estado IN ('completada', 'entregada') AND updated_at BETWEEN '{$fechaInicio->toDateTimeString()}' AND '{$fechaFin->toDateTimeString()}') as ingresos_periodo")
             )
             ->get()
             ->map(function($tecnico) {
@@ -174,10 +187,10 @@ class DashboardController extends Controller
                     ? ucfirst($especialidades[0]) 
                     : 'General';
                 
-                // Calcular comisión del mes (porcentaje sobre ingresos)
-                $ingresosMes = floatval($tecnico->ingresos_mes ?? 0);
+                // Calcular comisión del período (porcentaje sobre ingresos de órdenes completadas)
+                $ingresosPeriodo = floatval($tecnico->ingresos_periodo ?? 0);
                 $porcentajeComision = floatval($tecnico->comision_por_orden ?? 0);
-                $comisionTotal = ($ingresosMes * $porcentajeComision) / 100;
+                $comisionTotal = ($ingresosPeriodo * $porcentajeComision) / 100;
                 
                 return [
                     'id' => $tecnico->id,
@@ -187,9 +200,9 @@ class DashboardController extends Controller
                     'carga_trabajo' => round($cargaTrabajo),
                     'especialidad' => $especialidad,
                     'estado' => $estado,
-                    'ingresos_mes' => $ingresosMes,
+                    'ingresos_periodo' => $ingresosPeriodo,
                     'comision_por_orden' => $porcentajeComision,
-                    'comision_total' => $comisionTotal
+                    'comision_total' => round($comisionTotal, 2)
                 ];
             })
             ->toArray();
@@ -316,34 +329,45 @@ class DashboardController extends Controller
         $fechaInicioGrafico = $fechaInicio->format('d/m');
         $fechaFinGrafico = $fechaFin->format('d/m/Y');
 
-        // Cálculo de ingresos
+        // Cálculo de ingresos - Solo de órdenes completadas/entregadas (cuando realmente se genera el ingreso)
         // Ingreso mensual SIEMPRE usa el mes completo (no importa si filtró por semana)
         $ingresoMensual = DB::table('ordenes_servicio')
             ->where('servicio_tecnico_id', $servicioTecnicoId)
             ->whereNotNull('precio_presupuestado')
-            ->whereBetween('created_at', [$inicioMesCompleto, $finMesCompleto])
+            ->whereIn('estado', ['completada', 'entregada'])
+            ->whereBetween('updated_at', [$inicioMesCompleto, $finMesCompleto])
             ->sum('precio_presupuestado');
 
-        // Ingreso semanal - Si filtró por semana específica, calcular para esa semana, sino usar semana actual
+        // Ingreso semanal - Si filtró por semana específica, calcular para esa semana
+        // Si no filtró por semana, mostrar la primera semana del mes filtrado
+        // Solo contar órdenes completadas/entregadas (cuando realmente se genera el ingreso)
         if ($semana > 0) {
             // Calcular ingreso de la semana específica seleccionada
             $ingresoSemanal = DB::table('ordenes_servicio')
                 ->where('servicio_tecnico_id', $servicioTecnicoId)
                 ->whereNotNull('precio_presupuestado')
-                ->whereBetween('created_at', [$fechaInicio, $fechaFin])
+                ->whereIn('estado', ['completada', 'entregada'])
+                ->whereBetween('updated_at', [$fechaInicio, $fechaFin])
                 ->sum('precio_presupuestado');
             $rangoSemanalTexto = $fechaInicioGrafico . ' - ' . $fechaFinGrafico;
         } else {
-            // Usar la semana actual del calendario
+            // Calcular la primera semana del mes filtrado
+            $inicioPrimeraSemana = $inicioMesCompleto->copy();
+            $finPrimeraSemana = $inicioPrimeraSemana->copy()->addDays(6)->endOfDay();
+            if ($finPrimeraSemana->gt($finMesCompleto)) {
+                $finPrimeraSemana = $finMesCompleto;
+            }
+            
             $ingresoSemanal = DB::table('ordenes_servicio')
                 ->where('servicio_tecnico_id', $servicioTecnicoId)
                 ->whereNotNull('precio_presupuestado')
-                ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+                ->whereIn('estado', ['completada', 'entregada'])
+                ->whereBetween('updated_at', [$inicioPrimeraSemana, $finPrimeraSemana])
                 ->sum('precio_presupuestado');
-            $rangoSemanalTexto = now()->startOfWeek()->format('d/m') . ' - ' . now()->endOfWeek()->format('d/m/Y');
+            $rangoSemanalTexto = $inicioPrimeraSemana->format('d/m') . ' - ' . $finPrimeraSemana->format('d/m/Y');
         }
 
-        // 🏆 Empleado del Mes - Basado en órdenes completadas y calificación promedio
+        // 🏆 Empleado del Mes - Basado en órdenes completadas y calificación promedio DEL PERÍODO
         $empleadoDelMes = DB::table('tecnicos')
             ->where('tecnicos.servicio_tecnico_id', $servicioTecnicoId)
             ->whereNull('tecnicos.deleted_at')
@@ -354,20 +378,26 @@ class DashboardController extends Controller
                 // Contar órdenes completadas del rango filtrado
                 DB::raw("(SELECT COUNT(*) FROM ordenes_servicio 
                          WHERE tecnico_id = tecnicos.id 
-                         AND estado = 'completada' 
+                         AND estado IN ('completada', 'entregada')
                          AND updated_at BETWEEN '{$fechaInicio->toDateTimeString()}' AND '{$fechaFin->toDateTimeString()}') as ordenes_completadas"),
-                // Calcular calificación promedio general (todas las calificaciones)
-                DB::raw('(SELECT COALESCE(ROUND(AVG(calificacion), 1), 0) 
-                         FROM calificacion_tecnicos 
-                         WHERE tecnico_id = tecnicos.id) as calificacion_promedio'),
-                // Contar total de calificaciones
-                DB::raw('(SELECT COUNT(*) 
-                         FROM calificacion_tecnicos 
-                         WHERE tecnico_id = tecnicos.id) as total_calificaciones'),
-                // Suma total de puntos de calificación
-                DB::raw('(SELECT COALESCE(SUM(calificacion), 0) 
-                         FROM calificacion_tecnicos 
-                         WHERE tecnico_id = tecnicos.id) as suma_calificaciones')
+                // Calcular calificación promedio del período filtrado (solo de órdenes del período)
+                DB::raw("(SELECT COALESCE(ROUND(AVG(ct.calificacion), 1), 0) 
+                         FROM calificacion_tecnicos ct
+                         INNER JOIN ordenes_servicio os ON ct.orden_servicio_id = os.id
+                         WHERE ct.tecnico_id = tecnicos.id 
+                         AND os.updated_at BETWEEN '{$fechaInicio->toDateTimeString()}' AND '{$fechaFin->toDateTimeString()}') as calificacion_promedio"),
+                // Contar total de calificaciones del período
+                DB::raw("(SELECT COUNT(*) 
+                         FROM calificacion_tecnicos ct
+                         INNER JOIN ordenes_servicio os ON ct.orden_servicio_id = os.id
+                         WHERE ct.tecnico_id = tecnicos.id
+                         AND os.updated_at BETWEEN '{$fechaInicio->toDateTimeString()}' AND '{$fechaFin->toDateTimeString()}') as total_calificaciones"),
+                // Suma total de puntos de calificación del período
+                DB::raw("(SELECT COALESCE(SUM(ct.calificacion), 0) 
+                         FROM calificacion_tecnicos ct
+                         INNER JOIN ordenes_servicio os ON ct.orden_servicio_id = os.id
+                         WHERE ct.tecnico_id = tecnicos.id
+                         AND os.updated_at BETWEEN '{$fechaInicio->toDateTimeString()}' AND '{$fechaFin->toDateTimeString()}') as suma_calificaciones")
             )
             ->havingRaw('ordenes_completadas > 0')
             ->orderByDesc('ordenes_completadas')
@@ -543,6 +573,31 @@ class DashboardController extends Controller
                 ->count(),
         ];
 
+        // Obtener mes y año del request o usar actual
+        $mes = $request->input('mes', now()->month);
+        $anio = $request->input('anio', now()->year);
+        $semana = $request->input('semana', 0);
+        
+        // Crear rango de fechas
+        $fechaFiltro = \Carbon\Carbon::create($anio, $mes, 1);
+        
+        if ($semana > 0) {
+            $inicioMes = \Carbon\Carbon::create($anio, $mes, 1)->startOfDay();
+            $inicioSemana = $inicioMes->copy()->addDays(($semana - 1) * 7);
+            $finSemana = $inicioSemana->copy()->addDays(6)->endOfDay();
+            $finMes = \Carbon\Carbon::create($anio, $mes, 1)->endOfMonth()->endOfDay();
+            
+            if ($finSemana->gt($finMes)) {
+                $finSemana = $finMes;
+            }
+            
+            $fechaInicio = $inicioSemana;
+            $fechaFin = $finSemana;
+        } else {
+            $fechaInicio = $fechaFiltro->copy()->startOfMonth();
+            $fechaFin = $fechaFiltro->copy()->endOfMonth();
+        }
+        
         // Obtener carga laboral actualizada de técnicos
         $tecnicosData = DB::table('tecnicos')
             ->where('servicio_tecnico_id', $servicioTecnicoId)
@@ -553,8 +608,8 @@ class DashboardController extends Controller
                 'tecnicos.especialidades',
                 'tecnicos.comision_por_orden',
                 DB::raw('(SELECT COUNT(*) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND estado IN ("asignada", "en_progreso", "diagnostico")) as ordenes_asignadas'),
-                DB::raw('(SELECT COUNT(*) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND estado = "completada") as ordenes_completadas'),
-                DB::raw('(SELECT SUM(precio_presupuestado) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW())) as ingresos_mes')
+                DB::raw("(SELECT COUNT(*) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND estado IN ('completada', 'entregada') AND updated_at BETWEEN '{$fechaInicio->toDateTimeString()}' AND '{$fechaFin->toDateTimeString()}') as ordenes_completadas"),
+                DB::raw("(SELECT SUM(precio_presupuestado) FROM ordenes_servicio WHERE tecnico_id = tecnicos.id AND estado IN ('completada', 'entregada') AND updated_at BETWEEN '{$fechaInicio->toDateTimeString()}' AND '{$fechaFin->toDateTimeString()}') as ingresos_periodo")
             )
             ->get()
             ->map(function($tecnico) {
@@ -576,10 +631,10 @@ class DashboardController extends Controller
                     ? ucfirst($especialidades[0]) 
                     : 'General';
                 
-                // Calcular comisión (porcentaje sobre ingresos)
-                $ingresosMes = floatval($tecnico->ingresos_mes ?? 0);
+                // Calcular comisión del período (porcentaje sobre ingresos de órdenes completadas)
+                $ingresosPeriodo = floatval($tecnico->ingresos_periodo ?? 0);
                 $porcentajeComision = floatval($tecnico->comision_por_orden ?? 0);
-                $comisionTotal = ($ingresosMes * $porcentajeComision) / 100;
+                $comisionTotal = ($ingresosPeriodo * $porcentajeComision) / 100;
                 
                 return [
                     'id' => $tecnico->id,
@@ -589,24 +644,48 @@ class DashboardController extends Controller
                     'carga_trabajo' => round($cargaTrabajo),
                     'especialidad' => $especialidad,
                     'estado' => $estado,
-                    'comision_total' => $comisionTotal
+                    'ingresos_periodo' => $ingresosPeriodo,
+                    'comision_por_orden' => $porcentajeComision,
+                    'comision_total' => round($comisionTotal, 2)
                 ];
             })
             ->toArray();
 
-        // Cálculo de ingresos según el período filtrado
+        // Cálculo de ingresos según el período filtrado - Solo de órdenes completadas/entregadas
+        // Ingreso mensual: usa el mes completo filtrado
+        $inicioMesCompleto = \Carbon\Carbon::create($anio, $mes, 1)->startOfMonth();
+        $finMesCompleto = \Carbon\Carbon::create($anio, $mes, 1)->endOfMonth();
+        
         $ingresoMensual = DB::table('ordenes_servicio')
             ->where('servicio_tecnico_id', $servicioTecnicoId)
             ->whereNotNull('precio_presupuestado')
-            ->whereBetween('created_at', [$fechaInicio, $fechaFin])
+            ->whereIn('estado', ['completada', 'entregada'])
+            ->whereBetween('updated_at', [$inicioMesCompleto, $finMesCompleto])
             ->sum('precio_presupuestado');
 
-        // Ingreso semanal actual (semana en curso)
-        $ingresoSemanal = DB::table('ordenes_servicio')
-            ->where('servicio_tecnico_id', $servicioTecnicoId)
-            ->whereNotNull('precio_presupuestado')
-            ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
-            ->sum('precio_presupuestado');
+        // Ingreso semanal: usa la primera semana del mes filtrado o la semana específica
+        if ($semana > 0) {
+            $ingresoSemanal = DB::table('ordenes_servicio')
+                ->where('servicio_tecnico_id', $servicioTecnicoId)
+                ->whereNotNull('precio_presupuestado')
+                ->whereIn('estado', ['completada', 'entregada'])
+                ->whereBetween('updated_at', [$fechaInicio, $fechaFin])
+                ->sum('precio_presupuestado');
+        } else {
+            // Primera semana del mes filtrado
+            $inicioPrimeraSemana = $inicioMesCompleto->copy();
+            $finPrimeraSemana = $inicioPrimeraSemana->copy()->addDays(6)->endOfDay();
+            if ($finPrimeraSemana->gt($finMesCompleto)) {
+                $finPrimeraSemana = $finMesCompleto;
+            }
+            
+            $ingresoSemanal = DB::table('ordenes_servicio')
+                ->where('servicio_tecnico_id', $servicioTecnicoId)
+                ->whereNotNull('precio_presupuestado')
+                ->whereIn('estado', ['completada', 'entregada'])
+                ->whereBetween('updated_at', [$inicioPrimeraSemana, $finPrimeraSemana])
+                ->sum('precio_presupuestado');
+        }
         
         // Calcular comisiones totales
         $comisionesTotales = array_sum(array_column($tecnicosData, 'comision_total'));
