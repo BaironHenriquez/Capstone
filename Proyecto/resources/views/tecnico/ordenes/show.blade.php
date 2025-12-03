@@ -67,33 +67,27 @@
                     </div>
                     
                     <!-- Acciones según el estado -->
-                    <div class="flex space-x-3">
-                        @if($orden->estado === 'asignada')
-                            <button onclick="cambiarEstado('diagnostico')" 
-                                    class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md transition-colors">
-                                <i class="fas fa-stethoscope mr-2"></i>Iniciar Diagnóstico
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <div class="relative">
+                            <button type="button" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors flex items-center space-x-1" 
+                                    id="btnEstadoDropdown" onclick="toggleEstadoDropdown()">
+                                <i class="fas fa-exchange-alt"></i>
+                                <span>Cambiar Estado</span>
+                                <i class="fas fa-chevron-down text-xs"></i>
                             </button>
-                            <button onclick="cambiarEstado('en_progreso')" 
-                                    class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors">
-                                <i class="fas fa-play mr-2"></i>Comenzar Reparación
-                            </button>
-                        @elseif($orden->estado === 'diagnostico')
-                            <button onclick="mostrarModalDiagnostico()" 
-                                    class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md transition-colors">
-                                <i class="fas fa-file-medical mr-2"></i>Guardar Diagnóstico
-                            </button>
-                            <button onclick="cambiarEstado('en_progreso')" 
-                                    class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors">
-                                <i class="fas fa-wrench mr-2"></i>Iniciar Reparación
-                            </button>
-                        @elseif($orden->estado === 'en_progreso')
+                            <div id="estadoDropdown" class="hidden absolute top-full left-0 bg-white shadow-lg rounded-md mt-1 z-50 min-w-fit">
+                                <button onclick="cambiarEstado('diagnostico')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 whitespace-nowrap"><i class="fas fa-stethoscope mr-2"></i>Diagnóstico</button>
+                                <button onclick="cambiarEstado('espera_repuesto')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 whitespace-nowrap"><i class="fas fa-hourglass-half mr-2"></i>Espera de Repuesto</button>
+                                <button onclick="cambiarEstado('en_progreso')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 whitespace-nowrap"><i class="fas fa-wrench mr-2"></i>En Trabajo</button>
+                                <button onclick="cambiarEstado('listo_retiro')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 whitespace-nowrap"><i class="fas fa-check-double mr-2"></i>Listo para Retiro</button>
+                                <button onclick="cambiarEstado('completada')" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 whitespace-nowrap"><i class="fas fa-check-circle mr-2"></i>Completada</button>
+                                <button onclick="cambiarEstado('cancelada')" class="block w-full text-left px-4 py-2 text-sm hover:bg-red-100 whitespace-nowrap"><i class="fas fa-times-circle mr-2"></i>Cancelada</button>
+                            </div>
+                        </div>
+                        @if($orden->estado === 'en_progreso')
                             <button onclick="mostrarModalObservacion()" 
                                     class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
-                                <i class="fas fa-comment-dots mr-2"></i>Agregar Observación
-                            </button>
-                            <button onclick="mostrarModalCompletar()" 
-                                    class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors">
-                                <i class="fas fa-check-circle mr-2"></i>Completar Trabajo
+                                <i class="fas fa-comment-dots mr-2"></i>Observación
                             </button>
                         @endif
                     </div>
@@ -170,7 +164,7 @@
                     Detalles del Trabajo
                 </h3>
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                     <div>
                         <span class="text-sm font-medium text-gray-500 block mb-1">Prioridad</span>
                         @php
@@ -195,10 +189,13 @@
                     </div>
                     
                     <div>
-                        <span class="text-sm font-medium text-gray-500 block mb-1">Fecha Estimada</span>
-                        <span class="text-sm text-gray-900">
-                            {{ $orden->fecha_estimada_completion ? $orden->fecha_estimada_completion->format('d/m/Y') : 'No definida' }}
-                        </span>
+                        <span class="text-sm font-medium text-gray-500 block mb-1">Horas Estimadas</span>
+                        <span class="text-sm text-gray-900">{{ $orden->horas_estimadas ?? 0 }} hrs</span>
+                    </div>
+                    
+                    <div>
+                        <span class="text-sm font-medium text-gray-500 block mb-1">Horas Trabajadas</span>
+                        <span class="text-sm text-gray-900">{{ $orden->horas_trabajadas ?? 0 }} hrs</span>
                     </div>
                 </div>
 
@@ -217,21 +214,21 @@
                     </h4>
                     
                     @if($orden->fotos_antes && is_array($orden->fotos_antes) && count($orden->fotos_antes) > 0)
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                             @foreach($orden->fotos_antes as $foto)
-                                <div class="relative group overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-                                    <img src="{{ $foto }}" alt="Foto antes" class="w-full h-32 object-cover" onclick="abrirVisorFoto(this.src)">
-                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center">
+                                <div class="relative group overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer">
+                                    <img src="{{ $foto }}" alt="Foto antes" class="w-full h-48 object-cover hover:scale-105 transition-transform" onclick="abrirVisorFoto(this.src)">
+                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
                                         <button type="button" onclick="abrirVisorFoto(this.parentElement.querySelector('img').src)" 
-                                                class="opacity-0 group-hover:opacity-100 transition-opacity bg-white text-gray-800 px-2 py-1 rounded text-xs font-medium">
-                                            Ver
+                                                class="opacity-0 group-hover:opacity-100 transition-opacity bg-white text-gray-800 px-3 py-2 rounded font-medium flex items-center space-x-1">
+                                            <i class="fas fa-expand"></i><span>Ver Grande</span>
                                         </button>
                                     </div>
                                 </div>
                             @endforeach
                         </div>
                     @else
-                        <p class="text-xs text-gray-500 mb-3">No hay fotos aún</p>
+                        <p class="text-sm text-gray-500 mb-3">No hay fotos aún</p>
                     @endif
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -256,21 +253,21 @@
                     </h4>
                     
                     @if($orden->fotos_despues && is_array($orden->fotos_despues) && count($orden->fotos_despues) > 0)
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                             @foreach($orden->fotos_despues as $foto)
-                                <div class="relative group overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-                                    <img src="{{ $foto }}" alt="Foto después" class="w-full h-32 object-cover" onclick="abrirVisorFoto(this.src)">
-                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center">
+                                <div class="relative group overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer">
+                                    <img src="{{ $foto }}" alt="Foto después" class="w-full h-48 object-cover hover:scale-105 transition-transform" onclick="abrirVisorFoto(this.src)">
+                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
                                         <button type="button" onclick="abrirVisorFoto(this.parentElement.querySelector('img').src)" 
-                                                class="opacity-0 group-hover:opacity-100 transition-opacity bg-white text-gray-800 px-2 py-1 rounded text-xs font-medium">
-                                            Ver
+                                                class="opacity-0 group-hover:opacity-100 transition-opacity bg-white text-gray-800 px-3 py-2 rounded font-medium flex items-center space-x-1">
+                                            <i class="fas fa-expand"></i><span>Ver Grande</span>
                                         </button>
                                     </div>
                                 </div>
                             @endforeach
                         </div>
                     @else
-                        <p class="text-xs text-gray-500 mb-3">No hay fotos aún</p>
+                        <p class="text-sm text-gray-500 mb-3">No hay fotos aún</p>
                     @endif
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -313,16 +310,64 @@
 
                 @if($orden->estado === 'completada')
                     <div class="border-t mt-4 pt-4 bg-green-50 p-4 rounded-md">
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <h4 class="text-sm font-medium text-gray-700 mb-1">Fecha de Completado</h4>
                                 <p class="text-sm text-gray-900">{{ $orden->fecha_completada?->format('d/m/Y H:i') }}</p>
                             </div>
                             <div>
                                 <h4 class="text-sm font-medium text-gray-700 mb-1">Costo Total</h4>
-                                <p class="text-xl font-bold text-green-600">${{ number_format($orden->costo_total, 0, ',', '.') }}</p>
+                                <p class="text-lg font-bold text-green-600">${{ number_format($orden->costo_total, 0, ',', '.') }}</p>
+                            </div>
+                            @php
+                                $tecnico = $orden->tecnico ?? auth()->guard('tecnico')->user();
+                                $porcentajeComision = $tecnico->comision_por_orden ?? 0;
+                                $comision = ($orden->costo_total * $porcentajeComision) / 100;
+                            @endphp
+                            <div class="bg-white p-3 rounded-md">
+                                <h4 class="text-sm font-medium text-gray-700 mb-1">Comisión</h4>
+                                <p class="text-sm text-gray-600">{{ $porcentajeComision }}% del total</p>
+                                <p class="text-lg font-bold text-purple-600">${{ number_format($comision, 0, ',', '.') }}</p>
+                            </div>
+                            <div class="bg-purple-50 p-3 rounded-md">
+                                <h4 class="text-sm font-medium text-purple-700 mb-1">Tu Ganancia</h4>
+                                <p class="text-lg font-bold text-purple-700">${{ number_format($comision, 0, ',', '.') }}</p>
                             </div>
                         </div>
+                    </div>
+                @elseif($orden->costo_total || auth()->guard('tecnico')->user()->comision_por_orden)
+                    <!-- Información de Comisión (orden en progreso) -->
+                    <div class="border-t mt-4 pt-4 bg-blue-50 p-4 rounded-md">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-700 mb-1">Costo Presupuestado</h4>
+                                <p class="text-lg font-bold text-blue-600">${{ number_format($orden->precio_presupuestado ?? 0, 0, ',', '.') }}</p>
+                            </div>
+                            @php
+                                $tecnico = $orden->tecnico ?? auth()->guard('tecnico')->user();
+                                $porcentajeComision = $tecnico->comision_por_orden ?? 0;
+                                $comisionEstimada = ($orden->precio_presupuestado * $porcentajeComision) / 100;
+                            @endphp
+                            <div class="bg-white p-3 rounded-md">
+                                <h4 class="text-sm font-medium text-gray-700 mb-1">Tu Comisión Estimada</h4>
+                                <p class="text-sm text-gray-600">{{ $porcentajeComision }}% del costo</p>
+                                <p class="text-lg font-bold text-purple-600">${{ number_format($comisionEstimada, 0, ',', '.') }}</p>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-700 mb-1">Empresa</h4>
+                                <p class="text-sm text-gray-600">{{ (100 - $porcentajeComision) }}% del costo</p>
+                                <p class="text-lg font-bold text-green-600">${{ number_format($orden->precio_presupuestado - $comisionEstimada ?? 0, 0, ',', '.') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+                
+                @if($orden->materiales_usados)
+                    <div class="border-t mt-4 pt-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-list mr-2"></i>Materiales Utilizados
+                        </h4>
+                        <p class="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">{{ $orden->materiales_usados }}</p>
                     </div>
                 @endif
             </div>
@@ -489,8 +534,33 @@
     <script>
         const ordenId = {{ $orden->id }};
 
+        function toggleEstadoDropdown() {
+            const dropdown = document.getElementById('estadoDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Cerrar dropdown al hacer click fuera
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('estadoDropdown');
+            const btnEstado = document.getElementById('btnEstadoDropdown');
+            if (!dropdown.contains(e.target) && !btnEstado.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
         function cambiarEstado(nuevoEstado) {
-            if (!confirm(`¿Cambiar estado a "${nuevoEstado.replace('_', ' ')}"?`)) return;
+            document.getElementById('estadoDropdown').classList.add('hidden');
+            
+            const estadoTexto = {
+                'diagnostico': 'Diagnóstico',
+                'espera_repuesto': 'Espera de Repuesto',
+                'en_progreso': 'En Trabajo',
+                'listo_retiro': 'Listo para Retiro',
+                'completada': 'Completada',
+                'cancelada': 'Cancelada'
+            };
+            
+            if (!confirm(`¿Cambiar estado a "${estadoTexto[nuevoEstado]}"?`)) return;
 
             fetch(`/tecnico/ordenes/${ordenId}/actualizar-estado`, {
                 method: 'PATCH',
@@ -508,7 +578,10 @@
                     alert('Error: ' + data.message);
                 }
             })
-            .catch(error => alert('Error al actualizar el estado'));
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al actualizar el estado');
+            });
         }
 
         function mostrarModalDiagnostico() {
@@ -815,15 +888,23 @@
                 return;
             }
             
-            const response = await fetch(fotoCapturada);
-            const blob = await response.blob();
+            // Convertir data URL a blob directamente
+            const arr = fotoCapturada.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while(n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            const blob = new Blob([u8arr], {type: mime});
             
             const formData = new FormData();
             formData.append('foto', blob, `captura_${Date.now()}.jpg`);
-            formData.append('orden_id', {{ $orden->id }});
             formData.append('columna', columna);
             
             try {
+                console.log('Enviando foto capturada a:', '{{ route("tecnico.ordenes.upload-foto", $orden->id) }}');
                 const res = await fetch('{{ route("tecnico.ordenes.upload-foto", $orden->id) }}', {
                     method: 'POST',
                     headers: {
@@ -833,8 +914,9 @@
                 });
                 
                 const data = await res.json();
+                console.log('Respuesta del servidor:', data);
                 
-                if (res.ok) {
+                if (res.ok && data.success) {
                     alert('¡Foto subida correctamente!');
                     if (columna === 'fotos_antes') cerrarModalCamaraBefore();
                     else cerrarModalCamaraAfter();
@@ -843,8 +925,8 @@
                     alert('Error: ' + (data.message || 'No se pudo subir la foto'));
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert('Error al subir la foto');
+                console.error('Error al subir:', error);
+                alert('Error al subir la foto: ' + error.message);
             }
         }
 
@@ -854,10 +936,10 @@
             
             const formData = new FormData();
             formData.append('foto', archivo);
-            formData.append('orden_id', {{ $orden->id }});
             formData.append('columna', columna);
             
             try {
+                console.log('Enviando archivo a:', '{{ route("tecnico.ordenes.upload-foto", $orden->id) }}');
                 const res = await fetch('{{ route("tecnico.ordenes.upload-foto", $orden->id) }}', {
                     method: 'POST',
                     headers: {
@@ -867,16 +949,18 @@
                 });
                 
                 const data = await res.json();
+                console.log('Respuesta del servidor:', data);
                 
-                if (res.ok) {
+                if (res.ok && data.success) {
                     alert('¡Foto subida correctamente!');
                     location.reload();
                 } else {
                     alert('Error: ' + (data.message || 'No se pudo subir la foto'));
+                    console.error('Detalles del error:', data);
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert('Error al subir la foto');
+                console.error('Error al subir:', error);
+                alert('Error al subir la foto: ' + error.message);
             }
             
             event.target.value = '';

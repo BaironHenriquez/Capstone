@@ -84,7 +84,7 @@ class TecnicoOrdenController extends Controller
         }
 
         $request->validate([
-            'estado' => 'required|in:asignada,diagnostico,en_progreso,completada,cancelada'
+            'estado' => 'required|in:asignada,diagnostico,espera_repuesto,en_progreso,listo_retiro,completada,cancelada'
         ]);
 
         try {
